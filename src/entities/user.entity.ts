@@ -16,7 +16,7 @@ import { DealChatRoomUserMsg } from './dealChatRoomUserMsg.entity';
 @Entity('user')
 @Index(['email'])
 export class User {
-	@PrimaryColumn()
+	@PrimaryColumn({ type: 'varchar' })
 	email: string;
 
 	@Column({ type: 'varchar' })
