@@ -6,8 +6,6 @@ import { AccountController } from './account.controller';
 import { AccountService, KakaoLogin } from './account.service';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { LocalStrategy } from './local.strategy';
-import { UsersController } from './users.controller';
 
 @Module({
 	imports: [
@@ -22,7 +20,7 @@ import { UsersController } from './users.controller';
 			})
 		})
 	],
-	controllers: [AccountController, UsersController],
-	providers: [AccountService, LocalStrategy, JwtStrategy, GoogleStrategy, KakaoLogin]
+	controllers: [AccountController],
+	providers: [AccountService, JwtStrategy, GoogleStrategy, KakaoLogin]
 })
 export class AccountModule {}

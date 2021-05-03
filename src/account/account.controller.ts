@@ -1,4 +1,5 @@
 import {
+	Body,
 	Controller,
 	Get,
 	Header,
@@ -8,46 +9,59 @@ import {
 	Res,
 	UseGuards
 } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
-import { AccountGuardLocal } from './account-guard.local';
-import { AccountGuardJwt } from './account.guard.jwt';
+import { AccountGuardJwt } from '../guard/account.guard.jwt';
 import { AccountService, KakaoLogin } from './account.service';
 import { CurrentUser } from './current-account.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateUserDto } from './dto/create.user.dto';
+import { ChkEmailDto } from './dto/chkEmail.dto';
+import { ChkLoginDto } from './dto/chkLogin.dto';
 
 @Controller('account')
 export class AccountController {
-		constructor(
+	constructor(
 		private readonly accountService: AccountService,
-		private readonly kakaoLogin: KakaoLogin,
+		private readonly kakaoLogin: KakaoLogin
 	) {}
-	@Post('login')
-	@UseGuards(AccountGuardLocal)
-	async login(@CurrentUser() user: User) {
-		console.log(1234);
-		return {
-			email: user.email,
-			token: this.accountService.getTokenForUser(user)
-		};
+
+	// 회원 가입
+	@Post()
+	create(@Body() createUserDto: CreateUserDto) {
+		return this.accountService.setUser(createUserDto);
 	}
 
+	// 이메일 중복확인
+	@Post('chkEmail')
+	chkEmail(@Body() chkEmailDto: ChkEmailDto) {
+		return this.accountService.chkEmail(chkEmailDto);
+	}
+
+	// 기본 로그인
+	@Post('login')
+	chkLogin(@Body() chkLoginDto: ChkLoginDto) {
+		return this.accountService.chkLogin(chkLoginDto);
+	}
+
+	// 프로필 조회
 	@Get('profile')
 	@UseGuards(AccountGuardJwt)
-	async getProfile(@CurrentUser() user: User) {
-		console.log(1);
-		return user;
+	getProfile(@CurrentUser() email: string) {
+		return this.accountService.getProfile(email);
 	}
 
+	// 구글 로그인으로 이동
 	@Get('google')
 	@UseGuards(AuthGuard('google'))
-	async googleAuth(@Req() req) {}
+	googleAuth(@Req() req) {}
 
+	// 구글 로그인 성공시, 사용자 정보 가져오기
 	@Get('google/callback')
 	@UseGuards(AuthGuard('google'))
 	googleAuthRedirect(@Req() req) {
 		return this.accountService.googleLogin(req);
 	}
 
+	// 로그아웃
 	//   @Post('logout')
 	// async logOut(@Body() logOut: LogOut): Promise<LogOutSuccess> {
 	//   return this.authService.logOut(logOut);
@@ -82,12 +96,13 @@ export class AccountController {
       </div>
     `;
 	}
+
 	@Get('kakaoLoginLogic')
 	@Header('Content-Type', 'text/html')
 	kakaoLoginLogic(@Res() res): void {
 		// console.log(res)
 		const _hostName = 'https://kauth.kakao.com';
-		const _restApiKey = '7c935b2dc124b8b524cdc202052f93a1'; // * 입력필요
+		const _restApiKey = '3953c372bc39b1c251c98138635c1904'; // * 입력필요
 		// 카카오 로그인 RedirectURI 등록
 		const _redirectUrl =
 			'http://127.0.0.1:3000/account/kakaoLoginLogicRedirect';
@@ -95,10 +110,11 @@ export class AccountController {
 		//동의항목 이메일선택 가능
 		return res.redirect(url);
 	}
+
 	@Get('kakaoLoginLogicRedirect')
 	@Header('Content-Type', 'text/html')
 	kakaoLoginLogicRedirect(@Query() qs, @Res() res): void {
-		const _restApiKey = '7c935b2dc124b8b524cdc202052f93a1'; // * 입력필요
+		const _restApiKey = '3953c372bc39b1c251c98138635c1904'; // * 입력필요
 		const _redirect_uri =
 			'http://127.0.0.1:3000/account/kakaoLoginLogicRedirect';
 		const _hostName = `https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id=${_restApiKey}&redirect_uri=${_redirect_uri}&code=${qs.code}&scope=`;
