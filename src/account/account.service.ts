@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create.user.dto';
 import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
+import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
+import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
 
 @Injectable()
 export class AccountService {
@@ -101,6 +103,7 @@ export class AccountService {
 					errorMsg: '프로필 조회 중 오류가 발생하였습니다.'
 				};
 			});
+		
 	}
 
 	googleLogin(req) {
@@ -116,7 +119,30 @@ export class AccountService {
 	// logOut(logOut: LogOut): Promise<import('./account.dto').LogOutSuccess> {
 	// 	throw new Error('Method not implemented.');
 	// }
+
+		async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
+		const google = await this.userRepository.findOne({
+			email: googleChkEmaildto.email
+		})
+		// console.log(google)
+		if (google) {
+			return {msg:"fail",errorMsg: "이미 존재하는 계정입니다."} //this.getTokenForUser(googleChkEmaildto.email);
+		} else {
+			const user = new User();
+			user.email = googleChkEmaildto.email;
+			user.nickname = googleChkEmaildto.lastName+googleChkEmaildto.firstName;
+			user.address = " "
+
+			return await this.userRepository.save(user).then(async () => {
+				return { msg: 'success', errorMsg: '회원가입 성공!' };
+			});
+			// const token = this.getTokenForUser(googleChkEmaildto.email);
+			// return { token: token }
+		}
+	}
+	
 }
+
 
 //카카오로그인
 @Injectable()
@@ -124,13 +150,18 @@ export class KakaoLogin {
 	check: boolean;
 	accessToken: string;
 	accountemail: string;
+	accountnickname: string;
 
 	private http: HttpService;
-	constructor() {
+	constructor(
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>
+	) {
 		this.check = false;
 		this.http = new HttpService();
 		this.accessToken = '';
 		this.accountemail = '';
+		this.accountnickname = '';
 	}
 	loginCheck(): void {
 		this.check = !this.check;
@@ -142,6 +173,11 @@ export class KakaoLogin {
 	}
 	setToken(token: string): boolean {
 		this.accessToken = token;
+		return true;
+	}
+
+	setNickName(nickname: string): boolean {
+		this.accountnickname = nickname;
 		return true;
 	}
 
@@ -171,5 +207,26 @@ export class KakaoLogin {
 			Authorization: `bearer ${this.accessToken}`
 		};
 		return await this.http.post(_url, '', { headers: _header }).toPromise();
+	}
+
+	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
+		const kakao = await this.userRepository.findOne({
+			email: kakaoChkEmaildto.email
+		});
+		// console.log(kakao);
+		if (kakao) {
+			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' }; //this.getTokenForUser(googleChkEmaildto.email);
+		} else {
+			const user = new User();
+			user.email = kakaoChkEmaildto.email;
+			user.nickname = kakaoChkEmaildto.nickname;
+			user.address = ' ';
+
+			return await this.userRepository.save(user).then(async () => {
+				return { msg: 'success', errorMsg: '회원가입 성공!' };
+			});
+			// const token = this.getTokenForUser(googleChkEmaildto.email);
+			// return { token: token }
+		}
 	}
 }

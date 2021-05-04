@@ -16,6 +16,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from './dto/create.user.dto';
 import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
+import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
+import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
 
 @Controller('account')
 export class AccountController {
@@ -61,6 +63,12 @@ export class AccountController {
 		return this.accountService.googleLogin(req);
 	}
 
+	//구글로그인 확인
+	@Post('/googleAuth')
+	GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
+		return this.accountService.googleCheck(googleChkEmaildto);
+	}
+
 	// 로그아웃
 	//   @Post('logout')
 	// async logOut(@Body() logOut: LogOut): Promise<LogOutSuccess> {
@@ -102,7 +110,7 @@ export class AccountController {
 	kakaoLoginLogic(@Res() res): void {
 		// console.log(res)
 		const _hostName = 'https://kauth.kakao.com';
-		const _restApiKey = '3953c372bc39b1c251c98138635c1904'; // * 입력필요
+		const _restApiKey = '7c935b2dc124b8b524cdc202052f93a1'; // * 입력필요
 		// 카카오 로그인 RedirectURI 등록
 		const _redirectUrl =
 			'http://127.0.0.1:3000/account/kakaoLoginLogicRedirect';
@@ -114,7 +122,7 @@ export class AccountController {
 	@Get('kakaoLoginLogicRedirect')
 	@Header('Content-Type', 'text/html')
 	kakaoLoginLogicRedirect(@Query() qs, @Res() res): void {
-		const _restApiKey = '3953c372bc39b1c251c98138635c1904'; // * 입력필요
+		const _restApiKey = '7c935b2dc124b8b524cdc202052f93a1'; // * 입력필요
 		const _redirect_uri =
 			'http://127.0.0.1:3000/account/kakaoLoginLogicRedirect';
 		const _hostName = `https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id=${_restApiKey}&redirect_uri=${_redirect_uri}&code=${qs.code}&scope=`;
@@ -150,8 +158,10 @@ export class AccountController {
 			.getEmail() //getemail을 통해서 email정보가 넘어옴
 			.then((e) => {
 				// console.log(e);
+				console.log(e.data['properties']['nickname']);
 				console.log(e.data['kakao_account']['email']);
 				this.kakaoLogin.setEmail(e.data['kakao_account']['email']);
+				this.kakaoLogin.setNickName(e.data['properties']['nickname']);
 
 				return res.send(`
           <div>
@@ -163,6 +173,11 @@ export class AccountController {
 			});
 	}
 
+	@Post('/kakaoAuth')
+	KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
+		return this.kakaoLogin.kakaoCheck(kakaoChkEmaildto);
+	}
+
 	// 카카오 로그인 -> 고급에서 로그아웃 Logout Redirect URI 설정 필요
 	@Get('kakaoLogout')
 	kakaoLogout(@Res() res): void {
@@ -171,6 +186,7 @@ export class AccountController {
 		this.kakaoLogin
 			.deleteLog()
 			.then((e) => {
+				console.log('로그아웃성공');
 				return res.send(`
           <div>
             <h2>로그아웃 완료(연결끊기)</h2>
