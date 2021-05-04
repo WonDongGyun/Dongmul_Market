@@ -1,11 +1,17 @@
-import { Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+	Entity,
+	Index,
+	OneToMany,
+	PrimaryColumn,
+	PrimaryGeneratedColumn
+} from 'typeorm';
 import { DealChatRoomUser } from './dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from './dealChatRoomUserMsg.entity';
 
 @Entity()
 @Index(['dicrId'])
 export class DealChatRoom {
-	@PrimaryColumn('uuid')
+	@PrimaryGeneratedColumn('uuid')
 	dicrId: string;
 
 	// dealChatRoom은 dealChatRoomUser와 1 : N 관계입니다.

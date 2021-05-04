@@ -11,6 +11,8 @@ import { ItemChatRoomUserMsg } from './entities/itemChatRoomUserMsg.entity';
 import { DealChatRoom } from './entities/dealChatRoom.entity';
 import { DealChatRoomUser } from './entities/dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
+import { MainPageModule } from './main-page/main-page.module';
+import { Code } from './entities/code.entity';
 
 @Module({
 	imports: [
@@ -25,7 +27,8 @@ import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
 			ItemChatRoomUserMsg,
 			DealChatRoom,
 			DealChatRoomUser,
-			DealChatRoomUserMsg
+			DealChatRoomUserMsg,
+			Code
 		]),
 		TypeOrmModule.forRoot({
 			type: 'mysql',
@@ -42,12 +45,14 @@ import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
 				ItemChatRoomUserMsg,
 				DealChatRoom,
 				DealChatRoomUser,
-				DealChatRoomUserMsg
+				DealChatRoomUserMsg,
+				Code
 			],
 			synchronize: true
 		}),
 		ChatModule,
-		AccountModule
+		AccountModule,
+		MainPageModule
 	]
 })
 export class AppModule {}

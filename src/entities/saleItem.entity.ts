@@ -44,7 +44,7 @@ export class SaleItem {
 	// SI02 - 교환 중
 	// SI03 - 교환 완료
 	// SI04 - 경매 실패
-	@Column({ type: 'varchar', default: null })
+	@Column({ type: 'varchar', default: 'SI01' })
 	status: string;
 
 	// 교환이 완료되면 해당 교환자의 이메일이 입력됩니다.
