@@ -25,6 +25,13 @@ export class MainPageController {
 		return this.mainPageService.getItem(email);
 	}
 
+	// 로그인 하지 않은 사람들을 위한 메인 화면
+	// 사용자의 주소와 같은 주소를 가진 사람들의 경매 진행 중 목록만 가져옴
+	@Get('noLogin')
+	noLoginGetItem() {
+		return this.mainPageService.noLoginGetItem();
+	}
+
 	// 글 작성
 	@Post()
 	@UseGuards(AccountGuardJwt)

@@ -72,11 +72,46 @@ export class MainPageService {
 			.addSelect('si.deadLine', 'deadLine')
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
+			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('u.address = :address', { address: location.address })
+			.orderBy('si.deadLine', 'DESC')
+			.getRawMany()
+			.then((data) => {
+				return { mag: 'success', data: data };
+			})
+			.catch((err) => {
+				return {
+					mag: 'fail',
+					errorMsg: err
+				};
+			});
+	}
+
+	// 로그인을 하지 않은 경우 메인 화면
+	async noLoginGetItem() {
+		return await this.saleItemRepository
+			.createQueryBuilder('si')
+			.select('u.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('u.address', 'address')
+			.addSelect('si.itemId', 'itemId')
+			.addSelect('si.image', 'image')
+			.addSelect('si.title', 'title')
+			.addSelect('si.category', 'category')
+			.addSelect('si.wantItem', 'wantItem')
+			.addSelect('si.comment', 'comment')
+			.addSelect('si.deadLine', 'deadLine')
+			.addSelect('c.codeName', 'status')
+			.addSelect('si.icrId', 'icrId')
+			.addSelect('si.dicrId', 'dicrId')
+			.addSelect('si.buyerEmail', 'buyerEmail')
+			.addSelect('si.createdDt', 'createdDt')
+			.innerJoin(User, 'u', 'si.email = u.email')
+			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((data) => {
@@ -128,8 +163,7 @@ export class MainPageService {
 			.catch((err) => {
 				return {
 					msg: 'fail',
-					errorMsg: '경매 물건을 등록하던 중 오류가 발생하였습니다.',
-					errorMsg2: err
+					errorMsg: '경매 물건을 등록하던 중 오류가 발생하였습니다.'
 				};
 			});
 	}
