@@ -47,7 +47,7 @@ export class MainPageController {
 
 	// 경매 글 상세내용
 	@Get(':itemId')
-	getDetail(@Param() itemId: string) {
+	getDetail(@Param('itemId') itemId: string) {
 		return this.mainPageService.getDetail(itemId);
 	}
 }

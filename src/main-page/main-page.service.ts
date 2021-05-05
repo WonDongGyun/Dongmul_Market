@@ -115,11 +115,11 @@ export class MainPageService {
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((data) => {
-				return { mag: 'success', data: data };
+				return { msg: 'success', data: data };
 			})
 			.catch((err) => {
 				return {
-					mag: 'fail',
+					msg: 'fail',
 					errorMsg: err
 				};
 			});
@@ -128,14 +128,30 @@ export class MainPageService {
 	// 경매 글 상세내용
 	async getDetail(itemId: string) {
 		return await this.saleItemRepository
-			.findOne({ itemId: itemId })
+			.createQueryBuilder('si')
+			.select('si.itemId', 'itemId')
+			.addSelect('si.email', 'email')
+			.addSelect('si.image', 'image')
+			.addSelect('si.title', 'title')
+			.addSelect('si.category', 'category')
+			.addSelect('si.wantItem', 'wantItem')
+			.addSelect('si.comment', 'comment')
+			.addSelect('si.deadLine', 'deadLine')
+			.addSelect('c.codeName', 'status')
+			.addSelect('si.icrId', 'icrId')
+			.addSelect('si.dicrId', 'dicrId')
+			.addSelect('si.buyerEmail', 'buyerEmail')
+			.addSelect('si.createdDt', 'createdDt')
+			.innerJoin(Code, 'c', 'c.codeId = si.status')
+			.where('si.itemId = :itemId', { itemId: itemId })
+			.getRawOne()
 			.then((findDetail) => {
-				return { mag: 'success', data: findDetail };
+				return { msg: 'success', data: findDetail };
 			})
 			.catch(() => {
 				return {
-					mag: 'fail',
-					errorMsg: '상세 내용을 확인할 수 없습니다.'
+					msg: 'fail',
+					errorMsg: '해당 글의 상세 내용을 확인할 수 없습니다.'
 				};
 			});
 	}
