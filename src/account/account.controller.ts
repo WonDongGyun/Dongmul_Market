@@ -65,16 +65,10 @@ export class AccountController {
 		return this.accountService.googleLogin(req);
 	}
 
-	//구글 회원가입
+	//구글 회원가입 및 로그인
 	@Post('googleAuth')
 	GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
 		return this.accountService.googleCheck(googleChkEmaildto);
-	}
-
-	//구글 로그인
-	@Post('googleLogin')
-	gLogin(@Body() googleLoginDto: GoogleLoginDto) {
-		return this.accountService.gLogin(googleLoginDto);
 	}
 
 	// 로그아웃
@@ -181,16 +175,10 @@ export class AccountController {
 			});
 	}
 
-	//카카오 회원가입
+	//카카오 로그인 및 회원가입
 	@Post('/kakaoAuth')
 	KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
 		return this.kakaoLogin.kakaoCheck(kakaoChkEmaildto);
-	}
-
-	//구글 로그인
-	@Post('kakaoLogin')
-	kLogin(@Body() kakaoLoginDto: KakaoLoginDto) {
-		return this.kakaoLogin.kLogin(kakaoLoginDto);
 	}
 
 	// 카카오 로그인 -> 고급에서 로그아웃 Logout Redirect URI 설정 필요

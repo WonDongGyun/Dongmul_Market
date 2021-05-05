@@ -2,6 +2,7 @@ import {
 	Body,
 	Controller,
 	Get,
+	Param,
 	Post,
 	UploadedFile,
 	UseGuards,
@@ -32,7 +33,7 @@ export class MainPageController {
 		return this.mainPageService.noLoginGetItem();
 	}
 
-	// 글 작성
+	// 경매 글 작성
 	@Post()
 	@UseGuards(AccountGuardJwt)
 	@UseInterceptors(FileInterceptor('file'))
@@ -42,5 +43,11 @@ export class MainPageController {
 		@CurrentUser() email: string
 	) {
 		return this.mainPageService.setItem(setItemDto, file, email);
+	}
+
+	// 경매 글 상세내용
+	@Get(':itemId')
+	getDetail(@Param() itemId: string) {
+		return this.mainPageService.getDetail(itemId);
 	}
 }

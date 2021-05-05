@@ -128,7 +128,36 @@ export class AccountService {
 		});
 
 		if (google) {
-			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' };
+			return await this.userRepository
+				.findOne({
+					email: googleChkEmaildto.email,
+					password: null
+				})
+				.then((findGoogle) => {
+					if (findGoogle) {
+						const token = this.getTokenForUser(
+							googleChkEmaildto.email
+						);
+						return {
+							msg: 'success',
+							email: findGoogle.email,
+							nickname: findGoogle.nickname,
+							token: 'Bearer ' + token
+						};
+					} else {
+						return {
+							msg: 'fail',
+							errorMsg:
+								'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+						};
+					}
+				})
+				.catch((err) => {
+					return {
+						msg: 'fail',
+						errorMsg: err
+					};
+				});
 		} else {
 			const user = new User();
 			user.email = googleChkEmaildto.email;
@@ -146,37 +175,6 @@ export class AccountService {
 				};
 			});
 		}
-	}
-
-	// 구글 로그인
-	async gLogin(googleLoginDto: GoogleLoginDto) {
-		return await this.userRepository
-			.findOne({
-				email: googleLoginDto.email,
-				password: null
-			})
-			.then((findGoogle) => {
-				if (findGoogle) {
-					const token = this.getTokenForUser(googleLoginDto.email);
-					return {
-						msg: 'success',
-						email: findGoogle.email,
-						nickname: findGoogle.nickname,
-						token: 'Bearer ' + token
-					};
-				} else {
-					return {
-						msg: 'fail',
-						errorMsg: '이미 등록되었거나 잘못된 이메일 입니다.'
-					};
-				}
-			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: err
-				};
-			});
 	}
 }
 
@@ -253,14 +251,44 @@ export class KakaoLogin {
 			email
 		});
 	}
-	// 카카오 회원가입
+
+	// 카카오 로그인 및 회원가입
 	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
 		const kakao = await this.userRepository.findOne({
 			email: kakaoChkEmaildto.email
 		});
 		// console.log(kakao);
 		if (kakao) {
-			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' };
+			return await this.userRepository
+				.findOne({
+					email: kakaoChkEmaildto.email,
+					password: null
+				})
+				.then((findKakao) => {
+					if (findKakao) {
+						const token = this.getTokenForUser(
+							kakaoChkEmaildto.email
+						);
+						return {
+							msg: 'success',
+							email: findKakao.email,
+							nickname: findKakao.nickname,
+							token: 'Bearer ' + token
+						};
+					} else {
+						return {
+							msg: 'fail',
+							errorMsg:
+								'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+						};
+					}
+				})
+				.catch((err) => {
+					return {
+						msg: 'fail',
+						errorMsg: err
+					};
+				});
 		} else {
 			const user = new User();
 			user.email = kakaoChkEmaildto.email;
@@ -276,36 +304,5 @@ export class KakaoLogin {
 				};
 			});
 		}
-	}
-
-	// 카카오 로그인
-	async kLogin(kakaoLoginDto: KakaoLoginDto) {
-		return await this.userRepository
-			.findOne({
-				email: kakaoLoginDto.email,
-				password: null
-			})
-			.then((findKakao) => {
-				if (findKakao) {
-					const token = this.getTokenForUser(kakaoLoginDto.email);
-					return {
-						msg: 'success',
-						email: findKakao.email,
-						nickname: findKakao.nickname,
-						token: 'Bearer ' + token
-					};
-				} else {
-					return {
-						msg: 'fail',
-						errorMsg: '이미 등록되었거나 잘못된 이메일 입니다.'
-					};
-				}
-			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: err
-				};
-			});
 	}
 }

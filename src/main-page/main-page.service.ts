@@ -125,7 +125,22 @@ export class MainPageService {
 			});
 	}
 
-	// 물건 등록
+	// 경매 글 상세내용
+	async getDetail(itemId: string) {
+		return await this.saleItemRepository
+			.findOne({ itemId: itemId })
+			.then((findDetail) => {
+				return { mag: 'success', data: findDetail };
+			})
+			.catch(() => {
+				return {
+					mag: 'fail',
+					errorMsg: '상세 내용을 확인할 수 없습니다.'
+				};
+			});
+	}
+
+	// 경매 글 작성
 	async setItem(setItemDto: SetItemDto, file, email: string) {
 		const { originalname } = file;
 		const bucketS3 = 'dongmulbucket';
