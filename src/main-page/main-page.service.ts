@@ -2,11 +2,15 @@ import { Logger } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { S3 } from 'aws-sdk';
+import { User } from 'src/entities/user.entity';
+import { SaleItem } from 'src/entities/saleItem.entity';
 import { Code } from 'src/entities/code.entity';
 import { DealChatRoom } from 'src/entities/dealChatRoom.entity';
+import { DealChatRoomUser } from 'src/entities/dealChatRoomUser.entity';
+import { DealChatRoomUserMsg } from 'src/entities/dealChatRoomUserMsg.entity';
 import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
-import { SaleItem } from 'src/entities/saleItem.entity';
-import { User } from 'src/entities/user.entity';
+import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
+import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
 
@@ -22,8 +26,20 @@ export class MainPageService {
 		@InjectRepository(ItemChatRoom)
 		private readonly itemChatRoomRepository: Repository<ItemChatRoom>,
 
+		@InjectRepository(ItemChatRoomUser)
+		private readonly itemChatRoomUserRepository: Repository<ItemChatRoomUser>,
+
+		@InjectRepository(ItemChatRoomUserMsg)
+		private readonly itemChatRoomUserMsgRepository: Repository<ItemChatRoomUserMsg>,
+
 		@InjectRepository(DealChatRoom)
 		private readonly dealChatRoomRepository: Repository<DealChatRoom>,
+
+		@InjectRepository(DealChatRoomUser)
+		private readonly dealChatRoomUserRepository: Repository<DealChatRoomUser>,
+
+		@InjectRepository(DealChatRoomUserMsg)
+		private readonly dealChatRoomUserMsgRepository: Repository<DealChatRoomUserMsg>,
 
 		@InjectRepository(Code)
 		private readonly codeRepository: Repository<Code>
@@ -131,6 +147,7 @@ export class MainPageService {
 			.createQueryBuilder('si')
 			.select('si.itemId', 'itemId')
 			.addSelect('si.email', 'email')
+			.addSelect('u.nickname', 'nickname')
 			.addSelect('si.image', 'image')
 			.addSelect('si.title', 'title')
 			.addSelect('si.category', 'category')
@@ -142,11 +159,19 @@ export class MainPageService {
 			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
+			.innerJoin(User, 'u', 'u.email = si.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('si.itemId = :itemId', { itemId: itemId })
 			.getRawOne()
 			.then((findDetail) => {
-				return { msg: 'success', data: findDetail };
+				if (findDetail) {
+					return { msg: 'success', data: findDetail };
+				} else {
+					return {
+						msg: 'fail',
+						errorMsg: 'itemId를 다시 확인해주세요.'
+					};
+				}
 			})
 			.catch(() => {
 				return {
@@ -169,12 +194,27 @@ export class MainPageService {
 		const user: User = new User();
 		user.email = email;
 
+		// 채팅방 만들기
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
 		await this.itemChatRoomRepository.insert(itemChatRoom);
 
 		const dealChatRoom: DealChatRoom = new DealChatRoom();
 		await this.dealChatRoomRepository.insert(dealChatRoom);
 
+		// 경매 글 올린 사람, 채팅방 유저로 저장
+		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+		itemChatRoomUser.user = user;
+		itemChatRoomUser.itemChatRoom = itemChatRoom;
+		itemChatRoomUser.chooseYn = 'Y';
+		await this.itemChatRoomUserRepository.insert(itemChatRoomUser);
+
+		const dealChatRoomUser: DealChatRoomUser = new DealChatRoomUser();
+		dealChatRoomUser.user = user;
+		dealChatRoomUser.dealChatRoom = dealChatRoom;
+		dealChatRoomUser.changeYn = 'Y';
+		await this.dealChatRoomUserRepository.insert(dealChatRoomUser);
+
+		// 경매 글 저장
 		const saleItem: SaleItem = new SaleItem();
 		saleItem.image = uploadFile['Location'];
 		saleItem.title = setItemDto.title;

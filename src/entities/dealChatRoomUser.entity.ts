@@ -6,6 +6,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryGeneratedColumn,
+	Unique,
 	UpdateDateColumn
 } from 'typeorm';
 import { DealChatRoom } from './dealChatRoom.entity';
@@ -13,6 +14,7 @@ import { User } from './user.entity';
 
 @Entity()
 @Index(['dicruId'])
+@Unique(['user', 'dealChatRoom'])
 export class DealChatRoomUser {
 	@PrimaryGeneratedColumn('uuid')
 	dicruId: string;

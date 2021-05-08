@@ -13,6 +13,8 @@ import { DealChatRoomUser } from './entities/dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
 import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
 	imports: [
@@ -49,6 +51,9 @@ import { Code } from './entities/code.entity';
 				Code
 			],
 			synchronize: true
+		}),
+		ServeStaticModule.forRoot({
+			rootPath: join(__dirname, '..', 'static')
 		}),
 		ChatModule,
 		AccountModule,

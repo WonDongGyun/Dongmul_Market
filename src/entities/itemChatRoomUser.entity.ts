@@ -6,6 +6,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryGeneratedColumn,
+	Unique,
 	UpdateDateColumn
 } from 'typeorm';
 import { ItemChatRoom } from './itemChatRoom.entity';
@@ -13,6 +14,7 @@ import { User } from './user.entity';
 
 @Entity()
 @Index(['icruId'])
+@Unique(['user', 'itemChatRoom'])
 export class ItemChatRoomUser {
 	@PrimaryGeneratedColumn('uuid')
 	icruId: string;

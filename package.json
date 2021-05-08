@@ -28,6 +28,7 @@
 		"@nestjs/passport": "^7.1.5",
 		"@nestjs/platform-express": "^7.6.15",
 		"@nestjs/platform-socket.io": "^7.6.15",
+		"@nestjs/serve-static": "^2.1.4",
 		"@nestjs/typeorm": "^7.1.5",
 		"@nestjs/websockets": "^7.6.15",
 		"aws-sdk": "^2.899.0",

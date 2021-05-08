@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<style>
+		body {
+			margin: 0;
+			padding-bottom: 3rem;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+				Helvetica, Arial, sans-serif;
+		}
+
+		#form {
+			background: rgba(0, 0, 0, 0.15);
+			padding: 0.25rem;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: flex;
+			height: 3rem;
+			box-sizing: border-box;
+			backdrop-filter: blur(10px);
+		}
+		#input {
+			border: none;
+			padding: 0 1rem;
+			flex-grow: 1;
+			border-radius: 2rem;
+			margin: 0.25rem;
+		}
+		#input:focus {
+			outline: none;
+		}
+		#form > button {
+			background: #333;
+			border: none;
+			padding: 0 1rem;
+			margin: 0.25rem;
+			border-radius: 3px;
+			outline: none;
+			color: #fff;
+		}
+
+		#messages {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		#messages > li {
+			padding: 0.5rem 1rem;
+		}
+		#messages > li:nth-child(odd) {
+			background: #efefef;
+		}
+	</style>
+	<body>
+		<h1>Testing 1, 2, 3</h1>
+
+		<!-- Tabs -->
+		<div class="tab-row">
+			<button class="tab-btn" onclick="setRoom('general')">
+				General
+			</button>
+			<button class="tab-btn" onclick="setRoom('typescript')">
+				TypeScript
+			</button>
+			<button class="tab-btn" onclick="setRoom('nestjs')">NestJS</button>
+		</div>
+		<div class="tab-row">
+			<button id="joinLeave" onclick="toggleRoomMembership()">
+				join
+			</button>
+		</div>
+
+		<ul id="messages"></ul>
+		<form id="form" action="">
+			<input id="inputName" autocomplete="off" />
+			<input id="inputMsg" autocomplete="off" /><button>Send</button>
+		</form>
+
+		<!-- <script src="/socket.io/socket.io.js"></script> -->
+		<!-- <script src="http://localhost:3001/socket.io/socket.io.js"></script> -->
+		<!-- <script src="http://localhost:3001/chatting/socket.io.js"></script> -->
+		<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+		<script>
+			// chat.getway 에서 @WebSocketGateway 포트 설정 안했을 때
+			// var socket = io();
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정만 하고 path 설정 안했을 때
+			// var socket = io('http://localhost:3001');
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정도 하고 path 설정도 했을 때
+			// var socket = io('http://localhost:3001', { path: '/chatting' });
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정도 하고 path 설정이 아닌 namespace만 설정했을 때.
+			// 물론 namespace는 path랑 같이 써도 되지만, 같이 쓸 경우는 3번의 경우처럼 입력해야 한다.
+			var activeRoom = '';
+			var roomStatus = {
+				general: false,
+				typescript: false,
+				nestjs: false
+			};
+			var roomName = '';
+			var socket = io('http://localhost:3001/chatting');
+
+			var messages = document.getElementById('messages');
+			var form = document.getElementById('form');
+			var jl = document.getElementById('joinLeave');
+
+			var msg = document.getElementById('inputMsg');
+			var write = document.getElementById('inputName');
+
+			// 해당 경매 글의 방장인지 확인
+			window.onload = function () {
+				var data = {
+					email: 'waterflame1@naver.com',
+					icrId: 'f78ac07c-a732-4067-ac56-68c7c1999d00'
+				};
+				socket.emit('showUserList', data);
+				socket.emit('joinAuto', data);
+			};
+
+			// server의 chatToServer라는 socket으로 data 전송
+			form.addEventListener('submit', function (e) {
+				e.preventDefault();
+				var data = {
+					email: 'waterflame1@naver.com',
+					icrId: 'f78ac07c-a732-4067-ac56-68c7c1999d00',
+					chatMsg: msg.value
+				};
+				socket.emit('sendMsg', data);
+			});
+
+			socket.on('returnUserList', function (msg) {
+				socket.emit(
+					'authenticate',
+					{
+						token:
+							'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IndhdGVyZmxhbWUxQG5hdmVyLmNvbSIsImlhdCI6MTYyMDQ3MTU3OSwiZXhwIjoxNjIwNDc1MTc5fQ.6bOSk9taflnpHqqDYgRt9PCI_lGSvNZV8RD-PXWv8LQ'
+					},
+					(data) => {
+						if (data['msg'] == 'success') {
+							console.log(msg);
+						}
+					}
+				);
+			});
+
+			socket.on('returnJoinAuto', function (msg) {
+				console.log(msg);
+			});
+
+			// server에서 chatToClient socket으로 내려오는 data를 받음
+			socket.on('returnMsg', function (msg) {
+				console.log(msg);
+				var item = document.createElement('li');
+				item.textContent =
+					msg.data['email'] +
+					' ' +
+					msg.data['icruMsgId'] +
+					' ' +
+					msg.data['chatMsg'];
+				messages.appendChild(item);
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+
+			socket.on('returnJoinMsg', function (msg) {
+				console.log(msg);
+				var item = document.createElement('li');
+				item.textContent = msg + ' room join';
+				messages.appendChild(item);
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+
+			// server에서 leaveRoom socket으로 내려오는 data를 받음
+			socket.on('leaveRoom', function (msg) {
+				console.log(msg);
+				var item = document.createElement('li');
+				item.textContent = msg + ' room leave';
+				messages.appendChild(item);
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+
+			function setRoom(val) {
+				this.activeRoom = val;
+				console.log(activeRoom);
+			}
+
+			function toggleRoomMembership() {
+				if (this.roomStatus[this.activeRoom] == true) {
+					//this.socket.emit('leaveRoom', this.activeRoom);
+					//this.roomStatus[this.activeRoom] = false;
+				} else {
+					var data = {
+						email: 'uko02218@naver.com',
+						icrId: 'f78ac07c-a732-4067-ac56-68c7c1999d00'
+					};
+					this.socket.emit('joinRoom', data);
+					//this.roomStatus[this.activeRoom] = true;
+				}
+			}
+		</script>
+	</body>
+</html>
+
+<!-- <!DOCTYPE html>  간단한 채팅기능이 포함되어 있습니다.
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<style>
+		body {
+			margin: 0;
+			padding-bottom: 3rem;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+				Helvetica, Arial, sans-serif;
+		}
+
+		#form {
+			background: rgba(0, 0, 0, 0.15);
+			padding: 0.25rem;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			display: flex;
+			height: 3rem;
+			box-sizing: border-box;
+			backdrop-filter: blur(10px);
+		}
+		#input {
+			border: none;
+			padding: 0 1rem;
+			flex-grow: 1;
+			border-radius: 2rem;
+			margin: 0.25rem;
+		}
+		#input:focus {
+			outline: none;
+		}
+		#form > button {
+			background: #333;
+			border: none;
+			padding: 0 1rem;
+			margin: 0.25rem;
+			border-radius: 3px;
+			outline: none;
+			color: #fff;
+		}
+
+		#messages {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		#messages > li {
+			padding: 0.5rem 1rem;
+		}
+		#messages > li:nth-child(odd) {
+			background: #efefef;
+		}
+	</style>
+	<body>
+		<h1>Testing 1, 2, 3</h1>
+
+		<ul id="messages"></ul>
+		<form id="form" action="">
+			<input id="input" autocomplete="off" /><button>Send</button>
+		</form>
+
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+		<script src="http://localhost:3001/chatting/socket.io.js"></script>
+		<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+		<script>
+			// chat.getway 에서 @WebSocketGateway 포트 설정 안했을 때
+			// var socket = io();
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정만 하고 path 설정 안했을 때
+			// var socket = io('http://localhost:3001');
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정도 하고 path 설정도 했을 때
+			// var socket = io('http://localhost:3001', { path: '/chatting' });
+
+			// chat.getway 에서 @WebSocketGateway 포트 설정도 하고 path 설정이 아닌 namespace만 설정했을 때.
+			// 물론 namespace는 path랑 같이 써도 되지만, 같이 쓸 경우는 3번의 경우처럼 입력해야 한다.
+			var socket = io('http://localhost:3001/chatting');
+
+			var messages = document.getElementById('messages');
+			var form = document.getElementById('form');
+			var input = document.getElementById('input');
+
+			form.addEventListener('submit', function (e) {
+				e.preventDefault();
+				if (input.value) {
+					socket.emit('msgToServer', input.value);
+					input.value = '';
+				}
+			});
+
+			socket.on('msgToClient', function (msg) {
+				console.log(msg);
+				var item = document.createElement('li');
+				item.textContent = msg;
+				messages.appendChild(item);
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+		</script>
+	</body>
+</html> -->
