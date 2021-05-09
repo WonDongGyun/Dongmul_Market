@@ -10,8 +10,8 @@ import { Socket, Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { ItemChatJoinDto } from './dto/itemChatJoin.dto';
 import { ChatService } from './chat.service';
-import { ItemChatDto } from './dto/itemChatDto.dto';
-import { ShowUserDto } from './dto/showUserDto.dto';
+import { ItemChatDto } from './dto/itemChat.dto';
+import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import * as jwt from 'jsonwebtoken';
 
@@ -23,9 +23,9 @@ export class ChatGateway
 
 	@WebSocketServer() server: Server;
 
-	// '홍길동: 안녕하세요! 2021년 5월 6일'
 	// front => socket.emit('sendMsg', data = { email: '채팅을 친 사용자', icrId: icrId, chatMsg: '안녕하세요!'})
 	// 채팅 메시지 테이블에 저장하기
+	// 이메일, 닉네임, 메시지, 채팅한 시간 정보가 담겨있음.
 	@SubscribeMessage('sendMsg')
 	async handleMessage(client: Socket, itemChatDto: ItemChatDto) {
 		console.log(itemChatDto);
@@ -33,35 +33,65 @@ export class ChatGateway
 		this.server.to(itemChatDto.icrId).emit('returnMsg', data);
 	}
 
-	// 남은 인원을 실시간으로 체크
-	// 해당 방의 방장인지를 체크하고 보여줌.
+	// 이메일이 해당 방의 방장과 같다면, 단체 채팅방 및 1:1 채팅방 접속한 인원들을 보여줌.
 	// window.onload
 	// front => socket.emit('showUserList', data = { email: '현재 상세페이지에 들어온 사용자', icrId: icrId })
-	// Back => 그 사람이 방장이면 user 데이터 줌
 	@SubscribeMessage('showUserList')
 	async handleShowUserRoom(client: Socket, showUserDto: ShowUserDto) {
 		console.log(showUserDto);
-		await this.chatService.showUser(showUserDto).then((userData) => {
-			if (userData) {
-				client.emit('returnUserList', userData);
-			}
-		});
+		await this.chatService
+			.showGroupUser(showUserDto)
+			.then(async (groupUserData) => {
+				if (groupUserData) {
+					await this.chatService
+						.showOneUser(showUserDto)
+						.then((oneUserData) => {
+							const data = {
+								group: groupUserData,
+								one: oneUserData
+							};
+							client.emit('returnUserList', data);
+						});
+				}
+			});
 	}
 
 	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
 	// 채팅방 사용자 테이블에 해당 사용자가 등록되어 있지 않다면 자동으로 join 안함
 	// 또한 나갔다 들어온 이후에는 이전의 채팅방 메시지가 보여야 하므로, 해당 사용자가 입력한 첫 메시지 이후의 모든 메시지를 가져옴!
+	// 단체 채팅방 메시지, 1:1 메시지 모두 가져옴
+	// 이걸 사용해서 채팅방 참가 버튼 유무를 정할 수 있음.
 	@SubscribeMessage('joinAuto')
 	async handleJoinAutoRoom(client: Socket, joinAutoDto: JoinAutoDto) {
 		return await this.chatService
 			.joinAuto(joinAutoDto)
 			.then(async (joinAuto) => {
+				const data = {
+					chatGroup: 'N',
+					chatOne: 'N',
+					chatGroupList: null,
+					chatOneList: null
+				};
 				if (joinAuto) {
-					const chatList = await this.chatService.showChat(
+					client.join(joinAutoDto.icrId);
+
+					const chatGroupList = await this.chatService.showGroupChat(
 						joinAutoDto
 					);
-					client.join(joinAutoDto.icrId);
-					client.emit('returnJoinAuto', chatList);
+					data.chatGroupList = chatGroupList;
+					data.chatGroup = 'Y';
+					if (joinAuto.chooseYn == 'N') {
+						client.emit('returnJoinAuto', data);
+					} else {
+						const chatOneList = await this.chatService.showOneChat(
+							joinAutoDto
+						);
+						data.chatOne = 'Y';
+						data.chatOneList = chatOneList;
+						client.emit('returnJoinAuto', data);
+					}
+				} else {
+					client.emit('returnJoinAuto', data);
 				}
 			});
 	}
@@ -108,28 +138,17 @@ export class ChatGateway
 		const [type, token] = auth['token'].split(' ');
 
 		if (type != 'Bearer') {
-			// client.emit('returnAuth', { msg: 'fail', errorMsg: 'no login' });
 			return { msg: 'fail', errorMsg: 'no login' };
 		}
 
 		try {
 			const payload = jwt.verify(token, process.env.SECRET_KEY);
 			if (payload) {
-				// await client.emit('returnAuth', { msg: 'success' });
 				return { msg: 'success' };
 			} else {
-				// await client.emit('returnAuth', {
-				// msg: 'fail',
-				// errorMsg: 'no login'
-				// });
 				return { msg: 'fail', errorMsg: 'no login' };
 			}
 		} catch {
-			// await client.emit('returnAuth', {
-			// 	msg: 'fail',
-			// 	errorMsg: 'no login'
-			// });
-
 			return { msg: 'fail', errorMsg: 'no login' };
 		}
 	}

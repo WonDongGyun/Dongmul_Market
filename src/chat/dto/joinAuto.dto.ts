@@ -6,4 +6,7 @@ export class JoinAutoDto {
 
 	@IsString()
 	readonly icrId: string;
+
+	@IsString()
+	readonly dicrId: string;
 }

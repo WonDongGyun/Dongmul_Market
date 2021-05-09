@@ -107,6 +107,7 @@
 			};
 			var roomName = '';
 			var socket = io('http://localhost:3001/chatting');
+			console.log(socket);
 
 			var messages = document.getElementById('messages');
 			var form = document.getElementById('form');
@@ -119,7 +120,8 @@
 			window.onload = function () {
 				var data = {
 					email: 'waterflame1@naver.com',
-					icrId: 'f78ac07c-a732-4067-ac56-68c7c1999d00'
+					icrId: 'f78ac07c-a732-4067-ac56-68c7c1999d00',
+					dicrId: '3d582059-c432-4d39-a238-ba883dcbaaed'
 				};
 				socket.emit('showUserList', data);
 				socket.emit('joinAuto', data);
@@ -137,11 +139,12 @@
 			});
 
 			socket.on('returnUserList', function (msg) {
+				console.log(msg);
 				socket.emit(
 					'authenticate',
 					{
 						token:
-							'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IndhdGVyZmxhbWUxQG5hdmVyLmNvbSIsImlhdCI6MTYyMDQ3MTU3OSwiZXhwIjoxNjIwNDc1MTc5fQ.6bOSk9taflnpHqqDYgRt9PCI_lGSvNZV8RD-PXWv8LQ'
+							'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IndhdGVyZmxhbWUxQG5hdmVyLmNvbSIsImlhdCI6MTYyMDU3NDcwOCwiZXhwIjoxNjIwNTc4MzA4fQ.zoHGo4DpY_MrEwW01BXPp-2udKVSKFQc3pcdDnDf4hE'
 					},
 					(data) => {
 						if (data['msg'] == 'success') {
