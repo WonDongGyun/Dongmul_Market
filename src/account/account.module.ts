@@ -1,4 +1,3 @@
-import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,7 +6,7 @@ import { User } from 'src/entities/user.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
 import { AccountController } from './account.controller';
-import { AccountService, KakaoLogin } from './account.service';
+import { AccountService } from './account.service';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
 
@@ -26,13 +25,7 @@ import { JwtStrategy } from './jwt.strategy';
 		})
 	],
 	controllers: [AccountController],
-	providers: [
-		AccountService,
-		JwtStrategy,
-		GoogleStrategy,
-		KakaoLogin,
-		MailService
-	],
+	providers: [AccountService, JwtStrategy, GoogleStrategy, MailService],
 	exports: []
 })
 export class AccountModule {}
