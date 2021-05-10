@@ -13,9 +13,6 @@ import { DealChatRoomUser } from './entities/dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
 import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
-import { MailModule } from './mail/mail.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { EmailAuth } from './entities/emailAuth.entity';
 
 @Module({
 	imports: [
@@ -31,8 +28,7 @@ import { EmailAuth } from './entities/emailAuth.entity';
 			DealChatRoom,
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
-			Code,
-			EmailAuth
+			Code
 		]),
 		TypeOrmModule.forRoot({
 			type: 'mysql',
@@ -50,15 +46,13 @@ import { EmailAuth } from './entities/emailAuth.entity';
 				DealChatRoom,
 				DealChatRoomUser,
 				DealChatRoomUserMsg,
-				Code,
-				EmailAuth
+				Code
 			],
 			synchronize: true
 		}),
 		ChatModule,
 		AccountModule,
-		MainPageModule,
-		MailerModule
+		MainPageModule
 	]
 })
 export class AppModule {}

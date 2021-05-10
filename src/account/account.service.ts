@@ -1,4 +1,4 @@
-import {  BadRequestException, Body, HttpService, Injectable } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -9,23 +9,14 @@ import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
 import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
-import { MailerService } from '@nestjs-modules/mailer';
-import { EmailAuth } from 'src/entities/emailAuth.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dtd';
-import { PasswordChangeDto } from './dto/passwordChange.dto';
-
 
 @Injectable()
 export class AccountService {
 	constructor(
 		private readonly jwtService: JwtService,
-		private mailerService: MailerService,
 
 		@InjectRepository(User)
-		private readonly userRepository: Repository<User>,
-
-		@InjectRepository(EmailAuth)
-		private readonly emailRepository: Repository<EmailAuth>
+		private readonly userRepository: Repository<User>
 	) {}
 
 	// 패스워드 해쉬화
@@ -43,7 +34,6 @@ export class AccountService {
 	// 회원가입 하기
 	async setUser(createUserDto: CreateUserDto) {
 		const user = new User();
-		// const token = Math.floor(1000 + Math.random() * 9000).toString();
 		user.email = createUserDto.email;
 		user.password = await this.hashPassword(createUserDto.password);
 		user.nickname = createUserDto.nickname;
@@ -67,21 +57,6 @@ export class AccountService {
 		}
 	}
 
-	//이메일 찾기
-	async findByEmail(email: string): Promise<User> {
-		return await this.userRepository.findOne(email);
-	}
-	//업데이트
-	async update(email: string, payload: Partial<User>) {
-		return this.userRepository.update({ email: email }, payload);
-	}
-	//패스워드 찾기
-	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-		const user = await this.findByEmail(forgotPasswordDto.email);
-		if (!user) {
-			throw new BadRequestException('email이 없습니다.');
-		}
-	}
 	// 로그인 확인
 	async chkLogin(chkLoginDto: ChkLoginDto) {
 		const user = await this.userRepository.findOne({
@@ -128,6 +103,7 @@ export class AccountService {
 					errorMsg: '프로필 조회 중 오류가 발생하였습니다.'
 				};
 			});
+		
 	}
 
 	googleLogin(req) {
@@ -144,19 +120,18 @@ export class AccountService {
 	// 	throw new Error('Method not implemented.');
 	// }
 
-	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
+		async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
 		const google = await this.userRepository.findOne({
 			email: googleChkEmaildto.email
-		});
+		})
 		// console.log(google)
 		if (google) {
-			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' }; //this.getTokenForUser(googleChkEmaildto.email);
+			return {msg:"fail",errorMsg: "이미 존재하는 계정입니다."} //this.getTokenForUser(googleChkEmaildto.email);
 		} else {
 			const user = new User();
 			user.email = googleChkEmaildto.email;
-			user.nickname =
-				googleChkEmaildto.lastName + googleChkEmaildto.firstName;
-			user.address = ' ';
+			user.nickname = googleChkEmaildto.lastName+googleChkEmaildto.firstName;
+			user.address = " "
 
 			return await this.userRepository.save(user).then(async () => {
 				return { msg: 'success', errorMsg: '회원가입 성공!' };
@@ -165,169 +140,8 @@ export class AccountService {
 			// return { token: token }
 		}
 	}
-
-	async findUserEmail(email: string) {
-		const user = await this.userRepository.findOne({
-			where: { email: email }
-		});
-		return user;
-	}
-	//이메일 인증 코드 보내기
-	async sendRegisterMail(email: string) {
-		const findemail = await this.emailRepository.findOne({
-			where: { email: email }
-		});
-		try {
-			if (!findemail) {
-				const generateRandom = function (min: number, max: number) {
-					const ranNum =
-						Math.floor(Math.random() * (max - min + 1)) + min;
-					return ranNum;
-				};
-				const authNum: number = generateRandom(111111, 999999);
-				const emailAuth: EmailAuth = new EmailAuth();
-				emailAuth.email = email;
-				emailAuth.authNum = authNum;
-
-				await this.mailerService.sendMail({
-					to: email, // list of receivers
-					from: 'ljayoon@gmail.com', // sender address
-					subject: '인증번호 입니다.', // Subject line
-					html: `
-							<h1>
-							회원가입 요청 메일 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							6자리 인증 코드 :  <b> ${authNum}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
-				});
-
-				console.log(findemail);
-				await this.emailRepository.insert(emailAuth);
-				return {
-					statusCode: 201,
-					message: '인증번호 전송 완료'
-				};
-			} else {
-				const generateRandom = function (min: number, max: number) {
-					const ranNum =
-						Math.floor(Math.random() * (max - min + 1)) + min;
-					return ranNum;
-				};
-				const authNum: number = generateRandom(111111, 999999);
-				const emailAuth: EmailAuth = new EmailAuth();
-				emailAuth.email = email;
-				emailAuth.authNum = authNum;
-
-				await this.mailerService.sendMail({
-					to: email, // list of receivers
-					from: 'ljayoon@gmail.com', // sender address
-					subject: '인증번호 입니다.', // Subject line
-					html: `
-							<h1>
-							회원가입 요청 메일 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							6자리 인증 코드 :  <b> ${authNum}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
-				});
-
-				await this.emailRepository.update(email, {
-					authNum: authNum
-				});
-				return {
-					statusCode: 201,
-					message: '인증번호 재 전송 완료'
-				};
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	}
-
-	//authNum:number
-
-	//인증번호 확인하고 지움
-	async sendEmailConfirm(email: string, authNum: number) {
-		const findemail = await this.emailRepository.findOne(email);
-		console.log(findemail.authNum);
-		if (authNum == findemail.authNum) {
-			return { msg: 'success' };
-		} else {
-			return { msg: 'fail' };
-		}
-	}
-
-	//비밀번호 변경숫자 이메일 전송
-
-	async sendEmailPassword(email: string) {
-		const findemail = await this.userRepository.findOne(email);
-		if (findemail) {
-			const generateRandom = function (min: any, max: any) {
-				const ranNum =
-					Math.floor(Math.random() * (max - min + 1)) + min;
-				return ranNum;
-			};
-			const newpassword: string = generateRandom(111111, 999999);
-			const emailAuth: EmailAuth = new EmailAuth();
-			emailAuth.email = email;
-			emailAuth.newpassword = newpassword;
-
-			await this.mailerService.sendMail({
-				to: email, // list of receivers
-				from: 'ljayoon@gmail.com', // sender address
-				subject: '새로운 비밀번호 입니다.', // Subject line
-				html: `
-							<h1>
-							새로운 비밀번호 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							새로운 비밀번호6자리 입니다. :  <b> ${newpassword}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
-			});
-			let newspassword = emailAuth.newpassword.toString();
-			newspassword = await this.hashPassword(newspassword);
-			await this.userRepository.update(email, {
-				password: newspassword
-			});
-			return {
-				statusCode: 201,
-				message: '비밀번호 변경 이메일 전송 완료'
-			};
-		} else {
-			return { msg: '없는 계정입니다.' };
-		}
-	}
-	catch(err) {
-		console.log(err);
-	}
-
-	//비밀번호 변경
-	async changePassword(email: string, passwordChangeDto: PasswordChangeDto) {
-		const password = await this.hashPassword(passwordChangeDto.password);
-		return await this.userRepository.update(email, { password: password }).then(async () => {
-			return { msg: 'success', errorMsg: '비밀번호 변경 성공!' };
-		})
-	}
+	
 }
-
-
-
 
 
 //카카오로그인
@@ -415,6 +229,4 @@ export class KakaoLogin {
 			// return { token: token }
 		}
 	}
-
-
 }
