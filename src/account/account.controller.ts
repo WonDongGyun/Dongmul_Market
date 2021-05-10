@@ -17,6 +17,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ChkNumdto } from './dto/chkNum.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
+import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 
 @Controller('account')
 export class AccountController {
@@ -90,6 +91,12 @@ export class AccountController {
 	@Post('/changepassword')
 	async changePassword(@Body() passwordChangeDto: PasswordChangeDto) {
 		return await this.accountService.changePassword(passwordChangeDto);
+	}
+
+	//구글 회원가입 및 로그인
+	@Post('googleAuth')
+	GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
+		return this.accountService.googleCheck(googleChkEmaildto);
 	}
 
 	//카카오계정 저장
