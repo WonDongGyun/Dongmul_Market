@@ -161,7 +161,7 @@ export class ChatGateway
 		try {
 			const [type, token] = auth['token'].split(' ');
 
-			if (type != 'Bearer') {
+			if (type != 'bearer') {
 				return { msg: 'fail', errorMsg: 'no login' };
 			}
 			const payload = jwt.verify(token, process.env.SECRET_KEY);
