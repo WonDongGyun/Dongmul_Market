@@ -3,6 +3,7 @@ import {
 	Controller,
 	Get,
 	Header,
+	Param,
 	Post,
 	Query,
 	Req,
@@ -18,14 +19,20 @@ import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
 import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
-import { GoogleLoginDto } from './dto/googleLogin.dto';
-import { KakaoLoginDto } from './dto/kakaoLogin.dto';
+import { MailService } from 'src/mail/mail.service';
+import { User } from 'src/entities/user.entity';
+import { LoginUserDto } from './dto/login-user.dto';
+import { ChkNumdto } from './dto/chkNum.dto';
+import { ValidationPipe } from '@nestjs/common';
+import { ForgotPasswordDto } from './dto/forgot-password.dtd';
+import { PasswordChangeDto } from './dto/passwordChange.dto';
+
 
 @Controller('account')
 export class AccountController {
 	constructor(
 		private readonly accountService: AccountService,
-		private readonly kakaoLogin: KakaoLogin
+		private readonly kakaoLogin: KakaoLogin // private readonly mailService: MailService
 	) {}
 
 	// 회원 가입
@@ -65,10 +72,36 @@ export class AccountController {
 		return this.accountService.googleLogin(req);
 	}
 
-	//구글 회원가입 및 로그인
-	@Post('googleAuth')
+	//구글로그인 확인
+	@Post('/googleAuth')
 	GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
 		return this.accountService.googleCheck(googleChkEmaildto);
+	}
+
+	@Post('mail')
+	async mail(@Body() userData: LoginUserDto) {
+		console.log(userData);
+		const user = await this.accountService.findUserEmail(userData.email);
+
+		if (!user) {
+			const CodeEmail = await this.accountService.sendRegisterMail(
+				userData.email
+			);
+			console.log(
+				`email ID ${userData.email} not found 인증번호 메일 요청했습니다`
+			);
+			return CodeEmail;
+		} else {
+			console.log('이미 있는 계정입니다.');
+		}
+	}
+
+	@Post('mail/check')
+	async mailcheck(@Body() chkNum: ChkNumdto) {
+		return await this.accountService.sendEmailConfirm(
+			chkNum.email,
+			chkNum.authchkNum
+		);
 	}
 
 	// 로그아웃
@@ -82,6 +115,20 @@ export class AccountController {
 	logout(@Req() req, @Res() res) {
 		req.logout();
 		res.json({ loggedOut: true });
+	}
+
+	@Post('/sendpassword')
+	async forgotPassword(@Body() forgotPassword: ForgotPasswordDto) {
+		return await this.accountService.sendEmailPassword(
+			forgotPassword.email
+		);
+	}
+
+	@Post('/changepassword')
+	async changePassword(@Body() passwordChangeDto: PasswordChangeDto) {
+		return await this.accountService.changePassword(
+			passwordChangeDto
+		);
 	}
 
 	//카카오 시작
@@ -174,8 +221,7 @@ export class AccountController {
         // `);
 			});
 	}
-
-	//카카오 로그인 및 회원가입
+	//카카오계정 저장
 	@Post('/kakaoAuth')
 	KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
 		return this.kakaoLogin.kakaoCheck(kakaoChkEmaildto);
