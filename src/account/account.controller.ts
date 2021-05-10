@@ -3,7 +3,6 @@ import {
 	Controller,
 	Get,
 	Header,
-	Param,
 	Post,
 	Query,
 	Req,
@@ -23,7 +22,6 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ChkNumdto } from './dto/chkNum.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
-
 
 @Controller('account')
 export class AccountController {
@@ -123,9 +121,7 @@ export class AccountController {
 
 	@Post('/changepassword')
 	async changePassword(@Body() passwordChangeDto: PasswordChangeDto) {
-		return await this.accountService.changePassword(
-			passwordChangeDto
-		);
+		return await this.accountService.changePassword(passwordChangeDto);
 	}
 
 	//카카오 시작

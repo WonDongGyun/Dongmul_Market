@@ -28,9 +28,6 @@ export class User {
 	@Column({ type: 'varchar' })
 	address: string;
 
-	// @Column({ nullable: true, type: 'varchar', length: 64 })
-	// code: string;
-
 	@CreateDateColumn()
 	createdDt: Date;
 
