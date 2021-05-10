@@ -111,50 +111,42 @@ export class AccountService {
 		};
 	}
 
-	// 로그인 확인
-	async getProfile(email: string) {
-		return await this.userRepository
-			.findOne({
-				email: email
-			})
-			.then((findProfile) => {
-				if (findProfile) {
-					return {
-						email: findProfile.email,
-						nickname: findProfile.nickname,
-						address: findProfile.address
-					};
-				}
-			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: '프로필 조회 중 오류가 발생하였습니다.'
-				};
-			});
-	}
-
-	googleLogin(req) {
-		if (!req.user) {
-			return 'no user from google';
-		}
-		return {
-			message: 'User information from google',
-			user: req.user
-		};
-	}
-
-	// logOut(logOut: LogOut): Promise<import('./account.dto').LogOutSuccess> {
-	// 	throw new Error('Method not implemented.');
-	// }
-
 	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
 		const google = await this.userRepository.findOne({
 			email: googleChkEmaildto.email
 		});
 		// console.log(google)
 		if (google) {
-			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' }; //this.getTokenForUser(googleChkEmaildto.email);
+			return await this.userRepository
+				.findOne({
+					email: googleChkEmaildto.email,
+					password: null
+				})
+				.then((findGoogle) => {
+					if (findGoogle) {
+						const token = this.getTokenForUser(
+							googleChkEmaildto.email
+						);
+						return {
+							msg: 'success',
+							email: findGoogle.email,
+							nickname: findGoogle.nickname,
+							token: 'bearer ' + token
+						};
+					} else {
+						return {
+							msg: 'fail',
+							errorMsg:
+								'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+						};
+					}
+				})
+				.catch((err) => {
+					return {
+						msg: 'fail',
+						errorMsg: err
+					};
+				});
 		} else {
 			const user = new User();
 			user.email = googleChkEmaildto.email;
@@ -165,8 +157,54 @@ export class AccountService {
 			return await this.userRepository.save(user).then(async () => {
 				return { msg: 'success', errorMsg: '회원가입 성공!' };
 			});
-			// const token = this.getTokenForUser(googleChkEmaildto.email);
-			// return { token: token }
+		}
+	}
+
+	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
+		const kakao = await this.userRepository.findOne({
+			email: kakaoChkEmaildto.email
+		});
+		// console.log(kakao);
+		if (kakao) {
+			return await this.userRepository
+				.findOne({
+					email: kakaoChkEmaildto.email,
+					password: null
+				})
+				.then((findKakao) => {
+					if (findKakao) {
+						const token = this.getTokenForUser(
+							kakaoChkEmaildto.email
+						);
+						return {
+							msg: 'success',
+							email: findKakao.email,
+							nickname: findKakao.nickname,
+							token: 'bearer ' + token
+						};
+					} else {
+						return {
+							msg: 'fail',
+							errorMsg:
+								'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+						};
+					}
+				})
+				.catch((err) => {
+					return {
+						msg: 'fail',
+						errorMsg: err
+					};
+				});
+		} else {
+			const user = new User();
+			user.email = kakaoChkEmaildto.email;
+			user.nickname = kakaoChkEmaildto.nickname;
+			user.address = ' ';
+
+			return await this.userRepository.save(user).then(async () => {
+				return { msg: 'success', errorMsg: '회원가입 성공!' };
+			});
 		}
 	}
 
@@ -330,92 +368,5 @@ export class AccountService {
 			.then(async () => {
 				return { msg: 'success', errorMsg: '비밀번호 변경 성공!' };
 			});
-	}
-}
-
-//카카오로그인
-@Injectable()
-export class KakaoLogin {
-	check: boolean;
-	accessToken: string;
-	accountemail: string;
-	accountnickname: string;
-
-	private http: HttpService;
-	constructor(
-		@InjectRepository(User)
-		private readonly userRepository: Repository<User>
-	) {
-		this.check = false;
-		this.http = new HttpService();
-		this.accessToken = '';
-		this.accountemail = '';
-		this.accountnickname = '';
-	}
-	loginCheck(): void {
-		this.check = !this.check;
-
-		return;
-	}
-	async login(url: string, headers: any): Promise<any> {
-		return await this.http.post(url, '', { headers }).toPromise();
-	}
-	setToken(token: string): boolean {
-		this.accessToken = token;
-		return true;
-	}
-
-	setNickName(nickname: string): boolean {
-		this.accountnickname = nickname;
-		return true;
-	}
-
-	async getEmail(): Promise<any> {
-		const _url = 'https://kapi.kakao.com/v2/user/me';
-		const _header = {
-			Authorization: `bearer ${this.accessToken}`,
-			'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-		};
-		return await this.http.post(_url, '', { headers: _header }).toPromise();
-	}
-	setEmail(email: string): boolean {
-		this.accountemail = email;
-		return true;
-	}
-
-	async logout(): Promise<any> {
-		const _url = 'https://kapi.kakao.com/v1/user/logout';
-		const _header = {
-			Authorization: `bearer ${this.accessToken}`
-		};
-		return await this.http.post(_url, '', { headers: _header }).toPromise();
-	}
-	async deleteLog(): Promise<any> {
-		const _url = 'https://kapi.kakao.com/v1/user/unlink';
-		const _header = {
-			Authorization: `bearer ${this.accessToken}`
-		};
-		return await this.http.post(_url, '', { headers: _header }).toPromise();
-	}
-
-	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
-		const kakao = await this.userRepository.findOne({
-			email: kakaoChkEmaildto.email
-		});
-		// console.log(kakao);
-		if (kakao) {
-			return { msg: 'fail', errorMsg: '이미 존재하는 계정입니다.' }; //this.getTokenForUser(googleChkEmaildto.email);
-		} else {
-			const user = new User();
-			user.email = kakaoChkEmaildto.email;
-			user.nickname = kakaoChkEmaildto.nickname;
-			user.address = ' ';
-
-			return await this.userRepository.save(user).then(async () => {
-				return { msg: 'success', errorMsg: '회원가입 성공!' };
-			});
-			// const token = this.getTokenForUser(googleChkEmaildto.email);
-			// return { token: token }
-		}
 	}
 }
