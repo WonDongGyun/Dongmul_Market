@@ -15,6 +15,8 @@ import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { EmailAuth } from './entities/emailAuth.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
 	imports: [
@@ -30,7 +32,8 @@ import { join } from 'path';
 			DealChatRoom,
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
-			Code
+			Code,
+			EmailAuth
 		]),
 		TypeOrmModule.forRoot({
 			type: 'mysql',
@@ -48,7 +51,8 @@ import { join } from 'path';
 				DealChatRoom,
 				DealChatRoomUser,
 				DealChatRoomUserMsg,
-				Code
+				Code,
+				EmailAuth
 			],
 			synchronize: true
 		}),
@@ -57,7 +61,8 @@ import { join } from 'path';
 		}),
 		ChatModule,
 		AccountModule,
-		MainPageModule
+		MainPageModule,
+		MailerModule
 	]
 })
 export class AppModule {}
