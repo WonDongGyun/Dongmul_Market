@@ -189,7 +189,7 @@ export class ChatService {
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 
 		// itemChatRoomUser 테이블에 해당 사용자가 없다면 사용자 추가
-		await this.itemChatRoomUserRepository
+		return await this.itemChatRoomUserRepository
 			.createQueryBuilder('icru')
 			.select('icru.icruId', 'icruId')
 			.addSelect('icru.email', 'email')
