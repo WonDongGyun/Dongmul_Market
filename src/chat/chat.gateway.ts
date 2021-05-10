@@ -31,7 +31,7 @@ export class ChatGateway
 	async handleMessage(client: Socket, itemChatDto: ItemChatDto) {
 		console.log(itemChatDto);
 		const chatMsg = await this.chatService.saveChatMsg(itemChatDto);
-		console.log('sendMsg', chatMsg);
+		console.log('sendMsg => ', chatMsg);
 		this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg);
 	}
 
@@ -117,8 +117,8 @@ export class ChatGateway
 		const chatGroupList = await this.chatService.showGroupChat(
 			itemChatJoinDto
 		);
-		console.log('joinMsg', joinMsg);
-		console.log('chatGroupList', chatGroupList);
+		console.log('joinMsg => ', joinMsg);
+		console.log('chatGroupList => ', chatGroupList);
 		client.emit('setRoom', chatGroupList);
 	}
 

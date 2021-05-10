@@ -201,7 +201,7 @@ export class ChatService {
 			.andWhere('icru.icrId = :icrId', { icrId: itemChatJoinDto.icrId })
 			.getRawOne()
 			.then(async (findUser) => {
-				console.log(findUser);
+				console.log('findUser => ', findUser);
 				if (!findUser) {
 					await this.itemChatRoomUserRepository
 						.insert(itemChatRoomUser)
