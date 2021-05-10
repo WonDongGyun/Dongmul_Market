@@ -13,7 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User,EmailAuth]),
+		TypeOrmModule.forFeature([User, EmailAuth]),
 		// PassportModule,
 		MailModule,
 		JwtModule.registerAsync({
@@ -26,7 +26,13 @@ import { JwtStrategy } from './jwt.strategy';
 		})
 	],
 	controllers: [AccountController],
-	providers: [AccountService, JwtStrategy, GoogleStrategy, KakaoLogin,MailService],
+	providers: [
+		AccountService,
+		JwtStrategy,
+		GoogleStrategy,
+		KakaoLogin,
+		MailService
+	],
 	exports: []
 })
 export class AccountModule {}

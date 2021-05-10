@@ -15,6 +15,7 @@ import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { EmailAuth } from './entities/emailAuth.entity';
 
 @Module({
 	imports: [
@@ -30,7 +31,8 @@ import { join } from 'path';
 			DealChatRoom,
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
-			Code
+			Code,
+			EmailAuth
 		]),
 		TypeOrmModule.forRoot({
 			type: 'mysql',
@@ -48,13 +50,14 @@ import { join } from 'path';
 				DealChatRoom,
 				DealChatRoomUser,
 				DealChatRoomUserMsg,
-				Code
+				Code,
+				EmailAuth
 			],
 			synchronize: true
 		}),
-		ServeStaticModule.forRoot({
-			rootPath: join(__dirname, '..', 'static')
-		}),
+		// ServeStaticModule.forRoot({
+		// 	rootPath: join(__dirname, '..', 'static')
+		// }),
 		ChatModule,
 		AccountModule,
 		MainPageModule

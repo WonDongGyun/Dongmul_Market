@@ -11,6 +11,7 @@ import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { MainPageController } from './main-page.controller';
 import { MainPageService } from './main-page.service';
+import { EmailAuth } from 'src/entities/emailAuth.entity';
 
 @Module({
 	imports: [
@@ -23,7 +24,8 @@ import { MainPageService } from './main-page.service';
 			DealChatRoom,
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
-			Code
+			Code,
+			EmailAuth
 		])
 	],
 	controllers: [MainPageController],

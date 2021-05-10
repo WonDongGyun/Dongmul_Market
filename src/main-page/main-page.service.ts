@@ -198,8 +198,8 @@ export class MainPageService {
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
 		await this.itemChatRoomRepository.insert(itemChatRoom);
 
-		const dealChatRoom: DealChatRoom = new DealChatRoom();
-		await this.dealChatRoomRepository.insert(dealChatRoom);
+		// const dealChatRoom: DealChatRoom = new DealChatRoom();
+		// await this.dealChatRoomRepository.insert(dealChatRoom);
 
 		// 경매 글 올린 사람, 채팅방 유저로 저장
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
@@ -208,11 +208,11 @@ export class MainPageService {
 		itemChatRoomUser.chooseYn = 'Y';
 		await this.itemChatRoomUserRepository.insert(itemChatRoomUser);
 
-		const dealChatRoomUser: DealChatRoomUser = new DealChatRoomUser();
-		dealChatRoomUser.user = user;
-		dealChatRoomUser.dealChatRoom = dealChatRoom;
-		dealChatRoomUser.changeYn = 'Y';
-		await this.dealChatRoomUserRepository.insert(dealChatRoomUser);
+		// const dealChatRoomUser: DealChatRoomUser = new DealChatRoomUser();
+		// dealChatRoomUser.user = user;
+		// dealChatRoomUser.dealChatRoom = dealChatRoom;
+		// dealChatRoomUser.changeYn = 'Y';
+		// await this.dealChatRoomUserRepository.insert(dealChatRoomUser);
 
 		// 경매 글 저장
 		const saleItem: SaleItem = new SaleItem();
@@ -223,7 +223,7 @@ export class MainPageService {
 		saleItem.comment = setItemDto.comment;
 		saleItem.deadLine = new Date(setItemDto.deadLine);
 		saleItem.itemChatRoom = itemChatRoom;
-		saleItem.dealChatRoom = dealChatRoom;
+		// saleItem.dealChatRoom = dealChatRoom;
 		saleItem.user = user;
 
 		return await this.saleItemRepository

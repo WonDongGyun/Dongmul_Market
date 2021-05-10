@@ -30,74 +30,74 @@ export class ChatGateway
 	@SubscribeMessage('sendMsg')
 	async handleMessage(client: Socket, itemChatDto: ItemChatDto) {
 		console.log(itemChatDto);
-		const data = await this.chatService.saveChatMsg(itemChatDto);
-		console.log(data);
-		this.server.to(itemChatDto.icrId).emit('returnMsg', data);
+		const chatMsg = await this.chatService.saveChatMsg(itemChatDto);
+		console.log('sendMsg', chatMsg);
+		this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg);
 	}
 
 	// 이메일이 해당 방의 방장과 같다면, 단체 채팅방 및 1:1 채팅방 접속한 인원들을 보여줌.
 	// window.onload
 	// front => socket.emit('showUserList', data = { email: '현재 상세페이지에 들어온 사용자', icrId: icrId })
-	@SubscribeMessage('showUserList')
-	async handleShowUserRoom(client: Socket, showUserDto: ShowUserDto) {
-		console.log(showUserDto);
-		await this.chatService
-			.showGroupUser(showUserDto)
-			.then(async (groupUserData) => {
-				if (groupUserData) {
-					await this.chatService
-						.showOneUser(showUserDto)
-						.then((oneUserData) => {
-							const data = {
-								group: groupUserData,
-								one: oneUserData
-							};
-							console.log(data);
-							client.emit('returnUserList', data);
-						});
-				}
-			});
-	}
+	// @SubscribeMessage('showUserList')
+	// async handleShowUserRoom(client: Socket, showUserDto: ShowUserDto) {
+	// 	console.log(showUserDto);
+	// 	await this.chatService
+	// 		.showGroupUser(showUserDto)
+	// 		.then(async (groupUserData) => {
+	// 			if (groupUserData) {
+	// 				await this.chatService
+	// 					.showOneUser(showUserDto)
+	// 					.then((oneUserData) => {
+	// 						const data = {
+	// 							group: groupUserData,
+	// 							one: oneUserData
+	// 						};
+	// 						console.log(data);
+	// 						client.emit('returnUserList', data);
+	// 					});
+	// 			}
+	// 		});
+	// }
 
 	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
 	// 채팅방 사용자 테이블에 해당 사용자가 등록되어 있지 않다면 자동으로 join 안함
 	// 또한 나갔다 들어온 이후에는 이전의 채팅방 메시지가 보여야 하므로, 해당 사용자가 입력한 첫 메시지 이후의 모든 메시지를 가져옴!
 	// 단체 채팅방 메시지, 1:1 메시지 모두 가져옴
 	// 이걸 사용해서 채팅방 참가 버튼 유무를 정할 수 있음.
-	@SubscribeMessage('joinAuto')
-	async handleJoinAutoRoom(client: Socket, joinAutoDto: JoinAutoDto) {
-		return await this.chatService
-			.joinAuto(joinAutoDto)
-			.then(async (joinAuto) => {
-				const data = {
-					chatGroup: 'N',
-					chatOne: 'N',
-					chatGroupList: null,
-					chatOneList: null
-				};
-				if (joinAuto) {
-					client.join(joinAutoDto.icrId);
+	// @SubscribeMessage('joinAuto')
+	// async handleJoinAutoRoom(client: Socket, joinAutoDto: JoinAutoDto) {
+	// 	return await this.chatService
+	// 		.joinAuto(joinAutoDto)
+	// 		.then(async (joinAuto) => {
+	// 			const data = {
+	// 				chatGroup: 'N',
+	// 				chatOne: 'N',
+	// 				chatGroupList: null,
+	// 				chatOneList: null
+	// 			};
+	// 			if (joinAuto) {
+	// 				client.join(joinAutoDto.icrId);
 
-					const chatGroupList = await this.chatService.showGroupChat(
-						joinAutoDto
-					);
-					data.chatGroupList = chatGroupList;
-					data.chatGroup = 'Y';
-					if (joinAuto.chooseYn == 'N') {
-						client.emit('returnJoinAuto', data);
-					} else {
-						const chatOneList = await this.chatService.showOneChat(
-							joinAutoDto
-						);
-						data.chatOne = 'Y';
-						data.chatOneList = chatOneList;
-						client.emit('returnJoinAuto', data);
-					}
-				} else {
-					client.emit('returnJoinAuto', data);
-				}
-			});
-	}
+	// 				const chatGroupList = await this.chatService.showGroupChat(
+	// 					joinAutoDto
+	// 				);
+	// 				data.chatGroupList = chatGroupList;
+	// 				data.chatGroup = 'Y';
+	// 				if (joinAuto.chooseYn == 'N') {
+	// 					client.emit('returnJoinAuto', data);
+	// 				} else {
+	// 					const chatOneList = await this.chatService.showOneChat(
+	// 						joinAutoDto
+	// 					);
+	// 					data.chatOne = 'Y';
+	// 					data.chatOneList = chatOneList;
+	// 					client.emit('returnJoinAuto', data);
+	// 				}
+	// 			} else {
+	// 				client.emit('returnJoinAuto', data);
+	// 			}
+	// 		});
+	// }
 
 	// '님이 입장하셨습니다.'
 	// 채팅방 사용자 테이블에 해당 사용자 등록하기.
@@ -107,20 +107,30 @@ export class ChatGateway
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(client: Socket, itemChatJoinDto: ItemChatJoinDto) {
 		console.log(itemChatJoinDto);
-		await this.chatService.joinChatRoom(itemChatJoinDto);
+		const joinMsg = await this.chatService.joinChatRoom(itemChatJoinDto);
 		client.join(itemChatJoinDto.icrId);
-		client.emit('returnJoinMsg', itemChatJoinDto.icrId);
+		// 접속하셨습니다 메시지
+		client.emit('returnJoinMsg', joinMsg);
+		// 채팅방 유저 목록에 추가
+		client.emit('addUser', joinMsg);
+		// 지난 채팅 보여주기
+		const chatGroupList = await this.chatService.showGroupChat(
+			itemChatJoinDto
+		);
+		console.log('joinMsg', joinMsg);
+		console.log('chatGroupList', chatGroupList);
+		client.emit('setRoom', chatGroupList);
 	}
 
 	// 1:1 채팅 같은 경우에는, join하는 버튼이 아니라, 방장이 해당 유저를 추가해주는 식으로 들어가진다.
 	// 따라서 방장이 1:1채팅방에 유저를 추가해주면, 실시간으로 해당 유저의 1:1 채팅방이 열려야 한다.
-	@SubscribeMessage('joinOneRoom')
-	async handleJoinOneRoom(
-		client: Socket,
-		itemChatOneJoinDto: ItemChatOneJoinDto
-	) {
-		console.log(client, itemChatOneJoinDto);
-	}
+	// @SubscribeMessage('joinOneRoom')
+	// async handleJoinOneRoom(
+	// 	client: Socket,
+	// 	itemChatOneJoinDto: ItemChatOneJoinDto
+	// ) {
+	// 	console.log(client, itemChatOneJoinDto);
+	// }
 
 	// '님이 퇴장하셨습니다.'
 	// front => socket.emit('leaveRoom', icrId)

@@ -118,12 +118,12 @@ export class ChatService {
 
 	// 지난 단체 채팅 내역 보여주기
 	// 해당 사용자가 해당 채팅방에 들어온 시간 이후의 모든 채팅을 보여줌
-	async showGroupChat(joinAutoDto: JoinAutoDto) {
+	async showGroupChat(itemChatJoinDto: ItemChatJoinDto) {
 		return await this.itemChatRoomUserRepository
 			.createQueryBuilder('icru')
 			.select('icru.createdDt', 'createdDt')
-			.where('icru.email = :email', { email: joinAutoDto.email })
-			.andWhere('icru.icrId = :icrId', { icrId: joinAutoDto.icrId })
+			.where('icru.email = :email', { email: itemChatJoinDto.email })
+			.andWhere('icru.icrId = :icrId', { icrId: itemChatJoinDto.icrId })
 			.getRawOne()
 			.then(async (findDate) => {
 				if (findDate) {
@@ -137,7 +137,7 @@ export class ChatService {
 						.addSelect('icrum.createdDt', 'createdDt')
 						.innerJoin(User, 'u', 'u.email = icrum.email')
 						.where('icrum.icrId = :icrId', {
-							icrId: joinAutoDto.icrId
+							icrId: itemChatJoinDto.icrId
 						})
 						.andWhere(`icrum.createdDt > '${dt}'`)
 						.orderBy('icrum.createdDt', 'ASC')
@@ -190,15 +190,45 @@ export class ChatService {
 
 		// itemChatRoomUser 테이블에 해당 사용자가 없다면 사용자 추가
 		await this.itemChatRoomUserRepository
-			.findOne({
-				user: user,
-				itemChatRoom: itemChatRoom
-			})
+			.createQueryBuilder('icru')
+			.select('icru.icruId', 'icruId')
+			.addSelect('icru.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('icru.chooseYn', 'chooseYn')
+			.addSelect('icru.createdDt', 'createdDt')
+			.innerJoin(User, 'u', 'u.email = icru.email')
+			.where('icru.email = :email', { email: itemChatJoinDto.email })
+			.andWhere('icru.icrId = :icrId', { icrId: itemChatJoinDto.icrId })
+			.getRawOne()
 			.then(async (findUser) => {
 				if (!findUser) {
-					await this.itemChatRoomUserRepository.insert(
-						itemChatRoomUser
-					);
+					await this.itemChatRoomUserRepository
+						.insert(itemChatRoomUser)
+						.then(async (insertUser) => {
+							if (insertUser) {
+								return await this.itemChatRoomUserRepository
+									.createQueryBuilder('icru')
+									.select('icru.icruId', 'icruId')
+									.addSelect('icru.email', 'email')
+									.addSelect('u.nickname', 'nickname')
+									.addSelect('icru.chooseYn', 'chooseYn')
+									.addSelect('icru.createdDt', 'createdDt')
+									.innerJoin(
+										User,
+										'u',
+										'u.email = icru.email'
+									)
+									.where('icru.email = :email', {
+										email: itemChatJoinDto.email
+									})
+									.andWhere('icru.icrId = :icrId', {
+										icrId: itemChatJoinDto.icrId
+									})
+									.getRawOne();
+							}
+						});
+				} else {
+					return findUser;
 				}
 			});
 	}

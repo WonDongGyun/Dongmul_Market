@@ -1,4 +1,9 @@
-import {  BadRequestException, Body, HttpService, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Body,
+	HttpService,
+	Injectable
+} from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -13,7 +18,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
-
 
 @Injectable()
 export class AccountService {
@@ -43,7 +47,7 @@ export class AccountService {
 	// 회원가입 하기
 	async setUser(createUserDto: CreateUserDto) {
 		const user = new User();
-	
+
 		user.email = createUserDto.email;
 		user.password = await this.hashPassword(createUserDto.password);
 		user.nickname = createUserDto.nickname;
@@ -255,14 +259,12 @@ export class AccountService {
 		}
 	}
 
-	
-
 	//인증번호 확인하고 지움
 	async sendEmailConfirm(email: string, authNum: number) {
 		const findemail = await this.emailRepository.findOne(email);
 		console.log(findemail.authNum);
 		if (authNum == findemail.authNum) {
-			await this.emailRepository.delete({ email: email })
+			await this.emailRepository.delete({ email: email });
 			return { msg: 'success' };
 		} else {
 			return { msg: 'fail' };
@@ -320,9 +322,7 @@ export class AccountService {
 	}
 
 	//비밀번호 변경
-	async changePassword(
-		passwordChangeDto: PasswordChangeDto
-	) {
+	async changePassword(passwordChangeDto: PasswordChangeDto) {
 		const newpassword = await this.hashPassword(passwordChangeDto.password);
 		// console.log(newpassword)
 		return await this.userRepository
@@ -332,10 +332,6 @@ export class AccountService {
 			});
 	}
 }
-
-
-
-
 
 //카카오로그인
 @Injectable()
@@ -422,6 +418,4 @@ export class KakaoLogin {
 			// return { token: token }
 		}
 	}
-
-
 }

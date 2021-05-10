@@ -4,17 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 
-
 @Injectable()
 export class MailService {
-	constructor(
-		private readonly mailerService: MailerService,
-
-	) {}
-
-
-
-
+	constructor(private readonly mailerService: MailerService) {}
 
 	// async sendUserConfirmation(user: User, token: string) {
 	// 	const url = `http://localhost:3000/account/confirm?token=${token}`;
@@ -53,5 +45,3 @@ export class MailService {
 			});
 	}
 }
-
-
