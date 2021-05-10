@@ -107,7 +107,7 @@ export class AccountService {
 			msg: 'success',
 			email: user.email,
 			nickname: user.nickname,
-			token: this.getTokenForUser(user.email)
+			token: 'bearer ' + this.getTokenForUser(user.email)
 		};
 	}
 
