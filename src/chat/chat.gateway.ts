@@ -14,6 +14,7 @@ import { ItemChatDto } from './dto/itemChat.dto';
 import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import * as jwt from 'jsonwebtoken';
+import { ItemChatOneJoinDto } from './dto/itemChatOneJoin.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -30,6 +31,7 @@ export class ChatGateway
 	async handleMessage(client: Socket, itemChatDto: ItemChatDto) {
 		console.log(itemChatDto);
 		const data = await this.chatService.saveChatMsg(itemChatDto);
+		console.log(data);
 		this.server.to(itemChatDto.icrId).emit('returnMsg', data);
 	}
 
@@ -50,6 +52,7 @@ export class ChatGateway
 								group: groupUserData,
 								one: oneUserData
 							};
+							console.log(data);
 							client.emit('returnUserList', data);
 						});
 				}
@@ -109,6 +112,16 @@ export class ChatGateway
 		client.emit('returnJoinMsg', itemChatJoinDto.icrId);
 	}
 
+	// 1:1 채팅 같은 경우에는, join하는 버튼이 아니라, 방장이 해당 유저를 추가해주는 식으로 들어가진다.
+	// 따라서 방장이 1:1채팅방에 유저를 추가해주면, 실시간으로 해당 유저의 1:1 채팅방이 열려야 한다.
+	@SubscribeMessage('joinOneRoom')
+	async handleJoinOneRoom(
+		client: Socket,
+		itemChatOneJoinDto: ItemChatOneJoinDto
+	) {
+		console.log(client, itemChatOneJoinDto);
+	}
+
 	// '님이 퇴장하셨습니다.'
 	// front => socket.emit('leaveRoom', icrId)
 	// @SubscribeMessage('leaveRoom')
@@ -135,13 +148,12 @@ export class ChatGateway
 	// async 함수로 만들고 return으로 해주니까 front에서 on만으로도 결과값을 받을 수 있게 됨.
 	@SubscribeMessage('authenticate')
 	async handleAuthenticate(client: Socket, auth: string) {
-		const [type, token] = auth['token'].split(' ');
-
-		if (type != 'Bearer') {
-			return { msg: 'fail', errorMsg: 'no login' };
-		}
-
 		try {
+			const [type, token] = auth['token'].split(' ');
+
+			if (type != 'Bearer') {
+				return { msg: 'fail', errorMsg: 'no login' };
+			}
 			const payload = jwt.verify(token, process.env.SECRET_KEY);
 			if (payload) {
 				return { msg: 'success' };
