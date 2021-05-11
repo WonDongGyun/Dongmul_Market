@@ -15,6 +15,7 @@ import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import * as jwt from 'jsonwebtoken';
 import { ItemChatOneJoinDto } from './dto/itemChatOneJoin.dto';
+import { AutoJoinDto } from './dto/autoJoin.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -113,13 +114,7 @@ export class ChatGateway
 		this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
 		// 채팅방 유저 목록에 추가
 		this.server.to(itemChatJoinDto.icrId).emit('addUser', joinMsg);
-		// 지난 채팅 보여주기
-		const chatGroupList = await this.chatService.showGroupChat(
-			itemChatJoinDto
-		);
 		console.log('joinMsg => ', joinMsg);
-		console.log('chatGroupList => ', chatGroupList);
-		client.emit('setRoom', chatGroupList);
 	}
 
 	// 1:1 채팅 같은 경우에는, join하는 버튼이 아니라, 방장이 해당 유저를 추가해주는 식으로 들어가진다.
@@ -175,7 +170,35 @@ export class ChatGateway
 		}
 	}
 
-	handleConnection(client: Socket, ...args: any[]) {
+	async handleConnection(client: Socket, ...args: any[]) {
+		console.log(client.handshake.query.email);
+		console.log(client.handshake.query.icrId);
 		this.logger.log(`Client connected: ${client.id}`);
+
+		const autoJoin: AutoJoinDto = new AutoJoinDto();
+		autoJoin.email = client.handshake.query.email;
+		autoJoin.icrId = client.handshake.query.email;
+
+		await this.chatService.joinAuto(autoJoin).then(async (findJoin) => {
+			if (findJoin) {
+				// 지난 채팅 보여주기
+				const chatHistory = await this.chatService.showGroupChat(
+					autoJoin
+				);
+				const chatUserList = await this.chatService.showChatUser(
+					autoJoin
+				);
+				console.log('chatHistory => ', chatHistory);
+				console.log('chatGroupList => ', chatUserList);
+
+				const config = {
+					icrId: autoJoin.icrId,
+					userList: chatUserList,
+					msgList: chatHistory
+				};
+
+				client.emit('setRoom', config);
+			}
+		});
 	}
 }

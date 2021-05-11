@@ -14,6 +14,7 @@ import { ItemChatJoinDto } from './dto/itemChatJoin.dto';
 import { Code } from 'src/entities/code.entity';
 import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
+import { AutoJoinDto } from './dto/autoJoin.dto';
 
 @Injectable()
 export class ChatService {
@@ -81,6 +82,25 @@ export class ChatService {
 			});
 	}
 
+	// 현재 단체 채팅중인 사람 보여주기
+	async showChatUser(autoJoin: AutoJoinDto) {
+		return await this.itemChatRoomUserRepository
+			.createQueryBuilder('icru')
+			.select('icru.icruId', 'icruId')
+			.addSelect('icru.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('icru.chooseYn', 'chooseYn')
+			.addSelect(
+				`CASE WHEN icru.email = '${autoJoin.email}' THEN "방장" ELSE "참가자" END`,
+				'isBoss'
+			)
+			.innerJoin(User, 'u', 'u.email = icru.email')
+			.where('icru.icrId = :icrId', {
+				icrId: autoJoin.icrId
+			})
+			.getRawMany();
+	}
+
 	// 방장에게 현재 1:1 채팅중인 사람 보여주기
 	// 이미 단체 채팅 사람 가져올 때 확인을 마쳤으므로, 중간과정은 생략돼도 된다.
 	async showOneUser(showUserDto: ShowUserDto) {
@@ -102,12 +122,12 @@ export class ChatService {
 	}
 
 	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
-	async joinAuto(joinAutoDto: JoinAutoDto) {
+	async joinAuto(autoJoin: AutoJoinDto) {
 		const user: User = new User();
-		user.email = joinAutoDto.email;
+		user.email = autoJoin.email;
 
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		itemChatRoom.icrId = joinAutoDto.icrId;
+		itemChatRoom.icrId = autoJoin.icrId;
 
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
 		itemChatRoomUser.user = user;

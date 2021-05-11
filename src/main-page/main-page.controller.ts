@@ -59,21 +59,6 @@ export class MainPageController {
 		@CurrentUser() email: string,
 		@Param('icrId') icrId: string
 	) {
-		return await this.mainPageService
-			.getButton(email, icrId)
-			.then(async (joinYn) => {
-				// true 켜짐, false 꺼짐
-				const button = {
-					groupJoinButton: true,
-					oneJoinButton: false
-				};
-
-				if (joinYn) {
-					button.groupJoinButton = false;
-					return { buttonYn: button };
-				} else {
-					return { buttonYn: button };
-				}
-			});
+		return await this.mainPageService.getButton(email, icrId);
 	}
 }

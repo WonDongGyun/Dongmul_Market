@@ -106,7 +106,9 @@
 				nestjs: false
 			};
 			var roomName = '';
-			var socket = io('http://localhost:3001/chatting');
+			var socket = io('http://localhost:3001/chatting', {
+				query: 'email=waterflame1@naver.com&icrId=9999-9999'
+			});
 			console.log(socket);
 
 			var messages = document.getElementById('messages');
