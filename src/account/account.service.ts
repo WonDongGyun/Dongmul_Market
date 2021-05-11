@@ -349,9 +349,16 @@ export class AccountService {
 							message: '비밀번호 인증번호  전송 완료'
 						};
 					}
+					
 				}
-			}
-		} catch (err) {
+			}else {
+					return {
+						"msg": "fall",
+						"errorMsg": "이메일이 맞는지 확인 해주세요.!"
+					}
+					}
+				
+			} catch (err) {
 			console.log(err);
 		}
 	}
@@ -361,29 +368,35 @@ export class AccountService {
 		try {
 			const code = await this.emailRepository.findOne(
 				passwordChangeDto.email
-			);
-			// console.log(code)
-			if (code.authNum === passwordChangeDto.passwordchkNum) {
-				const password = await this.hashPassword(
-					passwordChangeDto.newpassword
-				);
+			)
+			if (code) {
+				if (code.authNum === passwordChangeDto.passwordchkNum) {
+					const password = await this.hashPassword(
+						passwordChangeDto.newpassword
+					);
 
-				await this.userRepository.update(passwordChangeDto.email, {
-					password: password
-				});
-				return await this.emailRepository
-					.delete({
-						email: passwordChangeDto.email
-					})
-					.then(async () => {
-						return {
-							msg: '비밀번호 변경 성공!'
-						};
+					await this.userRepository.update(passwordChangeDto.email, {
+						password: password
 					});
+					return await this.emailRepository
+						.delete({
+							email: passwordChangeDto.email
+						})
+						.then(async () => {
+							return {
+								msg: '비밀번호 변경 성공!'
+							};
+						});
+				} else {
+					return {
+						msg: 'fall',
+						errorMsg: '인증번호가 틀립니다.'
+					};
+				}
 			} else {
 				return {
 					msg: 'fall',
-					errorMsg: '인증번호가 틀립니다.'
+					errorMsg: '계정을 확인 해주세요.!'
 				};
 			}
 		} catch (err) {
