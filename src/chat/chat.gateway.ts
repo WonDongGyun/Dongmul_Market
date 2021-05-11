@@ -185,6 +185,7 @@ export class ChatGateway
 				const chatHistory = await this.chatService.showGroupChat(
 					autoJoin
 				);
+				// 채팅방 참가자 보여주기
 				const chatUserList = await this.chatService.showChatUser(
 					autoJoin
 				);

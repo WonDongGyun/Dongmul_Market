@@ -26,7 +26,7 @@ export class AccountService {
 
 		@InjectRepository(EmailAuth)
 		private readonly emailRepository: Repository<EmailAuth>
-	) { }
+	) {}
 
 	// 패스워드 해쉬화
 	public async hashPassword(password: string): Promise<string> {
@@ -55,7 +55,7 @@ export class AccountService {
 				return { msg: 'success', errorMsg: '회원가입 성공!' };
 			});
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 			return { msg: 'fail', errorMsg: ' 회원가입 실패!' };
 		}
 	}
@@ -67,8 +67,7 @@ export class AccountService {
 				email: loginUserDto.email
 			});
 		} catch (err) {
-			console.log(err)
-			
+			console.log(err);
 		}
 	}
 
@@ -115,7 +114,7 @@ export class AccountService {
 				token: 'bearer ' + this.getTokenForUser(user.email)
 			};
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
 
@@ -124,7 +123,7 @@ export class AccountService {
 			const google = await this.userRepository.findOne({
 				email: googleChkEmaildto.email
 			});
-			console.log(google)
+			console.log(google);
 			if (google) {
 				return await this.userRepository
 					.findOne({
@@ -168,10 +167,9 @@ export class AccountService {
 				});
 			}
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
-
 
 	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
 		try {
@@ -221,7 +219,7 @@ export class AccountService {
 				});
 			}
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
 
@@ -297,7 +295,7 @@ export class AccountService {
 					}
 				});
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
 
@@ -345,29 +343,26 @@ export class AccountService {
 							message: '비밀번호 인증번호  재 전송 완료'
 						};
 					} else {
-						await this.emailRepository.insert(emailAuth)
+						await this.emailRepository.insert(emailAuth);
 						return {
 							statusCode: 201,
 							message: '비밀번호 인증번호  전송 완료'
 						};
 					}
-					
-				} 
-					
-				}  				
+				}
+			}
 		} catch (err) {
-			console.log(err)
-		}}
-
-	
+			console.log(err);
+		}
+	}
 
 	//비밀번호 변경
 	async changePassword(passwordChangeDto: PasswordChangeDto) {
 		try {
 			const code = await this.emailRepository.findOne(
 				passwordChangeDto.email
-			)
-				// console.log(code)
+			);
+			// console.log(code)
 			if (code.authNum === passwordChangeDto.passwordchkNum) {
 				const password = await this.hashPassword(
 					passwordChangeDto.newpassword
@@ -383,18 +378,16 @@ export class AccountService {
 					.then(async () => {
 						return {
 							msg: '비밀번호 변경 성공!'
-						
 						};
 					});
 			} else {
 				return {
-					msg: "fall",
-					errorMsg: "인증번호가 틀립니다."
-				}
+					msg: 'fall',
+					errorMsg: '인증번호가 틀립니다.'
+				};
 			}
-				
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
 }
