@@ -110,9 +110,9 @@ export class ChatGateway
 		const joinMsg = await this.chatService.joinChatRoom(itemChatJoinDto);
 		client.join(itemChatJoinDto.icrId);
 		// 접속하셨습니다 메시지
-		client.emit('returnJoinMsg', joinMsg);
+		this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
 		// 채팅방 유저 목록에 추가
-		client.emit('addUser', joinMsg);
+		this.server.to(itemChatJoinDto.icrId).emit('addUser', joinMsg);
 		// 지난 채팅 보여주기
 		const chatGroupList = await this.chatService.showGroupChat(
 			itemChatJoinDto

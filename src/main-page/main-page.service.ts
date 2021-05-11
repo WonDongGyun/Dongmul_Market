@@ -181,6 +181,20 @@ export class MainPageService {
 			});
 	}
 
+	async getButton(email: string, icrId: string) {
+		const user: User = new User();
+		user.email = email;
+
+		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+		itemChatRoom.icrId = icrId;
+
+		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+		itemChatRoomUser.user = user;
+		itemChatRoomUser.itemChatRoom = itemChatRoom;
+
+		return this.itemChatRoomUserRepository.findOne(itemChatRoomUser);
+	}
+
 	// 경매 글 작성
 	async setItem(setItemDto: SetItemDto, file, email: string) {
 		const { originalname } = file;
