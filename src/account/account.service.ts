@@ -18,6 +18,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
+import { EmailAuthDto } from './dto/emailAuth.dto';
 
 @Injectable()
 export class AccountService {
@@ -53,7 +54,8 @@ export class AccountService {
 		user.nickname = createUserDto.nickname;
 		user.address = createUserDto.address;
 
-		return await this.userRepository.save(user).then(async () => {
+		await this.emailRepository.delete({ email: createUserDto.email });
+		return await this.userRepository.insert(user).then(async () => {
 			return { msg: 'success', errorMsg: '회원가입 성공!' };
 		});
 	}
@@ -298,15 +300,19 @@ export class AccountService {
 	}
 
 	//인증번호 확인하고 지움
-	async sendEmailConfirm(email: string, authNum: number) {
-		const findemail = await this.emailRepository.findOne(email);
-		console.log(findemail.authNum);
-		if (authNum == findemail.authNum) {
-			await this.emailRepository.delete({ email: email });
-			return { msg: 'success' };
-		} else {
-			return { msg: 'fail' };
-		}
+	async sendEmailConfirm(emailAuthDto: EmailAuthDto) {
+		return await this.emailRepository
+			.findOne({
+				email: emailAuthDto.email,
+				authNum: emailAuthDto.authchkNum
+			})
+			.then(async (findEmail) => {
+				if (findEmail) {
+					return { msg: 'success' };
+				} else {
+					return { msg: 'fail' };
+				}
+			});
 	}
 
 	//비밀번호 변경숫자 이메일 전송

@@ -14,7 +14,7 @@ import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
 import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { ChkNumdto } from './dto/chkNum.dto';
+import { EmailAuthDto } from './dto/emailAuth.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
 import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
@@ -25,20 +25,20 @@ export class AccountController {
 
 	// 회원 가입
 	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.accountService.setUser(createUserDto);
+	async create(@Body() createUserDto: CreateUserDto) {
+		return await this.accountService.setUser(createUserDto);
 	}
 
 	// 이메일 중복확인
 	@Post('chkEmail')
-	chkEmail(@Body() chkEmailDto: ChkEmailDto) {
-		return this.accountService.chkEmail(chkEmailDto);
+	async chkEmail(@Body() chkEmailDto: ChkEmailDto) {
+		return await this.accountService.chkEmail(chkEmailDto);
 	}
 
 	// 기본 로그인
 	@Post('login')
-	chkLogin(@Body() chkLoginDto: ChkLoginDto) {
-		return this.accountService.chkLogin(chkLoginDto);
+	async chkLogin(@Body() chkLoginDto: ChkLoginDto) {
+		return await this.accountService.chkLogin(chkLoginDto);
 	}
 
 	// // 프로필 조회
@@ -67,11 +67,8 @@ export class AccountController {
 	}
 
 	@Post('mail/check')
-	async mailcheck(@Body() chkNum: ChkNumdto) {
-		return await this.accountService.sendEmailConfirm(
-			chkNum.email,
-			chkNum.authchkNum
-		);
+	async mailcheck(@Body() emailAuthDto: EmailAuthDto) {
+		return await this.accountService.sendEmailConfirm(emailAuthDto);
 	}
 
 	@Get('logout')
@@ -95,13 +92,13 @@ export class AccountController {
 
 	//구글 회원가입 및 로그인
 	@Post('googleAuth')
-	GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
-		return this.accountService.googleCheck(googleChkEmaildto);
+	async GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
+		return await this.accountService.googleCheck(googleChkEmaildto);
 	}
 
 	//카카오계정 저장
 	@Post('/kakaoAuth')
-	KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
-		return this.accountService.kakaoCheck(kakaoChkEmaildto);
+	async KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
+		return await this.accountService.kakaoCheck(kakaoChkEmaildto);
 	}
 }
