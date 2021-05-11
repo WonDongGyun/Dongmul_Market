@@ -177,9 +177,10 @@ export class ChatGateway
 
 		const autoJoin: AutoJoinDto = new AutoJoinDto();
 		autoJoin.email = client.handshake.query.email;
-		autoJoin.icrId = client.handshake.query.email;
+		autoJoin.icrId = client.handshake.query.icrId;
 
 		await this.chatService.joinAuto(autoJoin).then(async (findJoin) => {
+			console.log(findJoin);
 			if (findJoin) {
 				// 지난 채팅 보여주기
 				const chatHistory = await this.chatService.showGroupChat(
@@ -198,6 +199,8 @@ export class ChatGateway
 					msgList: chatHistory
 				};
 
+				// 채팅방 접속 및 setRoom 정보 뿌리기
+				client.join(autoJoin.icrId);
 				client.emit('setRoom', config);
 			}
 		});
