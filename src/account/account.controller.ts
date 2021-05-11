@@ -10,7 +10,6 @@ import {
 import { AccountService } from './account.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from './dto/create.user.dto';
-import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
 import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -29,12 +28,6 @@ export class AccountController {
 		return await this.accountService.setUser(createUserDto);
 	}
 
-	// 이메일 중복확인
-	@Post('chkEmail')
-	async chkEmail(@Body() chkEmailDto: ChkEmailDto) {
-		return await this.accountService.chkEmail(chkEmailDto);
-	}
-
 	// 기본 로그인
 	@Post('login')
 	async chkLogin(@Body() chkLoginDto: ChkLoginDto) {
@@ -48,22 +41,26 @@ export class AccountController {
 	// 	return this.accountService.getProfile(email);
 	// }
 
+	// 이메일 중복확인 및 이메일 인증 보내기
 	@Post('mail')
-	async mail(@Body() userData: LoginUserDto) {
-		console.log(userData);
-		const user = await this.accountService.findUserEmail(userData.email);
-
-		if (!user) {
-			const CodeEmail = await this.accountService.sendRegisterMail(
-				userData.email
-			);
-			console.log(
-				`email ID ${userData.email} not found 인증번호 메일 요청했습니다`
-			);
-			return CodeEmail;
-		} else {
-			console.log('이미 있는 계정입니다.');
-		}
+	async mail(@Body() loginUserDto: LoginUserDto) {
+		return await this.accountService
+			.chkEmail(loginUserDto)
+			.then(async (findEmail) => {
+				if (findEmail) {
+					return {
+						msg: 'fail',
+						errorMsg: '이미 가입된 이메일 입니다.'
+					};
+				} else {
+					console.log(
+						`email ID ${loginUserDto.email} 인증번호 메일 요청했습니다`
+					);
+					return await this.accountService.sendRegisterMail(
+						loginUserDto.email
+					);
+				}
+			});
 	}
 
 	@Post('mail/check')

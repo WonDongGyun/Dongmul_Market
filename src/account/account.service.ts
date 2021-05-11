@@ -1,16 +1,10 @@
-import {
-	BadRequestException,
-	Body,
-	HttpService,
-	Injectable
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create.user.dto';
-import { ChkEmailDto } from './dto/chkEmail.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
 import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
@@ -19,6 +13,7 @@ import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
 import { EmailAuthDto } from './dto/emailAuth.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class AccountService {
@@ -61,9 +56,9 @@ export class AccountService {
 	}
 
 	// 이메일 중복확인
-	async chkEmail(chkEmailDto: ChkEmailDto) {
+	async chkEmail(loginUserDto: LoginUserDto) {
 		const existingUser = await this.userRepository.findOne({
-			email: chkEmailDto.email
+			email: loginUserDto.email
 		});
 
 		if (existingUser) {
@@ -210,82 +205,49 @@ export class AccountService {
 		}
 	}
 
-	async findUserEmail(email: string) {
-		const user = await this.userRepository.findOne({
-			where: { email: email }
-		});
-		return user;
-	}
 	//이메일 인증 코드 보내기
 	async sendRegisterMail(email: string) {
-		const findemail = await this.emailRepository.findOne({
-			where: { email: email }
-		});
 		try {
+			const findemail = await this.emailRepository.findOne({
+				where: { email: email }
+			});
+
+			const generateRandom = function (min: number, max: number) {
+				const ranNum =
+					Math.floor(Math.random() * (max - min + 1)) + min;
+				return ranNum;
+			};
+
+			const authNum: number = generateRandom(111111, 999999);
+			const emailAuth: EmailAuth = new EmailAuth();
+			emailAuth.email = email;
+			emailAuth.authNum = authNum;
+
+			await this.mailerService.sendMail({
+				to: email, // list of receivers
+				from: 'dongmulMarket@gmail.com', // sender address
+				subject: '인증번호 입니다.', // Subject line
+				html: `
+					<h1>
+					회원가입 요청 메일 
+					</h1>
+					<hr />
+					<br />
+					<p>안녕하세요 ${email}님 <p/>
+					<br />
+					<hr />
+					6자리 인증 코드 :  <b> ${authNum}</b>
+					<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
+				`
+			});
+
 			if (!findemail) {
-				const generateRandom = function (min: number, max: number) {
-					const ranNum =
-						Math.floor(Math.random() * (max - min + 1)) + min;
-					return ranNum;
-				};
-				const authNum: number = generateRandom(111111, 999999);
-				const emailAuth: EmailAuth = new EmailAuth();
-				emailAuth.email = email;
-				emailAuth.authNum = authNum;
-
-				await this.mailerService.sendMail({
-					to: email, // list of receivers
-					from: 'ljayoon@gmail.com', // sender address
-					subject: '인증번호 입니다.', // Subject line
-					html: `
-							<h1>
-							회원가입 요청 메일 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							6자리 인증 코드 :  <b> ${authNum}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
-				});
-
-				console.log(findemail);
 				await this.emailRepository.insert(emailAuth);
 				return {
 					statusCode: 201,
 					message: '인증번호 전송 완료'
 				};
 			} else {
-				const generateRandom = function (min: number, max: number) {
-					const ranNum =
-						Math.floor(Math.random() * (max - min + 1)) + min;
-					return ranNum;
-				};
-				const authNum: number = generateRandom(111111, 999999);
-				const emailAuth: EmailAuth = new EmailAuth();
-				emailAuth.email = email;
-				emailAuth.authNum = authNum;
-
-				await this.mailerService.sendMail({
-					to: email, // list of receivers
-					from: 'ljayoon@gmail.com', // sender address
-					subject: '인증번호 입니다.', // Subject line
-					html: `
-							<h1>
-							회원가입 요청 메일 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							6자리 인증 코드 :  <b> ${authNum}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
-				});
-
 				await this.emailRepository.update(email, {
 					authNum: authNum
 				});
