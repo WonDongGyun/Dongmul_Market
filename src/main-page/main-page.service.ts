@@ -192,7 +192,22 @@ export class MainPageService {
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 
-		return this.itemChatRoomUserRepository.findOne(itemChatRoomUser);
+		return this.itemChatRoomUserRepository
+			.findOne(itemChatRoomUser)
+			.then(async (joinYn) => {
+				// true 켜짐, false 꺼짐
+				const button = {
+					groupJoinButton: true,
+					oneJoinButton: false
+				};
+
+				if (joinYn) {
+					button.groupJoinButton = false;
+					return { buttonYn: button };
+				} else {
+					return { buttonYn: button };
+				}
+			});
 	}
 
 	// 경매 글 작성
