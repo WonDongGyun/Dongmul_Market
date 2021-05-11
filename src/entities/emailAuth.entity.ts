@@ -16,9 +16,6 @@ export class EmailAuth {
 	@Column({ type: 'int' })
 	authNum: number;
 
-	@Column({ default: null })
-	newpassword: string;
-
 	@CreateDateColumn()
 	createdDt: Date;
 

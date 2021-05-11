@@ -312,10 +312,10 @@ export class AccountService {
 						Math.floor(Math.random() * (max - min + 1)) + min;
 					return ranNum;
 				};
-				const newpassword: string = generateRandom(111111, 999999);
+				const authNum: number = generateRandom(111111, 999999);
 				const emailAuth: EmailAuth = new EmailAuth();
 				emailAuth.email = email;
-				emailAuth.newpassword = newpassword;
+				emailAuth.authNum = authNum;
 
 				await this.mailerService.sendMail({
 					to: email, // list of receivers
@@ -330,39 +330,69 @@ export class AccountService {
 							<p>안녕하세요 ${email}님 <p/>
 							<br />
 							<hr />
-							인증번호는 6자리 입니다. :  <b> ${newpassword}</b>
+							인증번호는 6자리 입니다. :  <b> ${authNum}</b>
 							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
 						`
 				});
-				let newspassword = emailAuth.newpassword.toString();
-				newspassword = await this.hashPassword(newspassword);
-				console.log(newspassword);
-				await this.userRepository.update(email, {
-					password: newspassword
-				});
-				return {
-					statusCode: 201,
-					message: '비밀번호 변경 이메일 전송 완료'
-				};
-			} else {
-				return { msg: '없는 계정입니다.' };
-			}
-		}
-		catch (err) {
-			console.log(err);
-		}
-	}
+				if (findemail) {
+					const find = await this.emailRepository.findOne(email);
+					if (find) {
+						await this.emailRepository.update(email, {
+							authNum: authNum
+						});
+						return {
+							statusCode: 201,
+							message: '비밀번호 인증번호  재 전송 완료'
+						};
+					} else {
+						await this.emailRepository.insert(emailAuth)
+						return {
+							statusCode: 201,
+							message: '비밀번호 인증번호  전송 완료'
+						};
+					}
+					
+				} 
+					
+				}  				
+		} catch (err) {
+			console.log(err)
+		}}
+
+	
 
 	//비밀번호 변경
 	async changePassword(passwordChangeDto: PasswordChangeDto) {
 		try {
-			const password = await this.hashPassword(passwordChangeDto.newpassword);
-			// console.log(newpassword)
-			return await this.userRepository
-				.update(passwordChangeDto.email, { password: password })
-				.then(async () => {
-					return { msg: 'success', errorMsg: '비밀번호 변경 성공!' };
+			const code = await this.emailRepository.findOne(
+				passwordChangeDto.email
+			)
+				// console.log(code)
+			if (code.authNum === passwordChangeDto.passwordchkNum) {
+				const password = await this.hashPassword(
+					passwordChangeDto.newpassword
+				);
+
+				await this.userRepository.update(passwordChangeDto.email, {
+					password: password
 				});
+				return await this.emailRepository
+					.delete({
+						email: passwordChangeDto.email
+					})
+					.then(async () => {
+						return {
+							msg: '비밀번호 변경 성공!'
+						
+						};
+					});
+			} else {
+				return {
+					msg: "fall",
+					errorMsg: "인증번호가 틀립니다."
+				}
+			}
+				
 		} catch (err) {
 			console.log(err)
 		}
