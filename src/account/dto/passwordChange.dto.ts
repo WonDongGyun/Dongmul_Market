@@ -10,5 +10,8 @@ export class PasswordChangeDto {
 	readonly email : string
 
 	@IsString()
-	readonly password: string;
+	readonly passwordchkNum: string;
+	@IsString()
+	readonly newpassword : string
+
 }
