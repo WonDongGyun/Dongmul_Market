@@ -57,15 +57,9 @@ export class AccountService {
 
 	// 이메일 중복확인
 	async chkEmail(loginUserDto: LoginUserDto) {
-		const existingUser = await this.userRepository.findOne({
+		return await this.userRepository.findOne({
 			email: loginUserDto.email
 		});
-
-		if (existingUser) {
-			return { msg: 'fail', errorMsg: '이미 등록된 이메일입니다.' };
-		} else {
-			return { msg: 'success' };
-		}
 	}
 
 	//이메일 찾기
