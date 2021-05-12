@@ -353,7 +353,7 @@ export class AccountService {
 				}
 			}else {
 					return {
-						"msg": "fall",
+						"msg": "fail",
 						"errorMsg": "이메일이 맞는지 확인 해주세요.!"
 					}
 					}
@@ -389,13 +389,13 @@ export class AccountService {
 						});
 				} else {
 					return {
-						msg: 'fall',
+						msg: 'fail',
 						errorMsg: '인증번호가 틀립니다.'
 					};
 				}
 			} else {
 				return {
-					msg: 'fall',
+					msg: 'fail',
 					errorMsg: '계정을 확인 해주세요.!'
 				};
 			}

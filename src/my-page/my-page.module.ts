@@ -12,6 +12,7 @@ import { DealChatRoomUser } from 'src/entities/dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from 'src/entities/dealChatRoomUserMsg.entity';
 import { Code } from 'src/entities/code.entity';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
+import { JwtStrategy } from 'src/account/jwt.strategy';
 
 @Module({
 	imports: [
@@ -29,6 +30,6 @@ import { EmailAuth } from 'src/entities/emailAuth.entity';
 		])
 	],
 	controllers: [MyPageController],
-	providers: [MyPageService]
+	providers: [MyPageService, JwtStrategy]
 })
 export class MyPageModule {}
