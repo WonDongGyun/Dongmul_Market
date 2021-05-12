@@ -68,16 +68,27 @@ export class AccountService {
 			});
 		} catch (err) {
 			console.log(err);
+			return { msg: "fail", errorMsg:'이메일 중복'}
 		}
 	}
 
 	//이메일 찾기
 	async findByEmail(email: string): Promise<User> {
-		return await this.userRepository.findOne(email);
+		try {
+			return await this.userRepository.findOne(email);
+		} catch (err) {
+			console.log(err)
+			// return { msg : 'fail', errorMsg:'이메일 찾기 실패'}
+		}
 	}
 	//업데이트
 	async update(email: string, payload: Partial<User>) {
-		return this.userRepository.update({ email: email }, payload);
+		try {
+			return this.userRepository.update({ email: email }, payload);
+		} catch (err) {
+			console.log(err)
+			return { msg: 'fail', errorMsg: '업데이트 실패' };
+		}
 	}
 	//패스워드 찾기
 	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
@@ -115,6 +126,7 @@ export class AccountService {
 			};
 		} catch (err) {
 			console.log(err);
+			return { msg: 'fail', errorMsg: '로그인 실패' };
 		}
 	}
 
@@ -152,7 +164,7 @@ export class AccountService {
 					.catch((err) => {
 						return {
 							msg: 'fail',
-							errorMsg: err
+							errorMsg: "구글 로그인 실패"
 						};
 					});
 			} else {
@@ -168,6 +180,7 @@ export class AccountService {
 			}
 		} catch (err) {
 			console.log(err);
+			return { msg: 'fail', errorMsg: '회원가입 실패' };
 		}
 	}
 
@@ -205,7 +218,7 @@ export class AccountService {
 					.catch((err) => {
 						return {
 							msg: 'fail',
-							errorMsg: err
+							errorMsg: 'err'
 						};
 					});
 			} else {
