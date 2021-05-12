@@ -98,10 +98,15 @@ export class ChatService {
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('icru.chooseYn', 'chooseYn')
 			.addSelect(
-				`CASE WHEN icru.email = '${autoJoin.email}' THEN "방장" ELSE "참가자" END`,
+				`CASE WHEN si.email = '${autoJoin.email}' THEN true ELSE false END`,
+				'isBoss'
+			)
+			.addSelect(
+				`CASE WHEN si.email = icru.email THEN "방장" ELSE "참가자" END`,
 				'isBoss'
 			)
 			.innerJoin(User, 'u', 'u.email = icru.email')
+			.innerJoin(SaleItem, 'si', 'si.icrId = icru.icrId')
 			.where('icru.icrId = :icrId', {
 				icrId: autoJoin.icrId
 			})
