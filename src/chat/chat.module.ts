@@ -7,6 +7,7 @@ import { DealChatRoomUserMsg } from 'src/entities/dealChatRoomUserMsg.entity';
 import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
+import { KickUser } from 'src/entities/kickUser.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
 import { ChatGateway } from './chat.gateway';
@@ -23,7 +24,8 @@ import { ChatService } from './chat.service';
 			DealChatRoom,
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
-			Code
+			Code,
+			KickUser
 		])
 	],
 	providers: [ChatGateway, ChatService]

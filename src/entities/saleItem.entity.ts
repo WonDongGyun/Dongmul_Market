@@ -6,12 +6,14 @@ import {
 	Index,
 	JoinColumn,
 	ManyToOne,
+	OneToMany,
 	OneToOne,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn
 } from 'typeorm';
 import { DealChatRoom } from './dealChatRoom.entity';
 import { ItemChatRoom } from './itemChatRoom.entity';
+import { KickUser } from './kickUser.entity';
 import { User } from './user.entity';
 
 @Entity('saleItem')
@@ -61,6 +63,12 @@ export class SaleItem {
 	@ManyToOne(() => User, (user) => user.saleItem)
 	@JoinColumn([{ name: 'email', referencedColumnName: 'email' }])
 	user: User;
+
+	// saleItem와 kickUser은 1 : N 관계입니다.
+	@OneToMany(() => KickUser, (kickUser) => kickUser.user, {
+		onDelete: 'CASCADE'
+	})
+	kickUser: KickUser[];
 
 	// saleItem과 itemChatRoom 1 : 1 관계입니다.
 	@OneToOne(() => ItemChatRoom)

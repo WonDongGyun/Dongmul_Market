@@ -17,6 +17,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
+import { KickUser } from './entities/kickUser.entity';
 
 @Module({
 	imports: [
@@ -33,7 +34,8 @@ import { MyPageModule } from './my-page/my-page.module';
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
 			Code,
-			EmailAuth
+			EmailAuth,
+			KickUser
 		]),
 		TypeOrmModule.forRoot({
 			type: 'mysql',
@@ -52,7 +54,8 @@ import { MyPageModule } from './my-page/my-page.module';
 				DealChatRoomUser,
 				DealChatRoomUserMsg,
 				Code,
-				EmailAuth
+				EmailAuth,
+				KickUser
 			],
 			synchronize: true
 		}),

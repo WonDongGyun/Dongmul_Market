@@ -12,6 +12,7 @@ import { ItemChatRoomUser } from './itemChatRoomUser.entity';
 import { SaleItem } from './saleItem.entity';
 import { DealChatRoomUser } from './dealChatRoomUser.entity';
 import { DealChatRoomUserMsg } from './dealChatRoomUserMsg.entity';
+import { KickUser } from './kickUser.entity';
 
 @Entity('user')
 @Index(['email'])
@@ -39,6 +40,12 @@ export class User {
 		onDelete: 'CASCADE'
 	})
 	saleItem: SaleItem[];
+
+	// user와 kickUser은 1 : N 관계입니다.
+	@OneToMany(() => KickUser, (kickUser) => kickUser.user, {
+		onDelete: 'CASCADE'
+	})
+	kickUser: KickUser[];
 
 	// user와 itemChatRoomUser는 1 : N 관계입니다.
 	@OneToMany(

@@ -16,6 +16,7 @@ import { JoinAutoDto } from './dto/joinAuto.dto';
 import * as jwt from 'jsonwebtoken';
 import { ItemChatOneJoinDto } from './dto/itemChatOneJoin.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
+import { RemoveUserDto } from './dto/removeUser.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -128,12 +129,16 @@ export class ChatGateway
 	// }
 
 	// '님이 퇴장하셨습니다.'
-	// front => socket.emit('leaveRoom', icrId)
-	// @SubscribeMessage('leaveRoom')
-	// handleLeaveRoom(client: Socket, room: string) {
-	// 	client.leave(room);
-	// 	client.emit('leaveRoom', room);
-	// }
+	// front => socket.emit('removeUser', icrId)
+	// 야 이거 클라이언트 아이디 어떻게 생성하냐????
+	@SubscribeMessage('removeUser')
+	async handleLeaveRoom(client: Socket) {
+		// console.log(client);
+		// await this.chatService.removeUser(removeUserDto);
+		// client.leave(removeUserDto.icrId);
+		// this.server.to(removeUserDto.icrId).emit('removeUser');
+		// client.emit('leaveRoom', room);
+	}
 
 	afterInit(server: Server) {
 		this.logger.log('Init');

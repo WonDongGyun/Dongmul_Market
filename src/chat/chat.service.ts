@@ -15,6 +15,8 @@ import { Code } from 'src/entities/code.entity';
 import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
+import { RemoveUserDto } from './dto/removeUser.dto';
+import { KickUser } from 'src/entities/kickUser.entity';
 
 @Injectable()
 export class ChatService {
@@ -44,7 +46,10 @@ export class ChatService {
 		private readonly dealChatRoomUserMsgRepository: Repository<DealChatRoomUserMsg>,
 
 		@InjectRepository(Code)
-		private readonly codeRepository: Repository<Code>
+		private readonly codeRepository: Repository<Code>,
+
+		@InjectRepository(KickUser)
+		private readonly kickUserRepository: Repository<KickUser>
 	) {}
 
 	// 방장에게 현재 단체 채팅중인 사람 보여주기
@@ -284,5 +289,43 @@ export class ChatService {
 			.then((data) => {
 				return { msg: 'success', data: data };
 			});
+	}
+
+	// 단체 채팅방 사용자 강퇴
+	async removeUser(removeUserDto: RemoveUserDto) {
+		const user: User = new User();
+		user.email = removeUserDto.email;
+
+		// const itemId = await this.saleItemRepository
+		// 	.createQueryBuilder('si')
+		// 	.select('si.itemId', 'itemId')
+		// 	.where('si.icrId = :icrId', {
+		// 		icrId: removeUserDto.icrId
+		// 	})
+		// 	.getRawOne();
+
+		const saleItem: SaleItem = new SaleItem();
+		saleItem.itemId = removeUserDto.itemId;
+
+		const kickUser: KickUser = new KickUser();
+		kickUser.user = user;
+		kickUser.saleItem = saleItem;
+
+		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+		itemChatRoom.icrId = removeUserDto.icrId;
+
+		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+		itemChatRoomUser.user = user;
+		itemChatRoomUser.itemChatRoom = itemChatRoom;
+
+		await this.kickUserRepository.insert(kickUser);
+		await this.itemChatRoomUserRepository.delete(itemChatRoomUser);
+
+		return await this.kickUserRepository
+			.createQueryBuilder('ku')
+			.select('ku.kickId', 'kickId')
+			.addSelect('ku.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('ku.createdDt', 'removeDt');
 	}
 }
