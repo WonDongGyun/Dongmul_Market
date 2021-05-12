@@ -17,6 +17,8 @@ import * as jwt from 'jsonwebtoken';
 import { ItemChatOneJoinDto } from './dto/itemChatOneJoin.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { RemoveUserDto } from './dto/removeUser.dto';
+import { DealChatDto } from './dto/dealChat.dto';
+import { DealChatJoinDto } from './dto/dealChatJoin.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -35,6 +37,14 @@ export class ChatGateway
 		const chatMsg = await this.chatService.saveChatMsg(itemChatDto);
 		console.log('sendMsg => ', chatMsg);
 		this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg);
+	}
+
+	@SubscribeMessage('sendPersonalMsg')
+	async handlePersonalMessage(client: Socket, dealChatDto: DealChatDto) {
+		console.log(dealChatDto);
+		const chatMsg = await this.chatService.savePersonalChatMsg(dealChatDto);
+		console.log('sendPersonalMsg => ', chatMsg);
+		this.server.to(dealChatDto.dicrId).emit('getPersonalMsg', chatMsg);
 	}
 
 	// 이메일이 해당 방의 방장과 같다면, 단체 채팅방 및 1:1 채팅방 접속한 인원들을 보여줌.
@@ -112,9 +122,26 @@ export class ChatGateway
 		const joinMsg = await this.chatService.joinChatRoom(itemChatJoinDto);
 		client.join(itemChatJoinDto.icrId);
 		// 접속하셨습니다 메시지
-		this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
+		// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
 		// 채팅방 유저 목록에 추가
 		this.server.to(itemChatJoinDto.icrId).emit('addUser', joinMsg);
+		console.log('joinMsg => ', joinMsg);
+	}
+
+	@SubscribeMessage('joinPersonalRoom')
+	async handlejoinPersonalRoom(
+		client: Socket,
+		dealChatJoinDto: DealChatJoinDto
+	) {
+		console.log(dealChatJoinDto);
+		const joinMsg = await this.chatService.joinPersonalChatRoom(
+			dealChatJoinDto
+		);
+		client.join(dealChatJoinDto.dicrId);
+		// 접속하셨습니다 메시지
+		// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
+		// 채팅방 유저 목록에 추가
+		this.server.to(dealChatJoinDto.dicrId).emit('addUser', joinMsg);
 		console.log('joinMsg => ', joinMsg);
 	}
 

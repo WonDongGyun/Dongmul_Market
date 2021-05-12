@@ -17,6 +17,8 @@ import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { RemoveUserDto } from './dto/removeUser.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
+import { DealChatDto } from './dto/dealChat.dto';
+import { DealChatJoinDto } from './dto/dealChatJoin.dto';
 
 @Injectable()
 export class ChatService {
@@ -53,39 +55,39 @@ export class ChatService {
 	) {}
 
 	// 방장에게 현재 단체 채팅중인 사람 보여주기
-	async showGroupUser(showUserDto: ShowUserDto) {
-		const user: User = new User();
-		user.email = showUserDto.email;
+	// async showGroupUser(showUserDto: ShowUserDto) {
+	// 	const user: User = new User();
+	// 	user.email = showUserDto.email;
 
-		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		itemChatRoom.icrId = showUserDto.icrId;
+	// 	const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+	// 	itemChatRoom.icrId = showUserDto.icrId;
 
-		const saleItem: SaleItem = new SaleItem();
-		saleItem.user = user;
-		saleItem.itemChatRoom = itemChatRoom;
+	// 	const saleItem: SaleItem = new SaleItem();
+	// 	saleItem.user = user;
+	// 	saleItem.itemChatRoom = itemChatRoom;
 
-		return await this.saleItemRepository
-			.findOne(saleItem)
-			.then(async (findMaster) => {
-				if (findMaster) {
-					return await this.itemChatRoomUserRepository
-						.createQueryBuilder('icru')
-						.select('icru.icruId', 'icruId')
-						.addSelect('icru.email', 'email')
-						.addSelect('u.nickname', 'nickname')
-						.addSelect('icru.chooseYn', 'chooseYn')
-						.addSelect(
-							`CASE WHEN icru.email = '${showUserDto.email}' THEN "방장" ELSE "참가자" END`,
-							'tier'
-						)
-						.innerJoin(User, 'u', 'u.email = icru.email')
-						.where('icru.icrId = :icrId', {
-							icrId: showUserDto.icrId
-						})
-						.getRawMany();
-				}
-			});
-	}
+	// 	return await this.saleItemRepository
+	// 		.findOne(saleItem)
+	// 		.then(async (findMaster) => {
+	// 			if (findMaster) {
+	// 				return await this.itemChatRoomUserRepository
+	// 					.createQueryBuilder('icru')
+	// 					.select('icru.icruId', 'icruId')
+	// 					.addSelect('icru.email', 'email')
+	// 					.addSelect('u.nickname', 'nickname')
+	// 					.addSelect('icru.chooseYn', 'chooseYn')
+	// 					.addSelect(
+	// 						`CASE WHEN icru.email = '${showUserDto.email}' THEN "방장" ELSE "참가자" END`,
+	// 						'tier'
+	// 					)
+	// 					.innerJoin(User, 'u', 'u.email = icru.email')
+	// 					.where('icru.icrId = :icrId', {
+	// 						icrId: showUserDto.icrId
+	// 					})
+	// 					.getRawMany();
+	// 			}
+	// 		});
+	// }
 
 	// 현재 단체 채팅중인 사람 보여주기
 	async showChatUser(autoJoin: AutoJoinDto) {
@@ -108,23 +110,23 @@ export class ChatService {
 
 	// 방장에게 현재 1:1 채팅중인 사람 보여주기
 	// 이미 단체 채팅 사람 가져올 때 확인을 마쳤으므로, 중간과정은 생략돼도 된다.
-	async showOneUser(showUserDto: ShowUserDto) {
-		return await this.dealChatRoomUserRepository
-			.createQueryBuilder('dicru')
-			.select('dicru.dicruId', 'dicruId')
-			.addSelect('dicru.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('dicru.changeYn', 'changeYn')
-			.addSelect(
-				`CASE WHEN dicru.email = '${showUserDto.email}' THEN "방장" ELSE "참가자" END`,
-				'tier'
-			)
-			.innerJoin(User, 'u', 'u.email = dicru.email')
-			.where('dicru.dicrId = :dicrId', {
-				dicrId: showUserDto.dicrId
-			})
-			.getRawMany();
-	}
+	// async showOneUser(showUserDto: ShowUserDto) {
+	// 	return await this.dealChatRoomUserRepository
+	// 		.createQueryBuilder('dicru')
+	// 		.select('dicru.dicruId', 'dicruId')
+	// 		.addSelect('dicru.email', 'email')
+	// 		.addSelect('u.nickname', 'nickname')
+	// 		.addSelect('dicru.changeYn', 'changeYn')
+	// 		.addSelect(
+	// 			`CASE WHEN dicru.email = '${showUserDto.email}' THEN "방장" ELSE "참가자" END`,
+	// 			'tier'
+	// 		)
+	// 		.innerJoin(User, 'u', 'u.email = dicru.email')
+	// 		.where('dicru.dicrId = :dicrId', {
+	// 			dicrId: showUserDto.dicrId
+	// 		})
+	// 		.getRawMany();
+	// }
 
 	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
 	async joinAuto(autoJoin: AutoJoinDto) {
@@ -173,33 +175,33 @@ export class ChatService {
 
 	// 지난 1:1 채팅 내역 보여주기
 	// 해당 사용자가 해당 채팅방에 들어온 시간 이후의 모든 채팅을 보여줌
-	async showOneChat(joinAutoDto: JoinAutoDto) {
-		return await this.dealChatRoomUserRepository
-			.createQueryBuilder('dicru')
-			.select('dicru.createdDt', 'createdDt')
-			.where('dicru.email = :email', { email: joinAutoDto.email })
-			.andWhere('dicru.dicrId = :dicrId', { dicrId: joinAutoDto.dicrId })
-			.getRawOne()
-			.then(async (findDate) => {
-				if (findDate) {
-					const dt = findDate['createdDt'].toISOString();
-					return await this.dealChatRoomUserMsgRepository
-						.createQueryBuilder('dicrum')
-						.select('dicrum.dicruMsgId', 'dicruMsgId')
-						.addSelect('dicrum.email', 'email')
-						.addSelect('u.nickname', 'nickname')
-						.addSelect('dicrum.chatMsg', 'chatMsg')
-						.addSelect('dicrum.createdDt', 'createdDt')
-						.innerJoin(User, 'u', 'u.email = dicrum.email')
-						.where('dicrum.dicrId = :dicrId', {
-							dicrId: joinAutoDto.dicrId
-						})
-						.andWhere(`dicrum.createdDt > '${dt}'`)
-						.orderBy('dicrum.createdDt', 'ASC')
-						.getRawMany();
-				}
-			});
-	}
+	// async showOneChat(joinAutoDto: JoinAutoDto) {
+	// 	return await this.dealChatRoomUserRepository
+	// 		.createQueryBuilder('dicru')
+	// 		.select('dicru.createdDt', 'createdDt')
+	// 		.where('dicru.email = :email', { email: joinAutoDto.email })
+	// 		.andWhere('dicru.dicrId = :dicrId', { dicrId: joinAutoDto.dicrId })
+	// 		.getRawOne()
+	// 		.then(async (findDate) => {
+	// 			if (findDate) {
+	// 				const dt = findDate['createdDt'].toISOString();
+	// 				return await this.dealChatRoomUserMsgRepository
+	// 					.createQueryBuilder('dicrum')
+	// 					.select('dicrum.dicruMsgId', 'dicruMsgId')
+	// 					.addSelect('dicrum.email', 'email')
+	// 					.addSelect('u.nickname', 'nickname')
+	// 					.addSelect('dicrum.chatMsg', 'chatMsg')
+	// 					.addSelect('dicrum.createdDt', 'createdDt')
+	// 					.innerJoin(User, 'u', 'u.email = dicrum.email')
+	// 					.where('dicrum.dicrId = :dicrId', {
+	// 						dicrId: joinAutoDto.dicrId
+	// 					})
+	// 					.andWhere(`dicrum.createdDt > '${dt}'`)
+	// 					.orderBy('dicrum.createdDt', 'ASC')
+	// 					.getRawMany();
+	// 			}
+	// 		});
+	// }
 
 	// 사용자가 채팅방 들어오면 사용자 추가
 	async joinChatRoom(itemChatJoinDto: ItemChatJoinDto) {
@@ -214,52 +216,65 @@ export class ChatService {
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 
 		// itemChatRoomUser 테이블에 해당 사용자가 없다면 사용자 추가
+		// main service쪽에서 이미 해당 유저가 가입했는지 안했는지를 판단해주고 있어서, 사용자 join 유무 판단 로직은 제거함.
 		return await this.itemChatRoomUserRepository
-			.createQueryBuilder('icru')
-			.select('icru.icruId', 'icruId')
-			.addSelect('icru.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('icru.chooseYn', 'chooseYn')
-			.addSelect('icru.createdDt', 'createdDt')
-			.innerJoin(User, 'u', 'u.email = icru.email')
-			.where('icru.email = :email', { email: itemChatJoinDto.email })
-			.andWhere('icru.icrId = :icrId', { icrId: itemChatJoinDto.icrId })
-			.getRawOne()
-			.then(async (findUser) => {
-				console.log('findUser => ', findUser);
-				if (!findUser) {
-					await this.itemChatRoomUserRepository
-						.insert(itemChatRoomUser)
-						.then(async (insertUser) => {
-							if (insertUser) {
-								return await this.itemChatRoomUserRepository
-									.createQueryBuilder('icru')
-									.select('icru.icruId', 'icruId')
-									.addSelect('icru.email', 'email')
-									.addSelect('u.nickname', 'nickname')
-									.addSelect('icru.chooseYn', 'chooseYn')
-									.addSelect('icru.createdDt', 'createdDt')
-									.innerJoin(
-										User,
-										'u',
-										'u.email = icru.email'
-									)
-									.where('icru.email = :email', {
-										email: itemChatJoinDto.email
-									})
-									.andWhere('icru.icrId = :icrId', {
-										icrId: itemChatJoinDto.icrId
-									})
-									.getRawOne();
-							}
-						});
-				} else {
-					return findUser;
+			.insert(itemChatRoomUser)
+			.then(async (insertUser) => {
+				if (insertUser) {
+					return await this.itemChatRoomUserRepository
+						.createQueryBuilder('icru')
+						.select('icru.icruId', 'icruId')
+						.addSelect('icru.email', 'email')
+						.addSelect('u.nickname', 'nickname')
+						.addSelect('icru.chooseYn', 'chooseYn')
+						.addSelect('icru.createdDt', 'createdDt')
+						.innerJoin(User, 'u', 'u.email = icru.email')
+						.where('icru.email = :email', {
+							email: itemChatJoinDto.email
+						})
+						.andWhere('icru.icrId = :icrId', {
+							icrId: itemChatJoinDto.icrId
+						})
+						.getRawOne();
 				}
 			});
 	}
 
-	// 채팅 저장하기
+	async joinPersonalChatRoom(dealChatJoinDto: DealChatJoinDto) {
+		const user: User = new User();
+		user.email = dealChatJoinDto.email;
+
+		const dealChatRoom: DealChatRoom = new DealChatRoom();
+		dealChatRoom.dicrId = dealChatJoinDto.dicrId;
+
+		const dealChatRoomUser: DealChatRoomUser = new DealChatRoomUser();
+		dealChatRoomUser.user = user;
+		dealChatRoomUser.dealChatRoom = dealChatRoom;
+
+		return await this.dealChatRoomUserRepository
+			.insert(dealChatRoomUser)
+			.then(async (insertUser) => {
+				if (insertUser) {
+					return await this.dealChatRoomUserRepository
+						.createQueryBuilder('dicru')
+						.select('dicru.icruId', 'icruId')
+						.addSelect('dicru.email', 'email')
+						.addSelect('u.nickname', 'nickname')
+						.addSelect('dicru.changeYn', 'changeYn')
+						.addSelect('dicru.createdDt', 'createdDt')
+						.innerJoin(User, 'u', 'u.email = dicru.email')
+						.where('dicru.email = :email', {
+							email: dealChatJoinDto.email
+						})
+						.andWhere('dicru.dicrId = :dicrId', {
+							dicrId: dealChatJoinDto.dicrId
+						})
+						.getRawOne();
+				}
+			});
+	}
+
+	// 단체 채팅 저장하기
 	async saveChatMsg(itemChatDto: ItemChatDto) {
 		const user: User = new User();
 		user.email = itemChatDto.email;
@@ -291,7 +306,40 @@ export class ChatService {
 			});
 	}
 
+	// 1:1 채팅 저장하기
+	async savePersonalChatMsg(dealChatDto: DealChatDto) {
+		const user: User = new User();
+		user.email = dealChatDto.email;
+
+		const dealChatRoom: DealChatRoom = new DealChatRoom();
+		dealChatRoom.dicrId = dealChatDto.dicrId;
+
+		const dealChatRoomUserMsg: DealChatRoomUserMsg = new DealChatRoomUserMsg();
+		dealChatRoomUserMsg.user = user;
+		dealChatRoomUserMsg.dealChatRoom = dealChatRoom;
+		dealChatRoomUserMsg.chatMsg = dealChatDto.chatMsg;
+		await this.dealChatRoomUserMsgRepository.insert(dealChatRoomUserMsg);
+
+		return await this.dealChatRoomUserMsgRepository
+			.createQueryBuilder('dicrum')
+			.select('dicrum.dicruMsgId', 'dicruMsgId')
+			.addSelect('dicrum.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('dicrum.chatMsg', 'chatMsg')
+			.addSelect('dicrum.createdDt', 'createdDt')
+			.innerJoin(User, 'u', 'u.email = dicrum.email')
+			.where('dicrum.email = :email', { email: dealChatDto.email })
+			.andWhere('dicrum.dicrId = :dicrId', { dicrId: dealChatDto.dicrId })
+			.orderBy('dicrum.createdDt', 'DESC')
+			.limit(1)
+			.getRawOne()
+			.then((data) => {
+				return { msg: 'success', data: data };
+			});
+	}
+
 	// 단체 채팅방 사용자 강퇴
+	// 미완성
 	async removeUser(removeUserDto: RemoveUserDto) {
 		const user: User = new User();
 		user.email = removeUserDto.email;
