@@ -13,6 +13,7 @@ import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
+import { DeleteButtonDto } from './dto/deleteButton.dto';
 
 @Injectable()
 export class MainPageService {
@@ -266,5 +267,22 @@ export class MainPageService {
 					errorMsg: '경매 물건을 등록하던 중 오류가 발생하였습니다.'
 				};
 			});
+	}
+
+	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
+		try {
+			const id = await this.saleItemRepository.findOne(deleteButtonDto.itemId);
+			if (id) {
+				await this.saleItemRepository.delete({ itemId: deleteButtonDto.itemId })
+				return { msg: "success" }
+			}else {
+				return {
+					msg: "fail",
+					errorMsg: "itemId가 다릅니다."
+				}
+			}
+		} catch (err) {
+			console.log(err)
+		}
 	}
 }
