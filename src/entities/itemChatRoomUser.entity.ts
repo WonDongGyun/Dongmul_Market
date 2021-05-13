@@ -19,6 +19,9 @@ export class ItemChatRoomUser {
 	@PrimaryGeneratedColumn('uuid')
 	icruId: string;
 
+	@Column({ type: 'varchar', default: null })
+	clientId: string;
+
 	@Column({ type: 'varchar', default: 'N' })
 	chooseYn: string;
 

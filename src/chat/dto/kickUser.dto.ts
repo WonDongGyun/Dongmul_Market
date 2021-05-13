@@ -1,7 +1,7 @@
-import { IsString } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
-export class RemoveUserDto {
-	@IsString()
+export class KickUserDto {
+	@IsEmail()
 	readonly email: string;
 
 	@IsString()

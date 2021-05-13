@@ -15,10 +15,10 @@ import { Code } from 'src/entities/code.entity';
 import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
-import { RemoveUserDto } from './dto/removeUser.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { DealChatDto } from './dto/dealChat.dto';
 import { DealChatJoinDto } from './dto/dealChatJoin.dto';
+import { KickUserDto } from './dto/kickUser.dto';
 
 @Injectable()
 export class ChatService {
@@ -98,10 +98,6 @@ export class ChatService {
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('icru.chooseYn', 'chooseYn')
 			.addSelect(
-				`CASE WHEN si.email = '${autoJoin.email}' THEN true ELSE false END`,
-				'isBoss'
-			)
-			.addSelect(
 				`CASE WHEN si.email = icru.email THEN "방장" ELSE "참가자" END`,
 				'isBoss'
 			)
@@ -134,18 +130,32 @@ export class ChatService {
 	// }
 
 	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
-	async joinAuto(autoJoin: AutoJoinDto) {
+	async joinAuto(autoJoin: AutoJoinDto, clientId: string) {
 		const user: User = new User();
 		user.email = autoJoin.email;
 
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
 		itemChatRoom.icrId = autoJoin.icrId;
 
-		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
-		itemChatRoomUser.user = user;
-		itemChatRoomUser.itemChatRoom = itemChatRoom;
+		// const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+		// itemChatRoomUser.user = user;
+		// itemChatRoomUser.itemChatRoom = itemChatRoom;
 
-		return this.itemChatRoomUserRepository.findOne(itemChatRoomUser);
+		return this.itemChatRoomUserRepository
+			.findOne({
+				where: {
+					user: user,
+					itemChatRoom: itemChatRoom
+				}
+			})
+			.then(async (findUser) => {
+				if (findUser) {
+					this.itemChatRoomUserRepository.update(findUser.icruId, {
+						clientId: clientId
+					});
+					return findUser;
+				}
+			});
 	}
 
 	// 지난 단체 채팅 내역 보여주기
@@ -209,7 +219,7 @@ export class ChatService {
 	// }
 
 	// 사용자가 채팅방 들어오면 사용자 추가
-	async joinChatRoom(itemChatJoinDto: ItemChatJoinDto) {
+	async joinChatRoom(itemChatJoinDto: ItemChatJoinDto, clientId: string) {
 		const user: User = new User();
 		user.email = itemChatJoinDto.email;
 
@@ -219,6 +229,7 @@ export class ChatService {
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
+		itemChatRoomUser.clientId = clientId;
 
 		// itemChatRoomUser 테이블에 해당 사용자가 없다면 사용자 추가
 		// main service쪽에서 이미 해당 유저가 가입했는지 안했는지를 판단해주고 있어서, 사용자 join 유무 판단 로직은 제거함.
@@ -344,41 +355,50 @@ export class ChatService {
 	}
 
 	// 단체 채팅방 사용자 강퇴
-	// 미완성
-	async removeUser(removeUserDto: RemoveUserDto) {
+	async kickUser(kickUserDto: KickUserDto) {
 		const user: User = new User();
-		user.email = removeUserDto.email;
-
-		// const itemId = await this.saleItemRepository
-		// 	.createQueryBuilder('si')
-		// 	.select('si.itemId', 'itemId')
-		// 	.where('si.icrId = :icrId', {
-		// 		icrId: removeUserDto.icrId
-		// 	})
-		// 	.getRawOne();
+		user.email = kickUserDto.email;
 
 		const saleItem: SaleItem = new SaleItem();
-		saleItem.itemId = removeUserDto.itemId;
+		saleItem.itemId = kickUserDto.itemId;
 
 		const kickUser: KickUser = new KickUser();
 		kickUser.user = user;
 		kickUser.saleItem = saleItem;
 
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		itemChatRoom.icrId = removeUserDto.icrId;
+		itemChatRoom.icrId = kickUserDto.icrId;
 
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 
-		await this.kickUserRepository.insert(kickUser);
-		await this.itemChatRoomUserRepository.delete(itemChatRoomUser);
+		await this.itemChatRoomUserRepository
+			.findOne(itemChatRoomUser)
+			.then(async (findUser) => {
+				if (findUser) {
+					const kickId = findUser.clientId;
+					await this.kickUserRepository.insert(kickUser);
+					await this.itemChatRoomUserRepository.delete(
+						itemChatRoomUser
+					);
 
-		return await this.kickUserRepository
-			.createQueryBuilder('ku')
-			.select('ku.kickId', 'kickId')
-			.addSelect('ku.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('ku.createdDt', 'removeDt');
+					const kickData = await this.kickUserRepository
+						.createQueryBuilder('ku')
+						.select('ku.kickId', 'kickId')
+						.addSelect('ku.email', 'email')
+						.addSelect('u.nickname', 'nickname')
+						.addSelect('ku.createdDt', 'removeDt');
+
+					return {
+						msg: 'success',
+						kickId: kickId,
+						kickData: kickData
+					};
+				}
+			})
+			.catch((err) => {
+				return { msg: 'fail' };
+			});
 	}
 }

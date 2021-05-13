@@ -11,14 +11,11 @@ import { Logger } from '@nestjs/common';
 import { ItemChatJoinDto } from './dto/itemChatJoin.dto';
 import { ChatService } from './chat.service';
 import { ItemChatDto } from './dto/itemChat.dto';
-import { ShowUserDto } from './dto/showUser.dto';
-import { JoinAutoDto } from './dto/joinAuto.dto';
 import * as jwt from 'jsonwebtoken';
-import { ItemChatOneJoinDto } from './dto/itemChatOneJoin.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
-import { RemoveUserDto } from './dto/removeUser.dto';
 import { DealChatDto } from './dto/dealChat.dto';
 import { DealChatJoinDto } from './dto/dealChatJoin.dto';
+import { KickUserDto } from './dto/kickUser.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -119,7 +116,10 @@ export class ChatGateway
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(client: Socket, itemChatJoinDto: ItemChatJoinDto) {
 		console.log(itemChatJoinDto);
-		const joinMsg = await this.chatService.joinChatRoom(itemChatJoinDto);
+		const joinMsg = await this.chatService.joinChatRoom(
+			itemChatJoinDto,
+			client.id
+		);
 		client.join(itemChatJoinDto.icrId);
 		// 접속하셨습니다 메시지
 		// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
@@ -157,10 +157,34 @@ export class ChatGateway
 
 	// '님이 퇴장하셨습니다.'
 	// front => socket.emit('removeUser', icrId)
-	// 야 이거 클라이언트 아이디 어떻게 생성하냐????
-	@SubscribeMessage('removeUser')
-	async handleLeaveRoom(client: Socket) {
-		// console.log(client);
+	@SubscribeMessage('kickUser')
+	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
+		// const a = 'hello_world';
+		// console.log(client.handshake.query.email);
+		// console.log(client.handshake.query.icrId);
+		// console.log(client.id);
+		// client.join(a);
+		// console.log('room => ', client.adapter.rooms.hello_world);
+		// console.log(client.id);
+		// console.log(client.client.id);
+		// console.log(this.server.sockets);
+		// this.server.sockets[client.id].leave(a);
+
+		return await this.chatService
+			.kickUser(kickUserDto)
+			.then(async (kickClient) => {
+				if (kickClient['msg'] == 'success') {
+					this.server.sockets[kickClient['kickId']].leave(
+						kickUserDto.icrId
+					);
+
+					// ~님이 강퇴당하셨습니다.
+					this.server
+						.to(kickUserDto.icrId)
+						.emit('kickUser', kickClient['kickData']);
+				}
+			});
+
 		// await this.chatService.removeUser(removeUserDto);
 		// client.leave(removeUserDto.icrId);
 		// this.server.to(removeUserDto.icrId).emit('removeUser');
@@ -203,38 +227,50 @@ export class ChatGateway
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) {
-		console.log(client.handshake.query.email);
-		console.log(client.handshake.query.icrId);
+		// const a = 'hello_world';
+		// console.log(client.handshake.query.email);
+		// console.log(client.handshake.query.icrId);
+		// console.log(client.id);
+		// client.join(a);
+		// console.log('room => ', client.adapter.rooms.hello_world);
+		// console.log(client.id);
+		// console.log(client.client.id);
+		// console.log(this.server.sockets);
+		// this.server.sockets[client.id].leave(a);
+
+		// console.log('room2 => ', client.adapter.rooms.hello_world);
 		this.logger.log(`Client connected: ${client.id}`);
 
 		const autoJoin: AutoJoinDto = new AutoJoinDto();
 		autoJoin.email = client.handshake.query.email;
 		autoJoin.icrId = client.handshake.query.icrId;
 
-		await this.chatService.joinAuto(autoJoin).then(async (findJoin) => {
-			console.log(findJoin);
-			if (findJoin) {
-				// 지난 채팅 보여주기
-				const chatHistory = await this.chatService.showGroupChat(
-					autoJoin
-				);
-				// 채팅방 참가자 보여주기
-				const chatUserList = await this.chatService.showChatUser(
-					autoJoin
-				);
-				console.log('chatHistory => ', chatHistory);
-				console.log('chatGroupList => ', chatUserList);
+		await this.chatService
+			.joinAuto(autoJoin, client.id)
+			.then(async (findJoin) => {
+				console.log(findJoin);
+				if (findJoin) {
+					// 지난 채팅 보여주기
+					const chatHistory = await this.chatService.showGroupChat(
+						autoJoin
+					);
+					// 채팅방 참가자 보여주기
+					const chatUserList = await this.chatService.showChatUser(
+						autoJoin
+					);
+					console.log('chatHistory => ', chatHistory);
+					console.log('chatGroupList => ', chatUserList);
 
-				const config = {
-					icrId: autoJoin.icrId,
-					userList: chatUserList,
-					msgList: chatHistory
-				};
+					const config = {
+						icrId: autoJoin.icrId,
+						userList: chatUserList,
+						msgList: chatHistory
+					};
 
-				// 채팅방 접속 및 setRoom 정보 뿌리기
-				client.join(autoJoin.icrId);
-				client.emit('setRoom', config);
-			}
-		});
+					// 채팅방 접속 및 setRoom 정보 뿌리기
+					client.join(autoJoin.icrId);
+					client.emit('setRoom', config);
+				}
+			});
 	}
 }
