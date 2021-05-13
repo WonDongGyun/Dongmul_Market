@@ -175,9 +175,11 @@ export class ChatService {
 						.select('icrum.icruMsgId', 'icruMsgId')
 						.addSelect('icrum.email', 'email')
 						.addSelect('u.nickname', 'nickname')
+						.addSelect('c.codeName', 'codeName')
 						.addSelect('icrum.chatMsg', 'chatMsg')
 						.addSelect('icrum.createdDt', 'createdDt')
 						.innerJoin(User, 'u', 'u.email = icrum.email')
+						.innerJoin(Code, 'c', 'c.codeId = icrum.textStatus')
 						.where('icrum.icrId = :icrId', {
 							icrId: itemChatJoinDto.icrId
 						})
@@ -230,7 +232,6 @@ export class ChatService {
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 		itemChatRoomUser.clientId = clientId;
-
 		// itemChatRoomUser 테이블에 해당 사용자가 없다면 사용자 추가
 		// main service쪽에서 이미 해당 유저가 가입했는지 안했는지를 판단해주고 있어서, 사용자 join 유무 판단 로직은 제거함.
 		return await this.itemChatRoomUserRepository
@@ -251,7 +252,22 @@ export class ChatService {
 						.andWhere('icru.icrId = :icrId', {
 							icrId: itemChatJoinDto.icrId
 						})
-						.getRawOne();
+						.getRawOne()
+						.then(async (saveUser) => {
+							if (saveUser) {
+								const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
+								itemChatRoomUserMsg.user = user;
+								itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
+								itemChatRoomUserMsg.chatMsg =
+									saveUser.nickname + '님이 입장하셨습니다.';
+								itemChatRoomUserMsg.textStatus = 'TXT02';
+								await this.itemChatRoomUserMsgRepository.insert(
+									itemChatRoomUserMsg
+								);
+
+								return saveUser;
+							}
+						});
 				}
 			});
 	}
@@ -302,6 +318,7 @@ export class ChatService {
 		itemChatRoomUserMsg.user = user;
 		itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
 		itemChatRoomUserMsg.chatMsg = itemChatDto.chatMsg;
+		itemChatRoomUserMsg.textStatus = 'TXT01';
 		await this.itemChatRoomUserMsgRepository.insert(itemChatRoomUserMsg);
 
 		return await this.itemChatRoomUserMsgRepository
@@ -379,17 +396,38 @@ export class ChatService {
 				if (findUser) {
 					const kickId = findUser.clientId;
 					await this.kickUserRepository.insert(kickUser);
+
+					const kickData = await this.itemChatRoomUserMsgRepository
+						.createQueryBuilder('icrum')
+						.select('icrum.icruMsgId', 'icruMsgId')
+						.addSelect('icrum.email', 'email')
+						.addSelect('u.nickname', 'nickname')
+						.addSelect('icrum.chatMsg', 'chatMsg')
+						.addSelect('icrum.createdDt', 'createdDt')
+						.innerJoin(User, 'u', 'u.email = icrum.email')
+						.where('icrum.email = :email', {
+							email: kickUserDto.email
+						})
+						.andWhere('icrum.icrId = :icrId', {
+							icrId: kickUserDto.icrId
+						})
+						.orderBy('icrum.createdDt', 'DESC')
+						.limit(1)
+						.getRawOne();
+
+					const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
+					itemChatRoomUserMsg.user = user;
+					itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
+					itemChatRoomUserMsg.chatMsg =
+						kickData.nickname + '님이 강퇴당하셨습니다.';
+					itemChatRoomUserMsg.textStatus = 'TXT03';
+					await this.itemChatRoomUserMsgRepository.insert(
+						itemChatRoomUserMsg
+					);
+
 					await this.itemChatRoomUserRepository.delete(
 						itemChatRoomUser
 					);
-
-					const kickData = await this.kickUserRepository
-						.createQueryBuilder('ku')
-						.select('ku.kickId', 'kickId')
-						.addSelect('ku.email', 'email')
-						.addSelect('u.nickname', 'nickname')
-						.addSelect('ku.createdDt', 'removeDt');
-
 					return {
 						msg: 'success',
 						kickId: kickId,

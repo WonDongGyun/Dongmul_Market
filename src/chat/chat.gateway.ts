@@ -122,7 +122,6 @@ export class ChatGateway
 		);
 		client.join(itemChatJoinDto.icrId);
 		// 접속하셨습니다 메시지
-		// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
 		// 채팅방 유저 목록에 추가
 		this.server.to(itemChatJoinDto.icrId).emit('addUser', joinMsg);
 		console.log('joinMsg => ', joinMsg);
@@ -182,6 +181,8 @@ export class ChatGateway
 					this.server
 						.to(kickUserDto.icrId)
 						.emit('kickUser', kickClient['kickData']);
+				} else {
+					return kickClient;
 				}
 			});
 
@@ -228,9 +229,9 @@ export class ChatGateway
 
 	async handleConnection(client: Socket, ...args: any[]) {
 		// const a = 'hello_world';
-		// console.log(client.handshake.query.email);
-		// console.log(client.handshake.query.icrId);
-		// console.log(client.id);
+		console.log(client.handshake.query.email);
+		console.log(client.handshake.query.icrId);
+		console.log(client.id);
 		// client.join(a);
 		// console.log('room => ', client.adapter.rooms.hello_world);
 		// console.log(client.id);

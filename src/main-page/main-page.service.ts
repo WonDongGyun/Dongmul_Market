@@ -14,6 +14,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
 import { DeleteButtonDto } from './dto/deleteButton.dto';
+import { KickUser } from 'src/entities/kickUser.entity';
 
 @Injectable()
 export class MainPageService {
@@ -43,7 +44,10 @@ export class MainPageService {
 		private readonly dealChatRoomUserMsgRepository: Repository<DealChatRoomUserMsg>,
 
 		@InjectRepository(Code)
-		private readonly codeRepository: Repository<Code>
+		private readonly codeRepository: Repository<Code>,
+
+		@InjectRepository(KickUser)
+		private readonly kickUserRepository: Repository<KickUser>
 	) {}
 
 	getS3() {
@@ -74,7 +78,7 @@ export class MainPageService {
 
 	// 메인 화면
 	async getItem(email: string) {
-		const location = await this.userRepository.findOne({ email: email });
+		const userData = await this.userRepository.findOne({ email: email });
 		return await this.saleItemRepository
 			.createQueryBuilder('si')
 			.select('u.email', 'email')
@@ -92,9 +96,14 @@ export class MainPageService {
 			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
+			.addSelect(
+				`CASE WHEN ku.email = '${userData.email}' THEN true ELSE false END`,
+				'kickYn'
+			)
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
-			.where('u.address = :address', { address: location.address })
+			.innerJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
+			.where('u.address = :address', { address: userData.address })
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((data) => {
@@ -271,18 +280,22 @@ export class MainPageService {
 
 	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
 		try {
-			const id = await this.saleItemRepository.findOne(deleteButtonDto.itemId);
+			const id = await this.saleItemRepository.findOne(
+				deleteButtonDto.itemId
+			);
 			if (id) {
-				await this.saleItemRepository.delete({ itemId: deleteButtonDto.itemId })
-				return { msg: "success" }
-			}else {
+				await this.saleItemRepository.delete({
+					itemId: deleteButtonDto.itemId
+				});
+				return { msg: 'success' };
+			} else {
 				return {
-					msg: "fail",
-					errorMsg: "itemId가 다릅니다."
-				}
+					msg: 'fail',
+					errorMsg: 'itemId가 다릅니다.'
+				};
 			}
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 		}
 	}
 }

@@ -20,6 +20,9 @@ export class ItemChatRoomUserMsg {
 	@Column({ type: 'varchar' })
 	chatMsg: string;
 
+	@Column({ type: 'varchar' })
+	textStatus: string;
+
 	@CreateDateColumn()
 	createdDt: Date;
 

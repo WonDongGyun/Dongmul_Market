@@ -12,6 +12,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { MainPageController } from './main-page.controller';
 import { MainPageService } from './main-page.service';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
+import { KickUser } from 'src/entities/kickUser.entity';
 
 @Module({
 	imports: [
@@ -25,7 +26,8 @@ import { EmailAuth } from 'src/entities/emailAuth.entity';
 			DealChatRoomUser,
 			DealChatRoomUserMsg,
 			Code,
-			EmailAuth
+			EmailAuth,
+			KickUser
 		])
 	],
 	controllers: [MainPageController],
