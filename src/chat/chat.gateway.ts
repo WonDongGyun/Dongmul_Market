@@ -218,9 +218,15 @@ export class ChatGateway
 			autoJoin.email = client.handshake.query.email;
 			autoJoin.icrId = client.handshake.query.icrId;
 
+			console.log(
+				client.handshake.query.email,
+				client.handshake.query.icrId
+			);
+
 			await this.chatService
 				.joinAuto(autoJoin, client.id)
 				.then(async (findJoin) => {
+					console.log(findJoin);
 					if (findJoin) {
 						if (findJoin['msg'] == 'success') {
 							// 지난 채팅 보여주기
