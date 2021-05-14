@@ -226,7 +226,6 @@ export class ChatGateway
 			await this.chatService
 				.joinAuto(autoJoin, client.id)
 				.then(async (findJoin) => {
-					console.log(findJoin);
 					if (findJoin) {
 						if (findJoin['msg'] == 'success') {
 							// 지난 채팅 보여주기
