@@ -134,7 +134,7 @@ export class ChatGateway
 	// front => socket.emit('removeUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
-		return await this.chatService
+		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
 				if (kickClient['msg'] == 'success') {
@@ -205,37 +205,52 @@ export class ChatGateway
 		// console.log('room2 => ', client.adapter.rooms.hello_world);
 		this.logger.log(`Client connected: ${client.id}`);
 
-		const autoJoin: AutoJoinDto = new AutoJoinDto();
-		autoJoin.email = client.handshake.query.email;
-		autoJoin.icrId = client.handshake.query.icrId;
-
-		await this.chatService
-			.joinAuto(autoJoin, client.id)
-			.then(async (findJoin) => {
-				console.log(findJoin);
-				console.log(findJoin['msg']);
-				if (findJoin['msg'] == 'success') {
-					// 지난 채팅 보여주기
-					const chatHistory = await this.chatService.showGroupChat(
-						autoJoin
-					);
-					// 채팅방 참가자 보여주기
-					const chatUserList = await this.chatService.showChatUser(
-						autoJoin
-					);
-
-					const config = {
-						icrId: autoJoin.icrId,
-						userList: chatUserList,
-						msgList: chatHistory
-					};
-
-					// 채팅방 접속 및 setRoom 정보 뿌리기
-					client.join(autoJoin.icrId);
-					client.emit('setRoom', config);
-				} else {
-					client.emit('setRoom', findJoin);
-				}
+		if (
+			client.handshake.query.email == undefined ||
+			client.handshake.query.icrId
+		) {
+			client.emit('setRoom', {
+				msg: 'fail',
+				errorMsg: '이메일 혹은 채팅방id를 확인해주세요.'
 			});
+		} else {
+			const autoJoin: AutoJoinDto = new AutoJoinDto();
+			autoJoin.email = client.handshake.query.email;
+			autoJoin.icrId = client.handshake.query.icrId;
+
+			await this.chatService
+				.joinAuto(autoJoin, client.id)
+				.then(async (findJoin) => {
+					if (findJoin) {
+						if (findJoin['msg'] == 'success') {
+							// 지난 채팅 보여주기
+							const chatHistory = await this.chatService.showGroupChat(
+								autoJoin
+							);
+							// 채팅방 참가자 보여주기
+							const chatUserList = await this.chatService.showChatUser(
+								autoJoin
+							);
+
+							const config = {
+								icrId: autoJoin.icrId,
+								userList: chatUserList,
+								msgList: chatHistory
+							};
+
+							// 채팅방 접속 및 setRoom 정보 뿌리기
+							client.join(autoJoin.icrId);
+							client.emit('setRoom', config);
+						} else {
+							client.emit('setRoom', findJoin);
+						}
+					} else {
+						client.emit('setRoom', {
+							msg: 'fail',
+							errorMsg: '이메일 혹은 채팅방id를 확인해주세요.'
+						});
+					}
+				});
+		}
 	}
 }
