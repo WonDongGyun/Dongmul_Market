@@ -413,7 +413,7 @@ export class ChatService {
 			.addSelect('icrum.chatMsg', 'chatMsg')
 			.addSelect('icrum.createdDt', 'createdDt')
 			.innerJoin(User, 'u', 'u.email = icrum.email')
-			.innerJoin(Code, 'c', 'c.codeId = icrum.testStatus')
+			.innerJoin(Code, 'c', 'c.codeId = icrum.textStatus')
 			.where('icrum.email = :email', { email: itemChatDto.email })
 			.andWhere('icrum.icrId = :icrId', { icrId: itemChatDto.icrId })
 			.orderBy('icrum.createdDt', 'DESC')
