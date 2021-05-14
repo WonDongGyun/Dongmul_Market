@@ -226,7 +226,6 @@ export class ChatGateway
 			await this.chatService
 				.joinAuto(autoJoin, client.id)
 				.then(async (findJoin) => {
-					console.log(findJoin);
 					if (findJoin) {
 						console.log(findJoin['msg'] == 'success');
 						if (findJoin['msg'] == 'success') {
