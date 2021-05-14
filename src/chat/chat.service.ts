@@ -155,6 +155,7 @@ export class ChatService {
 			})
 			.then(async (findUser) => {
 				if (findUser) {
+					console.log(findUser);
 					return await this.itemChatRoomUserRepository
 						.update(findUser.icruId, {
 							clientId: clientId
