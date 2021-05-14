@@ -245,6 +245,8 @@ export class ChatGateway
 								msgList: chatHistory
 							};
 
+							console.log(config);
+
 							// 채팅방 접속 및 setRoom 정보 뿌리기
 							client.join(autoJoin.icrId);
 							client.emit('setRoom', config);
