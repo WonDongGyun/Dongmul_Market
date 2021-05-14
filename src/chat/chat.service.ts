@@ -171,7 +171,7 @@ export class ChatService {
 						.select('icrum.icruMsgId', 'icruMsgId')
 						.addSelect('icrum.email', 'email')
 						.addSelect('u.nickname', 'nickname')
-						.addSelect('c.codeName', 'codeName')
+						.addSelect('c.codeName', 'msgType')
 						.addSelect('icrum.chatMsg', 'chatMsg')
 						.addSelect('icrum.createdDt', 'createdDt')
 						.innerJoin(User, 'u', 'u.email = icrum.email')
