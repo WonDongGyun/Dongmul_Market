@@ -106,7 +106,16 @@ export class ChatService {
 			.where('icru.icrId = :icrId', {
 				icrId: autoJoin.icrId
 			})
-			.getRawMany();
+			.getRawMany()
+			.then((groupChatUserList) => {
+				return groupChatUserList;
+			})
+			.catch(() => {
+				return {
+					msg: 'fail',
+					errorMsg: '단체 채팅방 참여자 목록을 불러 올 수 없습니다.'
+				};
+			});
 	}
 
 	// 방장에게 현재 1:1 채팅중인 사람 보여주기
@@ -146,11 +155,27 @@ export class ChatService {
 			})
 			.then(async (findUser) => {
 				if (findUser) {
-					this.itemChatRoomUserRepository.update(findUser.icruId, {
-						clientId: clientId
-					});
-					return findUser;
+					await this.itemChatRoomUserRepository
+						.update(findUser.icruId, {
+							clientId: clientId
+						})
+						.then(() => {
+							return { msg: 'success', findUser };
+						})
+						.catch((err) => {
+							return {
+								msg: 'fail',
+								errorMsg:
+									'해당 사용자의 클라이언트 id를 업데이트 하는 도중 문제가 발생하였습니다.'
+							};
+						});
 				}
+			})
+			.catch((err) => {
+				return {
+					msg: 'fail',
+					errorMsg: '해당 사용자가 존재하지 않습니다.'
+				};
 			});
 	}
 
@@ -181,8 +206,24 @@ export class ChatService {
 						})
 						.andWhere(`icrum.createdDt > '${dt}'`)
 						.orderBy('icrum.createdDt', 'ASC')
-						.getRawMany();
+						.getRawMany()
+						.then((groupChatList) => {
+							return groupChatList;
+						})
+						.catch(() => {
+							return {
+								msg: 'fail',
+								errorMsg:
+									'단체 채팅방 내역을 가져오던 중 문제가 발생하였습니다.'
+							};
+						});
 				}
+			})
+			.catch((err) => {
+				return {
+					msg: 'fail',
+					errorMsg: '해당 사용자가 존재하지 않습니다.'
+				};
 			});
 	}
 
@@ -230,71 +271,87 @@ export class ChatService {
 		itemChatRoomUser.clientId = clientId;
 
 		// main service쪽에서 이미 해당 유저가 가입했는지 안했는지를 판단해주고 있어서, 사용자 join 유무 판단 로직은 제거함.
-		return await this.itemChatRoomUserRepository
-			.insert(itemChatRoomUser)
-			.then(async (insertUser) => {
-				if (insertUser) {
-					return await this.itemChatRoomUserRepository
-						.createQueryBuilder('icru')
-						.select('icru.icruId', 'icruId')
-						.addSelect('icru.email', 'email')
-						.addSelect('u.nickname', 'nickname')
-						.addSelect('icru.chooseYn', 'chooseYn')
-						.addSelect('icru.createdDt', 'createdDt')
-						.innerJoin(User, 'u', 'u.email = icru.email')
-						.where('icru.email = :email', {
-							email: itemChatJoinDto.email
-						})
-						.andWhere('icru.icrId = :icrId', {
-							icrId: itemChatJoinDto.icrId
-						})
-						.getRawOne()
-						.then(async (saveUser) => {
-							if (saveUser) {
-								const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
-								itemChatRoomUserMsg.user = user;
-								itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
-								itemChatRoomUserMsg.chatMsg =
-									saveUser.nickname + '님이 입장하셨습니다.';
-								itemChatRoomUserMsg.textStatus = 'TXT02';
-								await this.itemChatRoomUserMsgRepository.insert(
-									itemChatRoomUserMsg
-								);
 
-								return await this.itemChatRoomUserMsgRepository
-									.createQueryBuilder('icrum')
-									.select('icrum.icruMsgId', 'icruMsgId')
-									.addSelect('icrum.email', 'email')
-									.addSelect('u.nickname', 'nickname')
-									.addSelect('c.codeName', 'msgType')
-									.addSelect('icrum.chatMsg', 'chatMsg')
-									.addSelect('icrum.createdDt', 'createdDt')
-									.innerJoin(
-										User,
-										'u',
-										'u.email = icrum.email'
-									)
-									.innerJoin(
-										Code,
-										'c',
-										'c.codeId = icrum.testStatus'
-									)
-									.where('icrum.email = :email', {
-										email: itemChatJoinDto.email
-									})
-									.andWhere('icrum.icrId = :icrId', {
-										icrId: itemChatJoinDto.icrId
-									})
-									.orderBy('icrum.createdDt', 'DESC')
-									.limit(1)
-									.getRawOne()
-									.then((data) => {
-										return { msg: 'success', data: data };
-									});
-							}
-						});
-				}
-			});
+		try {
+			return await this.itemChatRoomUserRepository
+				.insert(itemChatRoomUser)
+				.then(async (insertUser) => {
+					if (insertUser) {
+						return await this.itemChatRoomUserRepository
+							.createQueryBuilder('icru')
+							.select('icru.icruId', 'icruId')
+							.addSelect('icru.email', 'email')
+							.addSelect('u.nickname', 'nickname')
+							.addSelect('icru.chooseYn', 'chooseYn')
+							.addSelect('icru.createdDt', 'createdDt')
+							.innerJoin(User, 'u', 'u.email = icru.email')
+							.where('icru.email = :email', {
+								email: itemChatJoinDto.email
+							})
+							.andWhere('icru.icrId = :icrId', {
+								icrId: itemChatJoinDto.icrId
+							})
+							.getRawOne()
+							.then(async (saveUser) => {
+								if (saveUser) {
+									const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
+									itemChatRoomUserMsg.user = user;
+									itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
+									itemChatRoomUserMsg.chatMsg =
+										saveUser.nickname +
+										'님이 입장하셨습니다.';
+									itemChatRoomUserMsg.textStatus = 'TXT02';
+									await this.itemChatRoomUserMsgRepository.insert(
+										itemChatRoomUserMsg
+									);
+
+									return await this.itemChatRoomUserMsgRepository
+										.createQueryBuilder('icrum')
+										.select('icrum.icruMsgId', 'icruMsgId')
+										.addSelect('icrum.email', 'email')
+										.addSelect('u.nickname', 'nickname')
+										.addSelect('c.codeName', 'msgType')
+										.addSelect('icrum.chatMsg', 'chatMsg')
+										.addSelect(
+											'icrum.createdDt',
+											'createdDt'
+										)
+										.innerJoin(
+											User,
+											'u',
+											'u.email = icrum.email'
+										)
+										.innerJoin(
+											Code,
+											'c',
+											'c.codeId = icrum.testStatus'
+										)
+										.where('icrum.email = :email', {
+											email: itemChatJoinDto.email
+										})
+										.andWhere('icrum.icrId = :icrId', {
+											icrId: itemChatJoinDto.icrId
+										})
+										.orderBy('icrum.createdDt', 'DESC')
+										.limit(1)
+										.getRawOne()
+										.then((data) => {
+											return {
+												msg: 'success',
+												data: data
+											};
+										});
+								}
+							});
+					}
+				});
+		} catch {
+			return {
+				msg: 'fail',
+				errorMsg:
+					'해당 사용자를 채팅방에 참여시키는 도중 문제가 발생하였습니다.'
+			};
+		}
 	}
 
 	// async joinPersonalChatRoom(dealChatJoinDto: DealChatJoinDto) {
@@ -363,6 +420,13 @@ export class ChatService {
 			.getRawOne()
 			.then((data) => {
 				return { msg: 'success', data: data };
+			})
+			.catch((err) => {
+				return {
+					msg: 'fail',
+					errorMsg:
+						'단체 채팅 메시지를 반환하는 도중 문제가 발생하였습니다.'
+				};
 			});
 	}
 
@@ -435,52 +499,63 @@ export class ChatService {
 			.then(async (findUser) => {
 				if (findUser) {
 					const kickId = findUser.clientId;
-					await this.kickUserRepository.insert(kickUser);
 
-					const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
-					itemChatRoomUserMsg.user = user;
-					itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
-					itemChatRoomUserMsg.chatMsg =
-						findUser.nickname + '님이 강퇴당하셨습니다.';
-					itemChatRoomUserMsg.textStatus = 'TXT03';
+					try {
+						await this.kickUserRepository.insert(kickUser);
 
-					await this.itemChatRoomUserMsgRepository.insert(
-						itemChatRoomUserMsg
-					);
+						const itemChatRoomUserMsg: ItemChatRoomUserMsg = new ItemChatRoomUserMsg();
+						itemChatRoomUserMsg.user = user;
+						itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
+						itemChatRoomUserMsg.chatMsg =
+							findUser.nickname + '님이 강퇴당하셨습니다.';
+						itemChatRoomUserMsg.textStatus = 'TXT03';
 
-					await this.itemChatRoomUserRepository.delete(
-						itemChatRoomUser
-					);
+						await this.itemChatRoomUserMsgRepository.insert(
+							itemChatRoomUserMsg
+						);
 
-					const kickData = await this.itemChatRoomUserMsgRepository
-						.createQueryBuilder('icrum')
-						.select('icrum.icruMsgId', 'icruMsgId')
-						.addSelect('icrum.email', 'email')
-						.addSelect('u.nickname', 'nickname')
-						.addSelect('c.codeName', 'msgType')
-						.addSelect('icrum.chatMsg', 'chatMsg')
-						.addSelect('icrum.createdDt', 'createdDt')
-						.innerJoin(User, 'u', 'u.email = icrum.email')
-						.innerJoin(Code, 'c', 'c.codeId = icrum.testStatus')
-						.where('icrum.email = :email', {
-							email: kickUserDto.email
-						})
-						.andWhere('icrum.icrId = :icrId', {
-							icrId: kickUserDto.icrId
-						})
-						.orderBy('icrum.createdDt', 'DESC')
-						.limit(1)
-						.getRawOne();
+						await this.itemChatRoomUserRepository.delete(
+							itemChatRoomUser
+						);
 
-					return {
-						msg: 'success',
-						kickId: kickId,
-						kickData: kickData
-					};
+						const kickData = await this.itemChatRoomUserMsgRepository
+							.createQueryBuilder('icrum')
+							.select('icrum.icruMsgId', 'icruMsgId')
+							.addSelect('icrum.email', 'email')
+							.addSelect('u.nickname', 'nickname')
+							.addSelect('c.codeName', 'msgType')
+							.addSelect('icrum.chatMsg', 'chatMsg')
+							.addSelect('icrum.createdDt', 'createdDt')
+							.innerJoin(User, 'u', 'u.email = icrum.email')
+							.innerJoin(Code, 'c', 'c.codeId = icrum.testStatus')
+							.where('icrum.email = :email', {
+								email: kickUserDto.email
+							})
+							.andWhere('icrum.icrId = :icrId', {
+								icrId: kickUserDto.icrId
+							})
+							.orderBy('icrum.createdDt', 'DESC')
+							.limit(1)
+							.getRawOne();
+						return {
+							msg: 'success',
+							kickId: kickId,
+							kickData: kickData
+						};
+					} catch {
+						return {
+							msg: 'fail',
+							errorMsg:
+								'해당 사용자를 강퇴하던 도중 문제가 발생하였습니다.'
+						};
+					}
 				}
 			})
 			.catch((err) => {
-				return { msg: 'fail' };
+				return {
+					msg: 'fail',
+					errorMsg: '해당 사용자가 존재하지 않습니다.'
+				};
 			});
 	}
 }

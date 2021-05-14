@@ -30,10 +30,14 @@ export class ChatGateway
 	// 이메일, 닉네임, 메시지, 채팅한 시간 정보가 담겨있음.
 	@SubscribeMessage('sendMsg')
 	async handleMessage(client: Socket, itemChatDto: ItemChatDto) {
-		console.log(itemChatDto);
 		const chatMsg = await this.chatService.saveChatMsg(itemChatDto);
-		console.log('sendMsg => ', chatMsg);
-		this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg);
+		console.log('sendMsg Data => ', itemChatDto);
+		console.log('getMsg Data => ', chatMsg);
+		if (chatMsg['msg'] == 'success') {
+			this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg['data']);
+		} else {
+			client.emit('getMsg', chatMsg['errorMsg']);
+		}
 	}
 
 	// @SubscribeMessage('sendPersonalMsg')
@@ -68,46 +72,6 @@ export class ChatGateway
 	// 		});
 	// }
 
-	// 채팅방 사용자 테이블에 해당 사용자가 이미 등록되어 있다면 자동으로 join
-	// 채팅방 사용자 테이블에 해당 사용자가 등록되어 있지 않다면 자동으로 join 안함
-	// 또한 나갔다 들어온 이후에는 이전의 채팅방 메시지가 보여야 하므로, 해당 사용자가 입력한 첫 메시지 이후의 모든 메시지를 가져옴!
-	// 단체 채팅방 메시지, 1:1 메시지 모두 가져옴
-	// 이걸 사용해서 채팅방 참가 버튼 유무를 정할 수 있음.
-	// @SubscribeMessage('joinAuto')
-	// async handleJoinAutoRoom(client: Socket, joinAutoDto: JoinAutoDto) {
-	// 	return await this.chatService
-	// 		.joinAuto(joinAutoDto)
-	// 		.then(async (joinAuto) => {
-	// 			const data = {
-	// 				chatGroup: 'N',
-	// 				chatOne: 'N',
-	// 				chatGroupList: null,
-	// 				chatOneList: null
-	// 			};
-	// 			if (joinAuto) {
-	// 				client.join(joinAutoDto.icrId);
-
-	// 				const chatGroupList = await this.chatService.showGroupChat(
-	// 					joinAutoDto
-	// 				);
-	// 				data.chatGroupList = chatGroupList;
-	// 				data.chatGroup = 'Y';
-	// 				if (joinAuto.chooseYn == 'N') {
-	// 					client.emit('returnJoinAuto', data);
-	// 				} else {
-	// 					const chatOneList = await this.chatService.showOneChat(
-	// 						joinAutoDto
-	// 					);
-	// 					data.chatOne = 'Y';
-	// 					data.chatOneList = chatOneList;
-	// 					client.emit('returnJoinAuto', data);
-	// 				}
-	// 			} else {
-	// 				client.emit('returnJoinAuto', data);
-	// 			}
-	// 		});
-	// }
-
 	// '님이 입장하셨습니다.'
 	// 채팅방 사용자 테이블에 해당 사용자 등록하기.
 	// itemChatRoomUser 테이블에 존재하면 넣고, 아니라면 안넣음
@@ -115,7 +79,7 @@ export class ChatGateway
 	// front => socket.emit('joinRoom', data = { email: '사용자 email', icrId: icrId})
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(client: Socket, itemChatJoinDto: ItemChatJoinDto) {
-		console.log(itemChatJoinDto);
+		console.log('joinRoom Data => ', itemChatJoinDto);
 		const joinMsg = await this.chatService.joinChatRoom(
 			itemChatJoinDto,
 			client.id
@@ -178,6 +142,9 @@ export class ChatGateway
 						kickUserDto.icrId
 					);
 
+					console.log('kickUser => ', kickUserDto);
+					console.log('kickUser Data => ', kickClient['kickData']);
+
 					// ~님이 강퇴당하셨습니다.
 					this.server
 						.to(kickUserDto.icrId)
@@ -224,10 +191,10 @@ export class ChatGateway
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) {
+		console.log('client email => ', client.handshake.query.email);
+		console.log('client icrId => ', client.handshake.query.icrId);
+		console.log('client id => ', client.id);
 		// const a = 'hello_world';
-		console.log(client.handshake.query.email);
-		console.log(client.handshake.query.icrId);
-		console.log(client.id);
 		// client.join(a);
 		// console.log('room => ', client.adapter.rooms.hello_world);
 		// console.log(client.id);
@@ -245,8 +212,7 @@ export class ChatGateway
 		await this.chatService
 			.joinAuto(autoJoin, client.id)
 			.then(async (findJoin) => {
-				console.log(findJoin);
-				if (findJoin) {
+				if (findJoin['msg'] == 'success') {
 					// 지난 채팅 보여주기
 					const chatHistory = await this.chatService.showGroupChat(
 						autoJoin
@@ -255,8 +221,6 @@ export class ChatGateway
 					const chatUserList = await this.chatService.showChatUser(
 						autoJoin
 					);
-					console.log('chatHistory => ', chatHistory);
-					console.log('chatGroupList => ', chatUserList);
 
 					const config = {
 						icrId: autoJoin.icrId,
@@ -267,6 +231,8 @@ export class ChatGateway
 					// 채팅방 접속 및 setRoom 정보 뿌리기
 					client.join(autoJoin.icrId);
 					client.emit('setRoom', config);
+				} else {
+					client.emit('setRoom', findJoin);
 				}
 			});
 	}
