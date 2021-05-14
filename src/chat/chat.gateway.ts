@@ -36,13 +36,13 @@ export class ChatGateway
 		this.server.to(itemChatDto.icrId).emit('getMsg', chatMsg);
 	}
 
-	@SubscribeMessage('sendPersonalMsg')
-	async handlePersonalMessage(client: Socket, dealChatDto: DealChatDto) {
-		console.log(dealChatDto);
-		const chatMsg = await this.chatService.savePersonalChatMsg(dealChatDto);
-		console.log('sendPersonalMsg => ', chatMsg);
-		this.server.to(dealChatDto.dicrId).emit('getPersonalMsg', chatMsg);
-	}
+	// @SubscribeMessage('sendPersonalMsg')
+	// async handlePersonalMessage(client: Socket, dealChatDto: DealChatDto) {
+	// 	console.log(dealChatDto);
+	// 	const chatMsg = await this.chatService.savePersonalChatMsg(dealChatDto);
+	// 	console.log('sendPersonalMsg => ', chatMsg);
+	// 	this.server.to(dealChatDto.dicrId).emit('getPersonalMsg', chatMsg);
+	// }
 
 	// 이메일이 해당 방의 방장과 같다면, 단체 채팅방 및 1:1 채팅방 접속한 인원들을 보여줌.
 	// window.onload
@@ -120,29 +120,41 @@ export class ChatGateway
 			itemChatJoinDto,
 			client.id
 		);
-		client.join(itemChatJoinDto.icrId);
+
+		// 채팅방 참가자 보여주기
+		const chatUserList = await this.chatService.showChatUser(
+			itemChatJoinDto
+		);
+
+		const config = {
+			icrId: itemChatJoinDto.icrId,
+			userList: chatUserList,
+			msgList: joinMsg
+		};
+
 		// 접속하셨습니다 메시지
 		// 채팅방 유저 목록에 추가
-		this.server.to(itemChatJoinDto.icrId).emit('addUser', joinMsg);
+		client.join(itemChatJoinDto.icrId);
+		this.server.to(itemChatJoinDto.icrId).emit('addUser', config);
 		console.log('joinMsg => ', joinMsg);
 	}
 
-	@SubscribeMessage('joinPersonalRoom')
-	async handlejoinPersonalRoom(
-		client: Socket,
-		dealChatJoinDto: DealChatJoinDto
-	) {
-		console.log(dealChatJoinDto);
-		const joinMsg = await this.chatService.joinPersonalChatRoom(
-			dealChatJoinDto
-		);
-		client.join(dealChatJoinDto.dicrId);
-		// 접속하셨습니다 메시지
-		// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
-		// 채팅방 유저 목록에 추가
-		this.server.to(dealChatJoinDto.dicrId).emit('addUser', joinMsg);
-		console.log('joinMsg => ', joinMsg);
-	}
+	// @SubscribeMessage('joinPersonalRoom')
+	// async handlejoinPersonalRoom(
+	// 	client: Socket,
+	// 	dealChatJoinDto: DealChatJoinDto
+	// ) {
+	// 	console.log(dealChatJoinDto);
+	// 	const joinMsg = await this.chatService.joinPersonalChatRoom(
+	// 		dealChatJoinDto
+	// 	);
+	// 	client.join(dealChatJoinDto.dicrId);
+	// 	// 접속하셨습니다 메시지
+	// 	// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
+	// 	// 채팅방 유저 목록에 추가
+	// 	this.server.to(dealChatJoinDto.dicrId).emit('addUser', joinMsg);
+	// 	console.log('joinMsg => ', joinMsg);
+	// }
 
 	// 1:1 채팅 같은 경우에는, join하는 버튼이 아니라, 방장이 해당 유저를 추가해주는 식으로 들어가진다.
 	// 따라서 방장이 1:1채팅방에 유저를 추가해주면, 실시간으로 해당 유저의 1:1 채팅방이 열려야 한다.
@@ -158,17 +170,6 @@ export class ChatGateway
 	// front => socket.emit('removeUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
-		// const a = 'hello_world';
-		// console.log(client.handshake.query.email);
-		// console.log(client.handshake.query.icrId);
-		// console.log(client.id);
-		// client.join(a);
-		// console.log('room => ', client.adapter.rooms.hello_world);
-		// console.log(client.id);
-		// console.log(client.client.id);
-		// console.log(this.server.sockets);
-		// this.server.sockets[client.id].leave(a);
-
 		return await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
@@ -185,11 +186,6 @@ export class ChatGateway
 					return kickClient;
 				}
 			});
-
-		// await this.chatService.removeUser(removeUserDto);
-		// client.leave(removeUserDto.icrId);
-		// this.server.to(removeUserDto.icrId).emit('removeUser');
-		// client.emit('leaveRoom', room);
 	}
 
 	afterInit(server: Server) {
