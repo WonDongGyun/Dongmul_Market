@@ -228,6 +228,7 @@ export class ChatGateway
 				.then(async (findJoin) => {
 					console.log(findJoin);
 					if (findJoin) {
+						console.log(findJoin['msg'] == 'success');
 						if (findJoin['msg'] == 'success') {
 							// 지난 채팅 보여주기
 							const chatHistory = await this.chatService.showGroupChat(
