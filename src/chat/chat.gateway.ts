@@ -207,7 +207,7 @@ export class ChatGateway
 
 		if (
 			client.handshake.query.email == undefined ||
-			client.handshake.query.icrId
+			client.handshake.query.icrId == undefined
 		) {
 			client.emit('setRoom', {
 				msg: 'fail',
