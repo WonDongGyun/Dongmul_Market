@@ -41,8 +41,8 @@ export class MainPageController {
 		@CurrentUser() email: string,
 		@Body() deleteButtonDto: DeleteButtonDto
 	) {
-		console.log(email)
-		console.log(deleteButtonDto)
+		console.log(email);
+		console.log(deleteButtonDto);
 		return await this.mainPageService.deleteButton(email, deleteButtonDto);
 	}
 
@@ -61,6 +61,7 @@ export class MainPageController {
 	// 경매 글 상세내용
 	@Get(':itemId')
 	async getDetail(@Param('itemId') itemId: string) {
+		console.log(itemId);
 		return await this.mainPageService.getDetail(itemId);
 	}
 
