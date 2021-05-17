@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { User } from 'src/entities/user.entity';
 import { MailModule } from 'src/mail/mail.module';
-import { MailService } from 'src/mail/mail.service';
+
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { GoogleStrategy } from './google.strategy';
@@ -26,7 +26,7 @@ import { ErrService } from '../err/err.service';
 		})
 	],
 	controllers: [AccountController],
-	providers: [AccountService, JwtStrategy, GoogleStrategy, MailService, ErrService],
+	providers: [AccountService, JwtStrategy, GoogleStrategy, ErrService],
 	exports: []
 })
 export class AccountModule {}
