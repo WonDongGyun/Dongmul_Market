@@ -78,6 +78,7 @@ export class MainPageService {
 	}
 
 	// 메인 화면
+	// 강퇴당한 여부를 알 수 있음.
 	async getPostList(email: string) {
 		const userData = await this.userRepository.findOne({ email: email });
 		return await this.saleItemRepository
@@ -98,13 +99,14 @@ export class MainPageService {
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
 			.addSelect(
-				`CASE WHEN ku.email = '${userData.email}' THEN true ELSE false END`,
+				`IF(CASE WHEN ku.email = '${userData.email}' THEN true ELSE false END, 'true', 'false')`,
 				'kickYn'
 			)
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
 			.where('u.address = :address', { address: userData.address })
+			.andWhere('now() < si.deadLine')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((getPost) => {
