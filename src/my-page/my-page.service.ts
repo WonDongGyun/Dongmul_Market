@@ -22,12 +22,12 @@ export class MyPageService {
             // console.log(user.address)
             if (user.address) {
                 await this.userRepository.update(addressChangeDto.email, { address: addressChangeDto.new_address })
-                return { statusCode: 201, message: '주소 변경 완료' };
+                return { msg: 'success', message: '주소 변경 완료' };
             } else {
                 return {
-                    "msg": "fail",
-                    "errorMsg": "주소를 입력해주세요"
-                }
+					msg: 'success',
+					errorMsg: '정확한 주소를 입력해주세요'
+				};
             }
         } catch (err) {
             console.log(err)

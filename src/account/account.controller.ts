@@ -2,8 +2,6 @@ import {
 	Body,
 	Controller,
 	Get,
-	HttpException,
-	HttpStatus,
 	Post,
 	Req,
 	Res,
@@ -24,16 +22,6 @@ import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 export class AccountController {
 	constructor(private readonly accountService: AccountService) {}
 
-	@Get()
-	async findAll() {
-		throw new HttpException(
-			{
-				status: HttpStatus.FORBIDDEN,
-				error: 'This is a custom message'
-			},
-			HttpStatus.FORBIDDEN
-		);
-	}
 
 	// 회원 가입
 	@Post()
@@ -75,12 +63,12 @@ export class AccountController {
 				}
 			});
 	}
-
+//메일 인증번호 확인
 	@Post('mail/check')
 	async mailcheck(@Body() emailAuthDto: EmailAuthDto) {
 		return await this.accountService.sendEmailConfirm(emailAuthDto);
 	}
-
+//로그아웃
 	@Get('logout')
 	@UseGuards(AuthGuard('jwt'))
 	logout(@Req() req, @Res() res) {
@@ -88,13 +76,14 @@ export class AccountController {
 		res.json({ loggedOut: true });
 	}
 
+//비밀번호 인증번호 전송
 	@Post('/sendpassword')
 	async forgotPassword(@Body() forgotPassword: ForgotPasswordDto) {
 		return await this.accountService.sendEmailPassword(
 			forgotPassword.email
 		);
 	}
-
+//비밀번호 변경
 	@Post('/changepassword')
 	async changePassword(@Body() passwordChangeDto: PasswordChangeDto) {
 		return await this.accountService.changePassword(passwordChangeDto);

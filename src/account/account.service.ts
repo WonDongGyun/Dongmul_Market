@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -54,12 +54,10 @@ export class AccountService {
 
 			await this.emailRepository.delete({ email: createUserDto.email });
 			return await this.userRepository.insert(user).then(async () => {
-				// return { msg: 'success', errorMsg: '회원가입 성공!' };
-				return this.errService.signUpOk();
+			return this.errService.signUpOk();
 			});
 		} catch (err) {
 			console.log(err);
-			// return { msg: 'fail', errorMsg: ' 회원가입 실패!' };
 			return this.errService.setUserErr();
 		}
 	}
@@ -72,19 +70,16 @@ export class AccountService {
 			});
 		} catch (err) {
 			console.log(err);
-			// return { msg: "fail", errorMsg:'이메일 중복'}
 			return this.errService.existEmail();
 		}
 	}
 
 	//이메일 찾기
 	async findByEmail(email: string) {
-		//:Promise<User>
 		try {
 			return await this.userRepository.findOne(email);
 		} catch (err) {
 			console.log(err);
-			// return { msg : 'fail', errorMsg:'이메일 찾기 실패'}
 			return this.errService.emailChkOk();
 		}
 	}
@@ -101,7 +96,6 @@ export class AccountService {
 	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
 		const user = await this.findByEmail(forgotPasswordDto.email);
 		if (!user) {
-			// throw new BadRequestException('email이 없습니다.');
 			return this.errService.emailChkOk();
 		}
 	}
@@ -113,18 +107,10 @@ export class AccountService {
 			});
 
 			if (!user) {
-				// return {
-				// 	msg: 'fail',
-				// 	errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
-				// };
 				return this.errService.loginFail();
 			}
 
 			if (!(await bcrypt.compare(chkLoginDto.password, user.password))) {
-				// return {
-				// 	msg: 'fail',
-				// 	errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
-				// };
 				return this.errService.loginFail();
 			}
 
@@ -136,11 +122,10 @@ export class AccountService {
 			};
 		} catch (err) {
 			console.log(err);
-			// return { msg: 'fail', errorMsg: '로그인 실패' };
 			return this.errService.loginFail();
 		}
 	}
-
+//구글 로그인
 	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
 		try {
 			const google = await this.userRepository.findOne({
@@ -165,19 +150,10 @@ export class AccountService {
 								token: 'bearer ' + token
 							};
 						} else {
-							// return {
-							// 	msg: 'fail',
-							// 	errorMsg:
-							// 		'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
-							// };
 							return this.errService.existEmail();
 						}
 					})
 					.catch((err) => {
-						// return {
-						// 	msg: 'fail',
-						// 	errorMsg: "로그인 실패"
-						// };
 						return this.errService.socialLoginFail();
 					});
 			} else {
@@ -188,16 +164,15 @@ export class AccountService {
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-					// return { msg: 'success', errorMsg: '회원가입 성공!' };
-					return this.errService.signUpOk();
+				return this.errService.signUpOk();
 				});
 			}
 		} catch (err) {
 			console.log(err);
-			// return { msg: 'fail', errorMsg: '회원가입 실패' };
 			return this.errService.setUserErr();
 		}
 	}
+	//카카오 로그인
 
 	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
 		try {
@@ -222,20 +197,11 @@ export class AccountService {
 								nickname: findKakao.nickname,
 								token: 'bearer ' + token
 							};
-						} else {
-							// return {
-							// 	msg: 'fail',
-							// 	errorMsg:
-							// 		'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
-							// };
+						} else {;
 							return this.errService.existEmail();
 						}
 					})
 					.catch((err) => {
-						// return {
-						// 	msg: 'fail',
-						// 	errorMsg: '로그인 실패'
-						// };
 						return this.errService.socialLoginFail();
 					});
 			} else {
@@ -245,7 +211,6 @@ export class AccountService {
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-					// return { msg: 'success', errorMsg: '회원가입 성공!' };
 					return this.errService.signUpOk();
 				});
 			}
@@ -255,6 +220,7 @@ export class AccountService {
 	}
 
 	//이메일 인증 코드 보내기
+	//가입된 이메일을 찾아서 랜덤함수로 이메일을 보낸후 email auth에 저장 업데이트
 	async sendRegisterMail(email: string) {
 		try {
 			const findemail = await this.emailRepository.findOne({
@@ -273,9 +239,9 @@ export class AccountService {
 			emailAuth.authNum = authNum;
 
 			await this.mailerService.sendMail({
-				to: email, // list of receivers
-				from: 'dongmulMarket@gmail.com', // sender address
-				subject: '인증번호 입니다.', // Subject line
+				to: email, 
+				from: 'dongmulMarket@gmail.com', 
+				subject: '인증번호 입니다.', 
 				html: `
 					<h1>
 					회원가입 요청 메일 
@@ -292,19 +258,11 @@ export class AccountService {
 
 			if (!findemail) {
 				await this.emailRepository.insert(emailAuth);
-				// return {
-				// 	statusCode: 201,
-				// 	message: '인증번호 전송 완료'
-				// };
 				return this.errService.sendEmailOk();
 			} else {
 				await this.emailRepository.update(email, {
 					authNum: authNum
 				});
-				// return {
-				// 	statusCode: 201,
-				// 	message: '인증번호 재 전송 완료'
-				// };
 				return this.errService.sendEmailReOk();
 			}
 		} catch (err) {
@@ -312,7 +270,8 @@ export class AccountService {
 		}
 	}
 
-	//인증번호 확인하고 지움
+	
+	//email auth에 저장된 이메일 인증번호 찾음
 	async sendEmailConfirm(emailAuthDto: EmailAuthDto) {
 		try {
 			return await this.emailRepository
@@ -322,10 +281,8 @@ export class AccountService {
 				})
 				.then(async (findEmail) => {
 					if (findEmail) {
-						// return { msg: 'success' };
 						return this.errService.authNumOk();
 					} else {
-						// return { msg: 'fail', errorMsg: '인증번호가 틀립니다.' };
 						return this.errService.authNumDiffent();
 					}
 				});
@@ -335,6 +292,7 @@ export class AccountService {
 	}
 
 	//비밀번호 변경숫자 이메일 전송
+	//계정 찾고 랜덤함수 후 이메일 전송 email_auth에 있으면 업데이트
 
 	async sendEmailPassword(email: string) {
 		try {
@@ -351,9 +309,9 @@ export class AccountService {
 				emailAuth.authNum = authNum;
 
 				await this.mailerService.sendMail({
-					to: email, // list of receivers
-					from: 'ljayoon@gmail.com', // sender address
-					subject: '비밀번호 찾기 인증번호 입니다.', // Subject line
+					to: email, 
+					from: 'ljayoon@gmail.com', 
+					subject: '비밀번호 찾기 인증번호 입니다.', 
 					html: `
 							<h1>
 							비밀번호 찾기 인증번호 
@@ -373,25 +331,13 @@ export class AccountService {
 						await this.emailRepository.update(email, {
 							authNum: authNum
 						});
-						// return {
-						// 	statusCode: 201,
-						// 	message: '비밀번호 인증번호  재 전송 완료'
-						// };
 						return this.errService.sendEmailReOk();
 					} else {
 						await this.emailRepository.insert(emailAuth);
-						// return {
-						// 	statusCode: 201,
-						// 	message: '비밀번호 인증번호  전송 완료'
-						// };
 						return this.errService.sendEmailOk();
 					}
 				}
 			} else {
-				// return {
-				// 	"msg": "fail",
-				// 	"errorMsg": "이메일이 맞는지 확인 해주세요.!"
-				// }
 			}
 			return this.errService.emailChkOk();
 		} catch (err) {
@@ -400,6 +346,7 @@ export class AccountService {
 	}
 
 	//비밀번호 변경
+	//email_auth에 있으면 실행 변경할 비밀번호가 새로운 비밀번호와 서로 일치하면 비밀번호 변경
 	async changePassword(passwordChangeDto: PasswordChangeDto) {
 		try {
 			const code = await this.emailRepository.findOne(
@@ -424,17 +371,9 @@ export class AccountService {
 							};
 						});
 				} else {
-					// return {
-					// 	msg: 'fail',
-					// 	errorMsg: '인증번호가 틀립니다.'
-					// };
 					return this.errService.authNumDiffent();
 				}
 			} else {
-				// return {
-				// 	msg: 'fail',
-				// 	errorMsg: '계정을 확인 해주세요.!'
-				// };
 				return this.errService.emailChkOk();
 			}
 		} catch (err) {
