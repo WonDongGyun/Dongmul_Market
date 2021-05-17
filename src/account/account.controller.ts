@@ -2,6 +2,8 @@ import {
 	Body,
 	Controller,
 	Get,
+	HttpException,
+	HttpStatus,
 	Post,
 	Req,
 	Res,
@@ -21,6 +23,17 @@ import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 @Controller('account')
 export class AccountController {
 	constructor(private readonly accountService: AccountService) {}
+
+	@Get()
+	async findAll() {
+		throw new HttpException(
+			{
+				status: HttpStatus.FORBIDDEN,
+				error: 'This is a custom message'
+			},
+			HttpStatus.FORBIDDEN
+		);
+	}
 
 	// 회원 가입
 	@Post()

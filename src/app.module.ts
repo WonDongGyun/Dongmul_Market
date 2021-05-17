@@ -18,6 +18,9 @@ import { join } from 'path';
 import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
+import CatchException from './execption/CatchException';
+import { APP_FILTER } from '@nestjs/core';
+import { ErrModule } from './err/err.module';
 
 @Module({
 	imports: [
@@ -65,7 +68,9 @@ import { KickUser } from './entities/kickUser.entity';
 		ChatModule,
 		AccountModule,
 		MainPageModule,
-		MyPageModule
-	]
+		MyPageModule,
+		ErrModule
+	],
+	
 })
 export class AppModule {}

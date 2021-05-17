@@ -14,12 +14,14 @@ import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
 import { EmailAuthDto } from './dto/emailAuth.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ErrService } from '../err/err.service';
 
 @Injectable()
 export class AccountService {
 	constructor(
 		private readonly jwtService: JwtService,
 		private mailerService: MailerService,
+		private readonly errService : ErrService,
 
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
@@ -52,11 +54,13 @@ export class AccountService {
 
 			await this.emailRepository.delete({ email: createUserDto.email });
 			return await this.userRepository.insert(user).then(async () => {
-				return { msg: 'success', errorMsg: '회원가입 성공!' };
+				// return { msg: 'success', errorMsg: '회원가입 성공!' };
+				return this.errService.signUpOk();
 			});
 		} catch (err) {
 			console.log(err);
-			return { msg: 'fail', errorMsg: ' 회원가입 실패!' };
+			// return { msg: 'fail', errorMsg: ' 회원가입 실패!' };
+			return this.errService.setUserErr()
 		}
 	}
 
@@ -68,17 +72,19 @@ export class AccountService {
 			});
 		} catch (err) {
 			console.log(err);
-			return { msg: "fail", errorMsg:'이메일 중복'}
+			// return { msg: "fail", errorMsg:'이메일 중복'}
+			return this.errService.existEmail();
 		}
 	}
 
 	//이메일 찾기
-	async findByEmail(email: string): Promise<User> {
+	async findByEmail(email: string)  { //:Promise<User>
 		try {
 			return await this.userRepository.findOne(email);
 		} catch (err) {
 			console.log(err)
 			// return { msg : 'fail', errorMsg:'이메일 찾기 실패'}
+			return this.errService.emailChkOk()
 		}
 	}
 	//업데이트
@@ -94,7 +100,8 @@ export class AccountService {
 	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
 		const user = await this.findByEmail(forgotPasswordDto.email);
 		if (!user) {
-			throw new BadRequestException('email이 없습니다.');
+			// throw new BadRequestException('email이 없습니다.');
+			return this.errService.emailChkOk();
 		}
 	}
 	// 로그인 확인
@@ -105,17 +112,19 @@ export class AccountService {
 			});
 
 			if (!user) {
-				return {
-					msg: 'fail',
-					errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
-				};
+				// return {
+				// 	msg: 'fail',
+				// 	errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
+				// };
+				return this.errService.loginFail()
 			}
 
 			if (!(await bcrypt.compare(chkLoginDto.password, user.password))) {
-				return {
-					msg: 'fail',
-					errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
-				};
+				// return {
+				// 	msg: 'fail',
+				// 	errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
+				// };
+				return this.errService.loginFail();
 			}
 
 			return {
@@ -126,7 +135,8 @@ export class AccountService {
 			};
 		} catch (err) {
 			console.log(err);
-			return { msg: 'fail', errorMsg: '로그인 실패' };
+			// return { msg: 'fail', errorMsg: '로그인 실패' };
+			return this.errService.loginFail();
 		}
 	}
 
@@ -154,18 +164,20 @@ export class AccountService {
 								token: 'bearer ' + token
 							};
 						} else {
-							return {
-								msg: 'fail',
-								errorMsg:
-									'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
-							};
+							// return {
+							// 	msg: 'fail',
+							// 	errorMsg:
+							// 		'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+							// };
+							return this.errService.existEmail();
 						}
 					})
 					.catch((err) => {
-						return {
-							msg: 'fail',
-							errorMsg: "구글 로그인 실패"
-						};
+						// return {
+						// 	msg: 'fail',
+						// 	errorMsg: "로그인 실패"
+						// };
+						return this.errService.SocialLoginFail();
 					});
 			} else {
 				const user = new User();
@@ -175,12 +187,14 @@ export class AccountService {
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-					return { msg: 'success', errorMsg: '회원가입 성공!' };
+					// return { msg: 'success', errorMsg: '회원가입 성공!' };
+					return this.errService.signUpOk();
 				});
 			}
 		} catch (err) {
 			console.log(err);
-			return { msg: 'fail', errorMsg: '회원가입 실패' };
+			// return { msg: 'fail', errorMsg: '회원가입 실패' };
+			return this.errService.setUserErr();
 		}
 	}
 
@@ -208,18 +222,20 @@ export class AccountService {
 								token: 'bearer ' + token
 							};
 						} else {
-							return {
-								msg: 'fail',
-								errorMsg:
-									'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
-							};
+							// return {
+							// 	msg: 'fail',
+							// 	errorMsg:
+							// 		'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
+							// };
+							return this.errService.existEmail()
 						}
 					})
 					.catch((err) => {
-						return {
-							msg: 'fail',
-							errorMsg: 'err'
-						};
+						// return {
+						// 	msg: 'fail',
+						// 	errorMsg: '로그인 실패'
+						// };
+						return this.errService.SocialLoginFail()
 					});
 			} else {
 				const user = new User();
@@ -228,7 +244,8 @@ export class AccountService {
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-					return { msg: 'success', errorMsg: '회원가입 성공!' };
+					// return { msg: 'success', errorMsg: '회원가입 성공!' };
+					return this.errService.signUpOk();
 				});
 			}
 		} catch (err) {
@@ -274,18 +291,20 @@ export class AccountService {
 
 			if (!findemail) {
 				await this.emailRepository.insert(emailAuth);
-				return {
-					statusCode: 201,
-					message: '인증번호 전송 완료'
-				};
+				// return {
+				// 	statusCode: 201,
+				// 	message: '인증번호 전송 완료'
+				// };
+				return this.errService.sendEmailOk()
 			} else {
 				await this.emailRepository.update(email, {
 					authNum: authNum
 				});
-				return {
-					statusCode: 201,
-					message: '인증번호 재 전송 완료'
-				};
+				// return {
+				// 	statusCode: 201,
+				// 	message: '인증번호 재 전송 완료'
+				// };
+				return this.errService.sendEmailReOk();
 			}
 		} catch (err) {
 			console.log(err);
@@ -302,9 +321,11 @@ export class AccountService {
 				})
 				.then(async (findEmail) => {
 					if (findEmail) {
-						return { msg: 'success' };
+						// return { msg: 'success' };
+						return this.errService.authNumOk()
 					} else {
-						return { msg: 'fail' };
+						// return { msg: 'fail', errorMsg: '인증번호가 틀립니다.' };
+						return this.errService.authNumDiffent();
 					}
 				});
 		} catch (err) {
@@ -351,25 +372,28 @@ export class AccountService {
 						await this.emailRepository.update(email, {
 							authNum: authNum
 						});
-						return {
-							statusCode: 201,
-							message: '비밀번호 인증번호  재 전송 완료'
-						};
+						// return {
+						// 	statusCode: 201,
+						// 	message: '비밀번호 인증번호  재 전송 완료'
+						// };
+						return this.errService.sendEmailReOk();
 					} else {
 						await this.emailRepository.insert(emailAuth);
-						return {
-							statusCode: 201,
-							message: '비밀번호 인증번호  전송 완료'
-						};
+						// return {
+						// 	statusCode: 201,
+						// 	message: '비밀번호 인증번호  전송 완료'
+						// };
+						return this.errService.sendEmailOk();
 					}
 					
 				}
 			}else {
-					return {
-						"msg": "fail",
-						"errorMsg": "이메일이 맞는지 확인 해주세요.!"
-					}
-					}
+					// return {
+					// 	"msg": "fail",
+					// 	"errorMsg": "이메일이 맞는지 확인 해주세요.!"
+					// }
+			}
+			return this.errService.emailChkOk()
 				
 			} catch (err) {
 			console.log(err);
@@ -401,16 +425,18 @@ export class AccountService {
 							};
 						});
 				} else {
-					return {
-						msg: 'fail',
-						errorMsg: '인증번호가 틀립니다.'
-					};
+					// return {
+					// 	msg: 'fail',
+					// 	errorMsg: '인증번호가 틀립니다.'
+					// };
+					return this.errService.authNumDiffent()
 				}
 			} else {
-				return {
-					msg: 'fail',
-					errorMsg: '계정을 확인 해주세요.!'
-				};
+				// return {
+				// 	msg: 'fail',
+				// 	errorMsg: '계정을 확인 해주세요.!'
+				// };
+				return this.errService.emailChkOk();
 			}
 		} catch (err) {
 			console.log(err);

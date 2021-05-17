@@ -9,6 +9,7 @@ import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { ErrService } from '../err/err.service';
 
 @Module({
 	imports: [
@@ -25,7 +26,7 @@ import { JwtStrategy } from './jwt.strategy';
 		})
 	],
 	controllers: [AccountController],
-	providers: [AccountService, JwtStrategy, GoogleStrategy, MailService],
+	providers: [AccountService, JwtStrategy, GoogleStrategy, MailService, ErrService],
 	exports: []
 })
 export class AccountModule {}
