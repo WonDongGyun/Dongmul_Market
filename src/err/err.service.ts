@@ -17,7 +17,7 @@ export class ErrService {
 		};
 	}
 
-	SocialLoginFail() {
+	socialLoginFail() {
 		return {
 			msg: 'fail',
 			errorMsg: '로그인 실패'

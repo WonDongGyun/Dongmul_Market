@@ -21,7 +21,7 @@ export class AccountService {
 	constructor(
 		private readonly jwtService: JwtService,
 		private mailerService: MailerService,
-		private readonly errService : ErrService,
+		private readonly errService: ErrService,
 
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
@@ -60,7 +60,7 @@ export class AccountService {
 		} catch (err) {
 			console.log(err);
 			// return { msg: 'fail', errorMsg: ' 회원가입 실패!' };
-			return this.errService.setUserErr()
+			return this.errService.setUserErr();
 		}
 	}
 
@@ -78,13 +78,14 @@ export class AccountService {
 	}
 
 	//이메일 찾기
-	async findByEmail(email: string)  { //:Promise<User>
+	async findByEmail(email: string) {
+		//:Promise<User>
 		try {
 			return await this.userRepository.findOne(email);
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 			// return { msg : 'fail', errorMsg:'이메일 찾기 실패'}
-			return this.errService.emailChkOk()
+			return this.errService.emailChkOk();
 		}
 	}
 	//업데이트
@@ -92,7 +93,7 @@ export class AccountService {
 		try {
 			return this.userRepository.update({ email: email }, payload);
 		} catch (err) {
-			console.log(err)
+			console.log(err);
 			return { msg: 'fail', errorMsg: '업데이트 실패' };
 		}
 	}
@@ -116,7 +117,7 @@ export class AccountService {
 				// 	msg: 'fail',
 				// 	errorMsg: '잘못된 이메일 혹은 비밀번호를 입력하셨습니다.'
 				// };
-				return this.errService.loginFail()
+				return this.errService.loginFail();
 			}
 
 			if (!(await bcrypt.compare(chkLoginDto.password, user.password))) {
@@ -177,7 +178,7 @@ export class AccountService {
 						// 	msg: 'fail',
 						// 	errorMsg: "로그인 실패"
 						// };
-						return this.errService.SocialLoginFail();
+						return this.errService.socialLoginFail();
 					});
 			} else {
 				const user = new User();
@@ -227,7 +228,7 @@ export class AccountService {
 							// 	errorMsg:
 							// 		'해당 이메일이 이미 등록되어 있습니다. 로그인 방식을 확인해주세요.'
 							// };
-							return this.errService.existEmail()
+							return this.errService.existEmail();
 						}
 					})
 					.catch((err) => {
@@ -235,7 +236,7 @@ export class AccountService {
 						// 	msg: 'fail',
 						// 	errorMsg: '로그인 실패'
 						// };
-						return this.errService.SocialLoginFail()
+						return this.errService.socialLoginFail();
 					});
 			} else {
 				const user = new User();
@@ -295,7 +296,7 @@ export class AccountService {
 				// 	statusCode: 201,
 				// 	message: '인증번호 전송 완료'
 				// };
-				return this.errService.sendEmailOk()
+				return this.errService.sendEmailOk();
 			} else {
 				await this.emailRepository.update(email, {
 					authNum: authNum
@@ -322,7 +323,7 @@ export class AccountService {
 				.then(async (findEmail) => {
 					if (findEmail) {
 						// return { msg: 'success' };
-						return this.errService.authNumOk()
+						return this.errService.authNumOk();
 					} else {
 						// return { msg: 'fail', errorMsg: '인증번호가 틀립니다.' };
 						return this.errService.authNumDiffent();
@@ -385,17 +386,15 @@ export class AccountService {
 						// };
 						return this.errService.sendEmailOk();
 					}
-					
 				}
-			}else {
-					// return {
-					// 	"msg": "fail",
-					// 	"errorMsg": "이메일이 맞는지 확인 해주세요.!"
-					// }
+			} else {
+				// return {
+				// 	"msg": "fail",
+				// 	"errorMsg": "이메일이 맞는지 확인 해주세요.!"
+				// }
 			}
-			return this.errService.emailChkOk()
-				
-			} catch (err) {
+			return this.errService.emailChkOk();
+		} catch (err) {
 			console.log(err);
 		}
 	}
@@ -405,7 +404,7 @@ export class AccountService {
 		try {
 			const code = await this.emailRepository.findOne(
 				passwordChangeDto.email
-			)
+			);
 			if (code) {
 				if (code.authNum === passwordChangeDto.passwordchkNum) {
 					const password = await this.hashPassword(
@@ -429,7 +428,7 @@ export class AccountService {
 					// 	msg: 'fail',
 					// 	errorMsg: '인증번호가 틀립니다.'
 					// };
-					return this.errService.authNumDiffent()
+					return this.errService.authNumDiffent();
 				}
 			} else {
 				// return {
