@@ -17,12 +17,12 @@ export class ErrService {
 		};
 	}
 
-    SocialLoginFail() {
-        return {
-				msg: 'fail',
-				errorMsg: '로그인 실패'
-						}
-    }
+	SocialLoginFail() {
+		return {
+			msg: 'fail',
+			errorMsg: '로그인 실패'
+		};
+	}
 
 	existEmail() {
 		return {
