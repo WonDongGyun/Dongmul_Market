@@ -24,17 +24,18 @@ export class MainPageController {
 	// 사용자의 주소와 같은 주소를 가진 사람들의 경매 진행 중 목록만 가져옴
 	@Get()
 	@UseGuards(AccountGuardJwt)
-	async getItem(@CurrentUser() email: string) {
-		return await this.mainPageService.getItem(email);
+	async getPostList(@CurrentUser() email: string) {
+		return await this.mainPageService.getPostList(email);
 	}
 
 	// 로그인 하지 않은 사람들을 위한 메인 화면
 	// 사용자의 주소와 같은 주소를 가진 사람들의 경매 진행 중 목록만 가져옴
 	@Get('noLogin')
-	async noLoginGetItem() {
-		return await this.mainPageService.noLoginGetItem();
+	async noLoginGetPost() {
+		return await this.mainPageService.noLoginGetPost();
 	}
 
+	// 등록한 품목 삭제하기
 	@Delete('delete')
 	@UseGuards(AccountGuardJwt)
 	async delButton(
@@ -50,19 +51,22 @@ export class MainPageController {
 	@Post()
 	@UseGuards(AccountGuardJwt)
 	@UseInterceptors(FileInterceptor('file'))
-	async setItem(
+	async writePost(
 		@Body() setItemDto: SetItemDto,
 		@UploadedFile() file,
 		@CurrentUser() email: string
 	) {
-		return await this.mainPageService.setItem(setItemDto, file, email);
+		console.log(setItemDto);
+		const a = new Date(setItemDto.deadLine);
+		console.log(a);
+		return await this.mainPageService.writePost(setItemDto, file, email);
 	}
 
 	// 경매 글 상세내용
 	@Get(':itemId')
-	async getDetail(@Param('itemId') itemId: string) {
+	async getPostDetail(@Param('itemId') itemId: string) {
 		console.log(itemId);
-		return await this.mainPageService.getDetail(itemId);
+		return await this.mainPageService.getPostDetail(itemId);
 	}
 
 	// 로그인한 사용자의 경매 글 상세내용 채팅방 버튼 여부

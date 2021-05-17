@@ -50,6 +50,7 @@ export class MainPageService {
 		private readonly kickUserRepository: Repository<KickUser>
 	) {}
 
+	//s3 접속 키
 	getS3() {
 		return new S3({
 			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -77,7 +78,7 @@ export class MainPageService {
 	}
 
 	// 메인 화면
-	async getItem(email: string) {
+	async getPostList(email: string) {
 		const userData = await this.userRepository.findOne({ email: email });
 		return await this.saleItemRepository
 			.createQueryBuilder('si')
@@ -102,23 +103,23 @@ export class MainPageService {
 			)
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
-			.innerJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
+			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
 			.where('u.address = :address', { address: userData.address })
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
-			.then((data) => {
-				return { mag: 'success', data: data };
+			.then((getPost) => {
+				return { msg: 'success', data: getPost };
 			})
 			.catch((err) => {
 				return {
-					mag: 'fail',
-					errorMsg: err
+					msg: 'fail',
+					errorMsg: '로그인을 다시 해주시길 바랍니다.'
 				};
 			});
 	}
 
 	// 로그인을 하지 않은 경우 메인 화면
-	async noLoginGetItem() {
+	async noLoginGetPost() {
 		return await this.saleItemRepository
 			.createQueryBuilder('si')
 			.select('u.email', 'email')
@@ -146,13 +147,13 @@ export class MainPageService {
 			.catch((err) => {
 				return {
 					msg: 'fail',
-					errorMsg: err
+					errorMsg: '로그인을 다시 해주시길 바랍니다.'
 				};
 			});
 	}
 
 	// 경매 글 상세내용
-	async getDetail(itemId: string) {
+	async getPostDetail(itemId: string) {
 		return await this.saleItemRepository
 			.createQueryBuilder('si')
 			.select('si.itemId', 'itemId')
@@ -186,7 +187,7 @@ export class MainPageService {
 			.catch(() => {
 				return {
 					msg: 'fail',
-					errorMsg: '해당 글의 상세 내용을 확인할 수 없습니다.'
+					errorMsg: '로그인을 다시 해주시길 바랍니다.'
 				};
 			});
 	}
@@ -221,7 +222,7 @@ export class MainPageService {
 	}
 
 	// 경매 글 작성
-	async setItem(setItemDto: SetItemDto, file, email: string) {
+	async writePost(setItemDto: SetItemDto, file, email: string) {
 		const { originalname } = file;
 		const bucketS3 = 'dongmulbucket';
 		const uploadFile = await this.uploadS3(
@@ -278,6 +279,7 @@ export class MainPageService {
 			});
 	}
 
+	// 등록한 품목 삭제하기
 	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
 		try {
 			const id = await this.saleItemRepository.findOne(

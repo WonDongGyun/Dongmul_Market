@@ -38,7 +38,7 @@ export class SaleItem {
 	@Column({ type: 'varchar' })
 	comment: string;
 
-	@Column({ type: 'date' })
+	@Column({ type: 'timestamp' })
 	deadLine: Date;
 
 	// 현재 거래 상태를 나타냅니다.
