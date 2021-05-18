@@ -54,7 +54,7 @@ export class AccountService {
 
 			await this.emailRepository.delete({ email: createUserDto.email });
 			return await this.userRepository.insert(user).then(async () => {
-			return this.errService.signUpOk();
+				return this.errService.signUpOk();
 			});
 		} catch (err) {
 			console.log(err);
@@ -114,6 +114,8 @@ export class AccountService {
 				return this.errService.loginFail();
 			}
 
+			console.log(this.getTokenForUser(user.email));
+
 			return {
 				msg: 'success',
 				email: user.email,
@@ -125,7 +127,7 @@ export class AccountService {
 			return this.errService.loginFail();
 		}
 	}
-//구글 로그인
+	//구글 로그인
 	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
 		try {
 			const google = await this.userRepository.findOne({
@@ -164,7 +166,7 @@ export class AccountService {
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-				return this.errService.signUpOk();
+					return this.errService.signUpOk();
 				});
 			}
 		} catch (err) {
@@ -197,7 +199,7 @@ export class AccountService {
 								nickname: findKakao.nickname,
 								token: 'bearer ' + token
 							};
-						} else {;
+						} else {
 							return this.errService.existEmail();
 						}
 					})
@@ -239,9 +241,9 @@ export class AccountService {
 			emailAuth.authNum = authNum;
 
 			await this.mailerService.sendMail({
-				to: email, 
-				from: 'dongmulMarket@gmail.com', 
-				subject: '인증번호 입니다.', 
+				to: email,
+				from: 'dongmulMarket@gmail.com',
+				subject: '인증번호 입니다.',
 				html: `
 					<h1>
 					회원가입 요청 메일 
@@ -270,7 +272,6 @@ export class AccountService {
 		}
 	}
 
-	
 	//email auth에 저장된 이메일 인증번호 찾음
 	async sendEmailConfirm(emailAuthDto: EmailAuthDto) {
 		try {
@@ -309,9 +310,9 @@ export class AccountService {
 				emailAuth.authNum = authNum;
 
 				await this.mailerService.sendMail({
-					to: email, 
-					from: 'ljayoon@gmail.com', 
-					subject: '비밀번호 찾기 인증번호 입니다.', 
+					to: email,
+					from: 'ljayoon@gmail.com',
+					subject: '비밀번호 찾기 인증번호 입니다.',
 					html: `
 							<h1>
 							비밀번호 찾기 인증번호 
