@@ -14,6 +14,7 @@ import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { KickUserDto } from './dto/kickUser.dto';
+import { ExchangeDto } from './dto/exchange.dto';
 
 @Injectable()
 export class ChatService {
@@ -208,7 +209,6 @@ export class ChatService {
 		itemChatRoomUser.clientId = clientId;
 
 		// main service쪽에서 이미 해당 유저가 가입했는지 안했는지를 판단해주고 있어서, 사용자 join 유무 판단 로직은 제거함.
-
 		try {
 			return await this.itemChatRoomUserRepository
 				.insert(itemChatRoomUser)
@@ -332,6 +332,8 @@ export class ChatService {
 				};
 			});
 	}
+
+	// async exchange(exchangeDto: ExchangeDto) {}
 
 	// 단체 채팅방 사용자 강퇴
 	async kickUser(kickUserDto: KickUserDto) {

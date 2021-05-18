@@ -15,7 +15,7 @@ export class PostDetailController {
 
 	// 로그인한 사용자의 경매 글 상세내용 채팅방 버튼 여부
 	// 채팅방에 입장안한 상태라면, 채팅방 입장 버튼은 무조건 있어야함. 1:1은 꺼져있어야 함.
-	@Post(':icrId')
+	@Post('/icrId/:icrId')
 	@UseGuards(AccountGuardJwt)
 	async getButton(
 		@CurrentUser() email: string,
