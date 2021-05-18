@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
-import { DealChatRoom } from 'src/entities/dealChatRoom.entity';
-import { DealChatRoomUser } from 'src/entities/dealChatRoomUser.entity';
-import { DealChatRoomUserMsg } from 'src/entities/dealChatRoomUserMsg.entity';
 import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
@@ -37,15 +34,6 @@ export class ChatService {
 
 		@InjectRepository(ItemChatRoomUserMsg)
 		private readonly itemChatRoomUserMsgRepository: Repository<ItemChatRoomUserMsg>,
-
-		@InjectRepository(DealChatRoom)
-		private readonly dealChatRoomRepository: Repository<DealChatRoom>,
-
-		@InjectRepository(DealChatRoomUser)
-		private readonly dealChatRoomUserRepository: Repository<DealChatRoomUser>,
-
-		@InjectRepository(DealChatRoomUserMsg)
-		private readonly dealChatRoomUserMsgRepository: Repository<DealChatRoomUserMsg>,
 
 		@InjectRepository(Code)
 		private readonly codeRepository: Repository<Code>,
