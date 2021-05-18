@@ -127,6 +127,7 @@ export class MainPageService {
 			.addSelect('si.createdDt', 'createdDt')
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
+			.where('now() < si.deadLine')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((data) => {
