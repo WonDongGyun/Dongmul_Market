@@ -48,7 +48,7 @@ export class MainPageController {
 	}
 
 	// 경매 글 작성
-	@Post()
+	@Post('write')
 	@UseGuards(AccountGuardJwt)
 	@UseInterceptors(FileInterceptor('file'))
 	async writePost(
@@ -60,23 +60,5 @@ export class MainPageController {
 		const a = new Date(setItemDto.deadLine);
 		console.log(a);
 		return await this.mainPageService.writePost(setItemDto, file, email);
-	}
-
-	// 경매 글 상세내용
-	@Get(':itemId')
-	async getPostDetail(@Param('itemId') itemId: string) {
-		console.log(itemId);
-		return await this.mainPageService.getPostDetail(itemId);
-	}
-
-	// 로그인한 사용자의 경매 글 상세내용 채팅방 버튼 여부
-	// 채팅방에 입장안한 상태라면, 채팅방 입장 버튼은 무조건 있어야함. 1:1은 꺼져있어야 함.
-	@Post(':icrId')
-	@UseGuards(AccountGuardJwt)
-	async getButton(
-		@CurrentUser() email: string,
-		@Param('icrId') icrId: string
-	) {
-		return await this.mainPageService.getButton(email, icrId);
 	}
 }

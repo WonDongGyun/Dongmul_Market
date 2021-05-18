@@ -15,6 +15,9 @@ import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
 import { ErrModule } from './err/err.module';
+import { PostDetailController } from './post-detail/post-detail.controller';
+import { PostDetailService } from './post-detail/post-detail.service';
+import { PostDetailModule } from './post-detail/post-detail.module';
 
 @Module({
 	imports: [
@@ -57,7 +60,8 @@ import { ErrModule } from './err/err.module';
 		AccountModule,
 		MainPageModule,
 		MyPageModule,
-		ErrModule
+		ErrModule,
+		PostDetailModule
 	]
 })
 export class AppModule {}
