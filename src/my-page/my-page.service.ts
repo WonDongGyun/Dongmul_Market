@@ -60,7 +60,6 @@ export class MyPageService {
 			.addSelect('si.deadLine', 'deadLine')
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
 			.innerJoin(User, 'u', 'si.email = u.email')

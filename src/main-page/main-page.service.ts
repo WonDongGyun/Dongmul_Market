@@ -83,7 +83,6 @@ export class MainPageService {
 			.addSelect('si.deadLine', 'deadLine')
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
 			.addSelect(
@@ -124,7 +123,6 @@ export class MainPageService {
 			.addSelect('si.deadLine', 'deadLine')
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
 			.addSelect('si.createdDt', 'createdDt')
 			.innerJoin(User, 'u', 'si.email = u.email')
@@ -154,12 +152,17 @@ export class MainPageService {
 			.addSelect('si.category', 'category')
 			.addSelect('si.wantItem', 'wantItem')
 			.addSelect('si.comment', 'comment')
-			.addSelect('si.deadLine', 'deadLine')
+			.addSelect(
+				'DATE_FORMAT(si.deadLine, "%Y년 %m월 %d일 %H시 %i분")',
+				'deadLine'
+			)
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.dicrId', 'dicrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
-			.addSelect('si.createdDt', 'createdDt')
+			.addSelect(
+				'DATE_FORMAT(si.createdDt, "%Y년 %m월 %d일 %H시 %i분")',
+				'createdDt'
+			)
 			.innerJoin(User, 'u', 'u.email = si.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('si.itemId = :itemId', { itemId: itemId })
@@ -228,21 +231,12 @@ export class MainPageService {
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
 		await this.itemChatRoomRepository.insert(itemChatRoom);
 
-		// const dealChatRoom: DealChatRoom = new DealChatRoom();
-		// await this.dealChatRoomRepository.insert(dealChatRoom);
-
 		// 경매 글 올린 사람, 채팅방 유저로 저장
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 		itemChatRoomUser.chooseYn = 'Y';
 		await this.itemChatRoomUserRepository.insert(itemChatRoomUser);
-
-		// const dealChatRoomUser: DealChatRoomUser = new DealChatRoomUser();
-		// dealChatRoomUser.user = user;
-		// dealChatRoomUser.dealChatRoom = dealChatRoom;
-		// dealChatRoomUser.changeYn = 'Y';
-		// await this.dealChatRoomUserRepository.insert(dealChatRoomUser);
 
 		// 경매 글 저장
 		const saleItem: SaleItem = new SaleItem();
@@ -253,7 +247,6 @@ export class MainPageService {
 		saleItem.comment = setItemDto.comment;
 		saleItem.deadLine = new Date(setItemDto.deadLine);
 		saleItem.itemChatRoom = itemChatRoom;
-		// saleItem.dealChatRoom = dealChatRoom;
 		saleItem.user = user;
 
 		return await this.saleItemRepository

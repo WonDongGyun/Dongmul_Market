@@ -13,8 +13,6 @@ import { ShowUserDto } from './dto/showUser.dto';
 import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
-import { DealChatDto } from './dto/dealChat.dto';
-import { DealChatJoinDto } from './dto/dealChatJoin.dto';
 import { KickUserDto } from './dto/kickUser.dto';
 
 @Injectable()

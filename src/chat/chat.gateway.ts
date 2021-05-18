@@ -13,8 +13,6 @@ import { ChatService } from './chat.service';
 import { ItemChatDto } from './dto/itemChat.dto';
 import * as jwt from 'jsonwebtoken';
 import { AutoJoinDto } from './dto/autoJoin.dto';
-import { DealChatDto } from './dto/dealChat.dto';
-import { DealChatJoinDto } from './dto/dealChatJoin.dto';
 import { KickUserDto } from './dto/kickUser.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
