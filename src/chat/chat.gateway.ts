@@ -14,6 +14,7 @@ import { ItemChatDto } from './dto/itemChat.dto';
 import * as jwt from 'jsonwebtoken';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUserDto } from './dto/kickUser.dto';
+import { ExchangeDto } from './dto/exchange.dto';
 
 @WebSocketGateway(3001, { namespace: '/chatting' })
 export class ChatGateway
@@ -37,14 +38,6 @@ export class ChatGateway
 			client.emit('getMsg', chatMsg['errorMsg']);
 		}
 	}
-
-	// @SubscribeMessage('sendPersonalMsg')
-	// async handlePersonalMessage(client: Socket, dealChatDto: DealChatDto) {
-	// 	console.log(dealChatDto);
-	// 	const chatMsg = await this.chatService.savePersonalChatMsg(dealChatDto);
-	// 	console.log('sendPersonalMsg => ', chatMsg);
-	// 	this.server.to(dealChatDto.dicrId).emit('getPersonalMsg', chatMsg);
-	// }
 
 	// 이메일이 해당 방의 방장과 같다면, 단체 채팅방 및 1:1 채팅방 접속한 인원들을 보여줌.
 	// window.onload
@@ -101,35 +94,9 @@ export class ChatGateway
 		console.log('joinMsg => ', joinMsg);
 	}
 
-	// @SubscribeMessage('joinPersonalRoom')
-	// async handlejoinPersonalRoom(
-	// 	client: Socket,
-	// 	dealChatJoinDto: DealChatJoinDto
-	// ) {
-	// 	console.log(dealChatJoinDto);
-	// 	const joinMsg = await this.chatService.joinPersonalChatRoom(
-	// 		dealChatJoinDto
-	// 	);
-	// 	client.join(dealChatJoinDto.dicrId);
-	// 	// 접속하셨습니다 메시지
-	// 	// this.server.to(itemChatJoinDto.icrId).emit('returnJoinMsg', joinMsg);
-	// 	// 채팅방 유저 목록에 추가
-	// 	this.server.to(dealChatJoinDto.dicrId).emit('addUser', joinMsg);
-	// 	console.log('joinMsg => ', joinMsg);
-	// }
-
-	// 1:1 채팅 같은 경우에는, join하는 버튼이 아니라, 방장이 해당 유저를 추가해주는 식으로 들어가진다.
-	// 따라서 방장이 1:1채팅방에 유저를 추가해주면, 실시간으로 해당 유저의 1:1 채팅방이 열려야 한다.
-	// @SubscribeMessage('joinOneRoom')
-	// async handleJoinOneRoom(
-	// 	client: Socket,
-	// 	itemChatOneJoinDto: ItemChatOneJoinDto
-	// ) {
-	// 	console.log(client, itemChatOneJoinDto);
-	// }
-
-	// '님이 퇴장하셨습니다.'
-	// front => socket.emit('removeUser', icrId)
+	// '님이 강퇴당하셨습니다.'
+	// button.click
+	// front => socket.emit('kickUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
 		await this.chatService
@@ -151,6 +118,12 @@ export class ChatGateway
 					return kickClient;
 				}
 			});
+	}
+
+	// 해당 유저와 교환 성공!
+	@SubscribeMessage('exchange')
+	async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
+		// await this.chatService.
 	}
 
 	afterInit(server: Server) {
@@ -188,6 +161,7 @@ export class ChatGateway
 		}
 	}
 
+	// 소캣 연결
 	async handleConnection(client: Socket, ...args: any[]) {
 		console.log('client email => ', client.handshake.query.email);
 		console.log('client icrId => ', client.handshake.query.icrId);
