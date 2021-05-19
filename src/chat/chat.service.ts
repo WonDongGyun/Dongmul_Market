@@ -116,10 +116,8 @@ export class ChatService {
 
 		return this.itemChatRoomUserRepository
 			.findOne({
-				where: {
-					user: user,
-					itemChatRoom: itemChatRoom
-				}
+				user: user,
+				itemChatRoom: itemChatRoom
 			})
 			.then(async (findUser) => {
 				if (findUser) {
@@ -334,12 +332,26 @@ export class ChatService {
 			});
 	}
 
-	// async exchange(exchangeDto: ExchangeDto) {
-	// 	const user: User = new User();
-	// 	user.email = exchangeDto.hostEmail;
+	// 단체 채팅방 교환 성립
+	async exchange(exchangeDto: ExchangeDto) {
+		const user: User = new User();
+		user.email = exchangeDto.hostEmail;
 
-	// 	return await this.saleItemRepository.createQueryBuilder('si');
-	// }
+		return await this.saleItemRepository
+			.findOne({
+				user: user,
+				itemId: exchangeDto.itemId
+			})
+			.then(async (findItem) => {
+				if (findItem) {
+					await this.saleItemRepository.update(user, {
+						status: 'SI02',
+						buyerEmail: exchangeDto.consumerEmail
+					});
+				}
+			})
+			.catch();
+	}
 
 	// 단체 채팅방 사용자 강퇴
 	async kickUser(kickUserDto: KickUserDto) {

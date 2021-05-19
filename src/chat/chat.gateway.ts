@@ -99,6 +99,7 @@ export class ChatGateway
 	// front => socket.emit('kickUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
+		console.log(kickUserDto);
 		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
@@ -122,10 +123,10 @@ export class ChatGateway
 	}
 
 	// 해당 유저와 교환 성공!
-	// @SubscribeMessage('exchange')
-	// async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
-	// 	await this.chatService.exchange(exchangeDto);
-	// }
+	@SubscribeMessage('exchange')
+	async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
+		await this.chatService.exchange(exchangeDto);
+	}
 
 	afterInit(server: Server) {
 		this.logger.log('Init');
