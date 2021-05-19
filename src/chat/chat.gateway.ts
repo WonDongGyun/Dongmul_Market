@@ -103,6 +103,7 @@ export class ChatGateway
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
 				if (kickClient['msg'] == 'success') {
+					console.log(kickClient['kickId']);
 					this.server.sockets[kickClient['kickId']].leave(
 						kickUserDto.icrId
 					);

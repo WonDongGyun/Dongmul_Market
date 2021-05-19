@@ -15,6 +15,7 @@ import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
+import { ApiGatewayTimeoutResponse } from '@nestjs/swagger';
 
 @Injectable()
 export class ChatService {
@@ -333,7 +334,12 @@ export class ChatService {
 			});
 	}
 
-	// async exchange(exchangeDto: ExchangeDto) {}
+	// async exchange(exchangeDto: ExchangeDto) {
+	// 	const user: User = new User();
+	// 	user.email = exchangeDto.hostEmail;
+
+	// 	return await this.saleItemRepository.createQueryBuilder('si');
+	// }
 
 	// 단체 채팅방 사용자 강퇴
 	async kickUser(kickUserDto: KickUserDto) {
