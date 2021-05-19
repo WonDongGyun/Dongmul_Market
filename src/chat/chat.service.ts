@@ -85,7 +85,7 @@ export class ChatService {
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('icru.chooseYn', 'chooseYn')
 			.addSelect(
-				`CASE WHEN si.email = icru.email THEN "방장" ELSE "참가자" END`,
+				`CASE WHEN si.email = icru.email THEN true ELSE false END`,
 				'isBoss'
 			)
 			.innerJoin(User, 'u', 'u.email = icru.email')
