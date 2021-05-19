@@ -99,10 +99,11 @@ export class ChatGateway
 	// front => socket.emit('kickUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
-		console.log(kickUserDto);
+		console.log('kickUser => ', kickUserDto);
 		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
+				console.log(kickClient);
 				if (kickClient['msg'] == 'success') {
 					console.log(kickClient['kickId']);
 					this.server.sockets[kickClient['kickId']].leave(
