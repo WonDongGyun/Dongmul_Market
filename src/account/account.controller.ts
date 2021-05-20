@@ -17,16 +17,22 @@ import { EmailAuthDto } from './dto/emailAuth.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
 import { PasswordChangeDto } from './dto/passwordChange.dto';
 import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
+import { AccountNormalService } from './accountNormal.service';
+import { AccountGoogleService } from './accountGoogle.service';
+import { AccountKakaoService } from './accountKakao.service';
 
 @Controller('account')
 export class AccountController {
-	constructor(private readonly accountService: AccountService) {}
+	constructor(private readonly accountService: AccountService,
+		private readonly accountNormalService: AccountNormalService,
+		private readonly accountGoogleService: AccountGoogleService,
+		private readonly accountKakaoService: AccountKakaoService) { }
 
 
 	// 회원 가입
 	@Post()
 	async create(@Body() createUserDto: CreateUserDto) {
-		return await this.accountService.setUser(createUserDto);
+		return await this.accountNormalService.setUser(createUserDto);
 	}
 
 	// 기본 로그인
@@ -92,12 +98,12 @@ export class AccountController {
 	//구글 회원가입 및 로그인
 	@Post('googleAuth')
 	async GoogleAuthCheck(@Body() googleChkEmaildto: GoogleChkEmailDto) {
-		return await this.accountService.googleCheck(googleChkEmaildto);
+		return await this.accountGoogleService.googleCheck(googleChkEmaildto);
 	}
 
 	//카카오계정 저장
 	@Post('/kakaoAuth')
 	async KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
-		return await this.accountService.kakaoCheck(kakaoChkEmaildto);
+		return await this.accountKakaoService.kakaoCheck(kakaoChkEmaildto);
 	}
 }

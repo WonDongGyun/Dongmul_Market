@@ -4,10 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create.user.dto';
 import { ChkLoginDto } from './dto/chkLogin.dto';
-import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
-import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dtd';
@@ -42,25 +39,6 @@ export class AccountService {
 		});
 	}
 
-	// 회원가입 하기
-	async setUser(createUserDto: CreateUserDto) {
-		try {
-			const user = new User();
-
-			user.email = createUserDto.email;
-			user.password = await this.hashPassword(createUserDto.password);
-			user.nickname = createUserDto.nickname;
-			user.address = createUserDto.address;
-
-			await this.emailRepository.delete({ email: createUserDto.email });
-			return await this.userRepository.insert(user).then(async () => {
-			return this.errService.signUpOk();
-			});
-		} catch (err) {
-			console.log(err);
-			return this.errService.setUserErr();
-		}
-	}
 
 	// 이메일 중복확인
 	async chkEmail(loginUserDto: LoginUserDto) {
@@ -125,99 +103,7 @@ export class AccountService {
 			return this.errService.loginFail();
 		}
 	}
-//구글 로그인
-	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
-		try {
-			const google = await this.userRepository.findOne({
-				email: googleChkEmaildto.email
-			});
-			console.log(google);
-			if (google) {
-				return await this.userRepository
-					.findOne({
-						email: googleChkEmaildto.email,
-						password: null
-					})
-					.then((findGoogle) => {
-						if (findGoogle) {
-							const token = this.getTokenForUser(
-								googleChkEmaildto.email
-							);
-							return {
-								msg: 'success',
-								email: findGoogle.email,
-								nickname: findGoogle.nickname,
-								token: 'bearer ' + token
-							};
-						} else {
-							return this.errService.existEmail();
-						}
-					})
-					.catch((err) => {
-						return this.errService.socialLoginFail();
-					});
-			} else {
-				const user = new User();
-				user.email = googleChkEmaildto.email;
-				user.nickname =
-					googleChkEmaildto.lastName + googleChkEmaildto.firstName;
-				user.address = ' ';
 
-				return await this.userRepository.save(user).then(async () => {
-				return this.errService.signUpOk();
-				});
-			}
-		} catch (err) {
-			console.log(err);
-			return this.errService.setUserErr();
-		}
-	}
-	//카카오 로그인
-
-	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
-		try {
-			const kakao = await this.userRepository.findOne({
-				email: kakaoChkEmaildto.email
-			});
-			console.log(kakao);
-			if (kakao) {
-				return await this.userRepository
-					.findOne({
-						email: kakaoChkEmaildto.email,
-						password: null
-					})
-					.then((findKakao) => {
-						if (findKakao) {
-							const token = this.getTokenForUser(
-								kakaoChkEmaildto.email
-							);
-							return {
-								msg: 'success',
-								email: findKakao.email,
-								nickname: findKakao.nickname,
-								token: 'bearer ' + token
-							};
-						} else {;
-							return this.errService.existEmail();
-						}
-					})
-					.catch((err) => {
-						return this.errService.socialLoginFail();
-					});
-			} else {
-				const user = new User();
-				user.email = kakaoChkEmaildto.email;
-				user.nickname = kakaoChkEmaildto.nickname;
-				user.address = ' ';
-
-				return await this.userRepository.save(user).then(async () => {
-					return this.errService.signUpOk();
-				});
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	}
 
 	//이메일 인증 코드 보내기
 	//가입된 이메일을 찾아서 랜덤함수로 이메일을 보낸후 email auth에 저장 업데이트
@@ -239,21 +125,26 @@ export class AccountService {
 			emailAuth.authNum = authNum;
 
 			await this.mailerService.sendMail({
-				to: email, 
-				from: 'dongmulMarket@gmail.com', 
-				subject: '인증번호 입니다.', 
-				html: `
-					<h1>
-					회원가입 요청 메일 
-					</h1>
-					<hr />
-					<br />
-					<p>안녕하세요 ${email}님 <p/>
-					<br />
-					<hr />
-					6자리 인증 코드 :  <b> ${authNum}</b>
-					<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-				`
+				to: email,
+				from: 'dongmulMarket@gmail.com',
+				subject: ' 이메일 인증번호 입니다.',
+				template: '../dongmul/src/template/emailAuthNum.hbs',
+				context: {
+					code: authNum,
+					username: email
+				},
+				// html: `
+				// 	<h1>
+				// 	회원가입 요청 메일 
+				// 	</h1>
+				// 	<hr />
+				// 	<br />
+				// 	<p>안녕하세요 ${email}님 <p/>
+				// 	<br />
+				// 	<hr />
+				// 	6자리 인증 코드 :  <b> ${authNum}</b>
+				// 	<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
+				// `
 			});
 
 			if (!findemail) {
@@ -309,21 +200,27 @@ export class AccountService {
 				emailAuth.authNum = authNum;
 
 				await this.mailerService.sendMail({
-					to: email, 
-					from: 'ljayoon@gmail.com', 
-					subject: '비밀번호 찾기 인증번호 입니다.', 
-					html: `
-							<h1>
-							비밀번호 찾기 인증번호 
-							</h1>
-							<hr />
-							<br />
-							<p>안녕하세요 ${email}님 <p/>
-							<br />
-							<hr />
-							인증번호는 6자리 입니다. :  <b> ${authNum}</b>
-							<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-						`
+					to: email,
+					from: 'dongmulMarket@gmail.com',
+					subject: ' 비밀번호 인증번호 입니다.',
+					template:
+						'../dongmul/src/template/passwordAuthNum.hbs',
+					context: {
+						code: authNum,
+						username: email
+					}
+					// html: `
+					// 		<h1>
+					// 		비밀번호 찾기 인증번호
+					// 		</h1>
+					// 		<hr />
+					// 		<br />
+					// 		<p>안녕하세요 ${email}님 <p/>
+					// 		<br />
+					// 		<hr />
+					// 		인증번호는 6자리 입니다. :  <b> ${authNum}</b>
+					// 		<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
+					// 	`
 				});
 				if (findemail) {
 					const find = await this.emailRepository.findOne(email);

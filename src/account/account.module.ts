@@ -4,12 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { User } from 'src/entities/user.entity';
 import { MailModule } from 'src/mail/mail.module';
-
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { ErrService } from '../err/err.service';
+import { AccountNormalService } from './accountNormal.service';
+import { AccountGoogleService } from './accountGoogle.service';
+import { AccountKakaoService } from './accountKakao.service';
 
 @Module({
 	imports: [
@@ -26,7 +28,15 @@ import { ErrService } from '../err/err.service';
 		})
 	],
 	controllers: [AccountController],
-	providers: [AccountService, JwtStrategy, GoogleStrategy, ErrService],
+	providers: [
+		AccountService,
+		JwtStrategy,
+		GoogleStrategy,
+		ErrService,
+		AccountNormalService,
+		AccountGoogleService,
+		AccountKakaoService
+	],
 	exports: []
 })
 export class AccountModule {}

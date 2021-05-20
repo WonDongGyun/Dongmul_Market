@@ -22,7 +22,7 @@ require('dotenv').config();
 			},
 			template: {
 				// dir: process.cwd() + '/template/',
-				dir: process.cwd() + '/templates/',
+				dir: process.cwd() + '/template/',
 				adapter: new HandlebarsAdapter(), //new HandlebarsAdapter(), //new HandlebarsAdapter(), // or new PugAdapter()
 				options: {
 					// extName: '.pug',
