@@ -9,13 +9,10 @@ import { Repository } from 'typeorm';
 import { ItemChatDto } from './dto/itemChat.dto';
 import { ItemChatJoinDto } from './dto/itemChatJoin.dto';
 import { Code } from 'src/entities/code.entity';
-import { ShowUserDto } from './dto/showUser.dto';
-import { JoinAutoDto } from './dto/joinAuto.dto';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
-import { ApiGatewayTimeoutResponse } from '@nestjs/swagger';
 
 @Injectable()
 export class ChatService {

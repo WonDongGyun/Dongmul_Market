@@ -30,7 +30,7 @@ export class MyPageService {
 				await this.userRepository.update(addressChangeDto.email, {
 					address: addressChangeDto.new_address
 				});
-				return { statusCode: 201, message: '주소 변경 완료' };
+				return { statusCode: 'success', message: '주소 변경 완료' };
 			} else {
 				return {
 					msg: 'fail',
