@@ -348,9 +348,18 @@ export class ChatService {
 						status: 'SI02',
 						buyerEmail: exchangeDto.consumerEmail
 					});
+
+					return {
+						msg: 'success'
+					};
 				}
 			})
-			.catch();
+			.catch((err) => {
+				return {
+					msg: 'fail',
+					errorMsg: '교환을 성립하던 중 문제가 발생하였습니다.'
+				};
+			});
 	}
 
 	// 단체 채팅방 사용자 강퇴
@@ -376,6 +385,7 @@ export class ChatService {
 			.createQueryBuilder('icru')
 			.select('icru.icruId', 'icruId')
 			.addSelect('icru.email', 'email')
+			.addSelect('icru.clientId', 'clientId')
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('icru.chooseYn', 'chooseYn')
 			.addSelect('icru.createdDt', 'createdDt')
@@ -389,6 +399,7 @@ export class ChatService {
 			.getRawOne()
 			.then(async (findUser) => {
 				if (findUser) {
+					console.log('findUser.clientId => ', findUser.clientId);
 					const kickId = findUser.clientId;
 
 					try {

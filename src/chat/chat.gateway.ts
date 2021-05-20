@@ -94,6 +94,24 @@ export class ChatGateway
 		console.log('joinMsg => ', joinMsg);
 	}
 
+	// 해당 유저와 교환 성공!
+	@SubscribeMessage('exchange')
+	async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
+		await this.chatService
+			.exchange(exchangeDto)
+			.then(async (exchangeYn) => {
+				if (exchangeYn['msg'] == 'success') {
+					// 현재 접속중인 모든 사용자들을 현재의 채팅방에서 내보냄
+					// 프론트에서 무조건 모두에게 팝업을 띄워주어야 함.
+					for (var key in client.adapter.rooms[exchangeDto.icrId]
+						.sockets) {
+						this.server.sockets[key].leave(exchangeDto.icrId);
+					}
+					this.server.to(exchangeDto.icrId).emit('exchange');
+				}
+			});
+	}
+
 	// '님이 강퇴당하셨습니다.'
 	// button.click
 	// front => socket.emit('kickUser', icrId)
@@ -103,17 +121,23 @@ export class ChatGateway
 		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
-				console.log(kickClient);
 				if (kickClient['msg'] == 'success') {
 					console.log(kickClient['kickId']);
-					this.server.sockets[kickClient['kickId']].leave(
-						kickUserDto.icrId
-					);
+
+					// 만약 그 클라이언트가 실제로 현재 접속중이라면 방을 떠나게 만듬
+					for (var key in client.adapter.rooms[kickUserDto.icrId]
+						.sockets) {
+						if (key == kickClient['kickId']) {
+							this.server.sockets[key].leave(kickUserDto.icrId);
+						}
+					}
 
 					console.log('kickUser => ', kickUserDto);
 					console.log('kickUser Data => ', kickClient['kickData']);
 
 					// ~님이 강퇴당하셨습니다.
+					// 프론트에서는 받을 때 현재 접속한 사람의 이메일이랑 맞다면 alert을 띄워야 함
+					// 그 후 메인화면으로 강제로 이동
 					this.server
 						.to(kickUserDto.icrId)
 						.emit('kickUser', kickClient['kickData']);
@@ -121,12 +145,6 @@ export class ChatGateway
 					return kickClient;
 				}
 			});
-	}
-
-	// 해당 유저와 교환 성공!
-	@SubscribeMessage('exchange')
-	async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
-		await this.chatService.exchange(exchangeDto);
 	}
 
 	afterInit(server: Server) {
@@ -169,15 +187,19 @@ export class ChatGateway
 		console.log('client email => ', client.handshake.query.email);
 		console.log('client icrId => ', client.handshake.query.icrId);
 		console.log('client id => ', client.id);
+
 		// const a = 'hello_world';
 		// client.join(a);
 		// console.log('room => ', client.adapter.rooms.hello_world);
 		// console.log(client.id);
-		// console.log(client.client.id);
-		// console.log(this.server.sockets);
+		// console.log(client.adapter.rooms['hello_world'].sockets);
 		// this.server.sockets[client.id].leave(a);
 
-		// console.log('room2 => ', client.adapter.rooms.hello_world);
+		// for (var key in client.adapter.rooms['hello_world'].sockets) {
+		// 	this.server.sockets[key].leave(a);
+		// }
+		// console.log('room2 => ', client.adapter.rooms['hello_world']);
+
 		this.logger.log(`Client connected: ${client.id}`);
 
 		if (
