@@ -71,6 +71,7 @@ export class ChatGateway
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(client: Socket, itemChatJoinDto: ItemChatJoinDto) {
 		console.log('joinRoom Data => ', itemChatJoinDto);
+		console.log('joinRoom client.id => ', client.id);
 		const joinMsg = await this.chatService.joinChatRoom(
 			itemChatJoinDto,
 			client.id
@@ -103,7 +104,7 @@ export class ChatGateway
 				if (exchangeYn['msg'] == 'success') {
 					// 현재 접속중인 모든 사용자들을 현재의 채팅방에서 내보냄
 					// 프론트에서 무조건 모두에게 팝업을 띄워주어야 함.
-					for (var key in client.adapter.rooms[exchangeDto.icrId]
+					for (const key in client.adapter.rooms[exchangeDto.icrId]
 						.sockets) {
 						this.server.sockets[key].leave(exchangeDto.icrId);
 					}
@@ -120,11 +121,12 @@ export class ChatGateway
 		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
+				console.log('kickClient => ', kickClient);
 				if (kickClient['msg'] == 'success') {
-					console.log(kickClient['kickId']);
+					console.log('kickClient kickId=> ', kickClient['kickId']);
 
 					// 만약 그 클라이언트가 실제로 현재 접속중이라면 방을 떠나게 만듬
-					for (var key in client.adapter.rooms[kickUserDto.icrId]
+					for (const key in client.adapter.rooms[kickUserDto.icrId]
 						.sockets) {
 						if (key == kickClient['kickId']) {
 							this.server.sockets[key].leave(kickUserDto.icrId);
