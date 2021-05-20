@@ -117,7 +117,6 @@ export class ChatGateway
 	// front => socket.emit('kickUser', icrId)
 	@SubscribeMessage('kickUser')
 	async handleKickUser(client: Socket, kickUserDto: KickUserDto) {
-		console.log('kickUser => ', kickUserDto);
 		await this.chatService
 			.kickUser(kickUserDto)
 			.then(async (kickClient) => {
