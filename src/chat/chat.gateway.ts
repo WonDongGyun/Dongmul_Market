@@ -129,6 +129,17 @@ export class ChatGateway
 					for (const key in client.adapter.rooms[kickUserDto.icrId]
 						.sockets) {
 						if (key == kickClient['kickId']) {
+							console.log(key, kickClient['kickId']);
+							console.log(
+								client.adapter.rooms[kickUserDto.icrId]
+							);
+
+							// const a = 'hello_world';
+							// client.join(a);
+							// console.log('room => ', client.adapter.rooms.hello_world);
+							// console.log(client.id);
+							// console.log(client.adapter.rooms['hello_world'].sockets);
+							// this.server.sockets[client.id].leave(a);
 							this.server.sockets[key].leave(kickUserDto.icrId);
 						}
 					}
