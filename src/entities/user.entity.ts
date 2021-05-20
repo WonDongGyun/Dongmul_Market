@@ -10,8 +10,6 @@ import {
 import { ItemChatRoomUserMsg } from './itemChatRoomUserMsg.entity';
 import { ItemChatRoomUser } from './itemChatRoomUser.entity';
 import { SaleItem } from './saleItem.entity';
-import { DealChatRoomUser } from './dealChatRoomUser.entity';
-import { DealChatRoomUserMsg } from './dealChatRoomUserMsg.entity';
 import { KickUser } from './kickUser.entity';
 
 @Entity('user')
@@ -66,24 +64,4 @@ export class User {
 		}
 	)
 	itemChatRoomUserMsg: ItemChatRoomUserMsg[];
-
-	// user와 dealChatRoomUser는 1 : N 관계입니다.
-	@OneToMany(
-		() => DealChatRoomUser,
-		(dealChatRoomUser) => dealChatRoomUser.user,
-		{
-			onDelete: 'CASCADE'
-		}
-	)
-	dealChatRoomUser: DealChatRoomUser[];
-
-	// user와 dealChatRoomUserMsg는 1 : N 관계입니다.
-	@OneToMany(
-		() => DealChatRoomUserMsg,
-		(dealChatRoomUserMsg) => dealChatRoomUserMsg.user,
-		{
-			onDelete: 'CASCADE'
-		}
-	)
-	dealChatRoomUserMsg: DealChatRoomUserMsg[];
 }

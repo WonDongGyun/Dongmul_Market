@@ -11,7 +11,6 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn
 } from 'typeorm';
-import { DealChatRoom } from './dealChatRoom.entity';
 import { ItemChatRoom } from './itemChatRoom.entity';
 import { KickUser } from './kickUser.entity';
 import { User } from './user.entity';
@@ -38,7 +37,7 @@ export class SaleItem {
 	@Column({ type: 'varchar' })
 	comment: string;
 
-	@Column({ type: 'date' })
+	@Column({ type: 'timestamp' })
 	deadLine: Date;
 
 	// 현재 거래 상태를 나타냅니다.
@@ -75,10 +74,4 @@ export class SaleItem {
 	@Generated('uuid')
 	@JoinColumn([{ name: 'icrId', referencedColumnName: 'icrId' }])
 	itemChatRoom: ItemChatRoom;
-
-	// saleItem과 dealChatRoom 1 : 1 관계입니다.
-	@OneToOne(() => DealChatRoom)
-	@Generated('uuid')
-	@JoinColumn([{ name: 'dicrId', referencedColumnName: 'dicrId' }])
-	dealChatRoom: DealChatRoom;
 }

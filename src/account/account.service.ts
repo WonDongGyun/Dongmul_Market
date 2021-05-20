@@ -92,6 +92,8 @@ export class AccountService {
 				return this.errService.loginFail();
 			}
 
+			console.log(this.getTokenForUser(user.email));
+
 			return {
 				msg: 'success',
 				email: user.email,
@@ -103,7 +105,6 @@ export class AccountService {
 			return this.errService.loginFail();
 		}
 	}
-
 
 	//이메일 인증 코드 보내기
 	//가입된 이메일을 찾아서 랜덤함수로 이메일을 보낸후 email auth에 저장 업데이트
@@ -161,7 +162,6 @@ export class AccountService {
 		}
 	}
 
-	
 	//email auth에 저장된 이메일 인증번호 찾음
 	async sendEmailConfirm(emailAuthDto: EmailAuthDto) {
 		try {

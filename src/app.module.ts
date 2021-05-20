@@ -8,17 +8,16 @@ import { SaleItem } from './entities/saleItem.entity';
 import { ItemChatRoom } from './entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from './entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from './entities/itemChatRoomUserMsg.entity';
-import { DealChatRoom } from './entities/dealChatRoom.entity';
-import { DealChatRoomUser } from './entities/dealChatRoomUser.entity';
-import { DealChatRoomUserMsg } from './entities/dealChatRoomUserMsg.entity';
 import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
 import { ErrModule } from './err/err.module';
+import { PostDetailController } from './post-detail/post-detail.controller';
+import { PostDetailService } from './post-detail/post-detail.service';
+import { PostDetailModule } from './post-detail/post-detail.module';
 
 @Module({
 	imports: [
@@ -31,9 +30,6 @@ import { ErrModule } from './err/err.module';
 			ItemChatRoom,
 			ItemChatRoomUser,
 			ItemChatRoomUserMsg,
-			DealChatRoom,
-			DealChatRoomUser,
-			DealChatRoomUserMsg,
 			Code,
 			EmailAuth,
 			KickUser
@@ -51,9 +47,6 @@ import { ErrModule } from './err/err.module';
 				ItemChatRoom,
 				ItemChatRoomUser,
 				ItemChatRoomUserMsg,
-				DealChatRoom,
-				DealChatRoomUser,
-				DealChatRoomUserMsg,
 				Code,
 				EmailAuth,
 				KickUser
@@ -67,7 +60,8 @@ import { ErrModule } from './err/err.module';
 		AccountModule,
 		MainPageModule,
 		MyPageModule,
-		ErrModule
+		ErrModule,
+		PostDetailModule
 	]
 })
 export class AppModule {}

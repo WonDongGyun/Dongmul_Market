@@ -7,9 +7,6 @@ import { SaleItem } from 'src/entities/saleItem.entity';
 import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
-import { DealChatRoom } from 'src/entities/dealChatRoom.entity';
-import { DealChatRoomUser } from 'src/entities/dealChatRoomUser.entity';
-import { DealChatRoomUserMsg } from 'src/entities/dealChatRoomUserMsg.entity';
 import { Code } from 'src/entities/code.entity';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { JwtStrategy } from 'src/account/jwt.strategy';
@@ -22,9 +19,6 @@ import { JwtStrategy } from 'src/account/jwt.strategy';
 			ItemChatRoom,
 			ItemChatRoomUser,
 			ItemChatRoomUserMsg,
-			DealChatRoom,
-			DealChatRoomUser,
-			DealChatRoomUserMsg,
 			Code,
 			EmailAuth
 		])
