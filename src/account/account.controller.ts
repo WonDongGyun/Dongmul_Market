@@ -20,6 +20,7 @@ import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 import { AccountNormalService } from './services/accountNormal.service';
 import { AccountGoogleService } from './services/accountGoogle.service';
 import { AccountKakaoService } from './services/accountKakao.service';
+import { MessageService } from 'src/message/message.service';
 
 
 @Controller('account')
@@ -28,8 +29,9 @@ export class AccountController {
 		// private readonly accountService: AccountService,
 		private readonly accountNormalService: AccountNormalService,
 		private readonly accountGoogleService: AccountGoogleService,
-		private readonly accountKakaoService: AccountKakaoService) { }
-
+		private readonly accountKakaoService: AccountKakaoService,
+		private readonly messageService: MessageService
+	) {}
 
 	// 회원 가입
 	@Post()
@@ -57,10 +59,7 @@ export class AccountController {
 			.chkEmail(loginUserDto)
 			.then(async (findEmail) => {
 				if (findEmail) {
-					return {
-						msg: 'fail',
-						errorMsg: '이미 가입된 이메일 입니다.'
-					};
+					return this.messageService.existEmail();
 				} else {
 					console.log(
 						`email ID ${loginUserDto.email} 인증번호 메일 요청했습니다`
@@ -71,12 +70,12 @@ export class AccountController {
 				}
 			});
 	}
-//메일 인증번호 확인
+	//메일 인증번호 확인
 	@Post('mail/check')
 	async mailcheck(@Body() emailAuthDto: EmailAuthDto) {
 		return await this.accountNormalService.sendEmailConfirm(emailAuthDto);
 	}
-//로그아웃
+	//로그아웃
 	@Get('logout')
 	@UseGuards(AuthGuard('jwt'))
 	logout(@Req() req, @Res() res) {
@@ -84,14 +83,14 @@ export class AccountController {
 		res.json({ loggedOut: true });
 	}
 
-//비밀번호 인증번호 전송
+	//비밀번호 인증번호 전송
 	@Post('/sendpassword')
 	async forgotPassword(@Body() forgotPassword: ForgotPasswordDto) {
 		return await this.accountNormalService.sendEmailPassword(
 			forgotPassword.email
 		);
 	}
-//비밀번호 변경
+	//비밀번호 변경
 	@Post('/changepassword')
 	async changePassword(@Body() passwordChangeDto: PasswordChangeDto) {
 		return await this.accountNormalService.changePassword(
