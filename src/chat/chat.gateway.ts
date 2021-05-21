@@ -134,14 +134,13 @@ export class ChatGateway
 						.to(kickUserDto.icrId)
 						.emit('kickUser', kickClient['kickData']);
 
+					console.log(client.adapter.rooms[kickUserDto.icrId]);
+
 					// 만약 그 클라이언트가 실제로 현재 접속중이라면 방을 떠나게 만듬
 					for (const key in client.adapter.rooms[kickUserDto.icrId]
 						.sockets) {
 						if (key == kickClient['kickId']) {
 							console.log(key, kickClient['kickId']);
-							console.log(
-								client.adapter.rooms[kickUserDto.icrId]
-							);
 
 							// const a = 'hello_world';
 							// client.join(a);
