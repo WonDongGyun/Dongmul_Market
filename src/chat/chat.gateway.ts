@@ -130,11 +130,19 @@ export class ChatGateway
 					// ~님이 강퇴당하셨습니다.
 					// 프론트에서는 받을 때 현재 접속한 사람의 이메일이랑 맞다면 alert을 띄워야 함
 					// 그 후 메인화면으로 강제로 이동
+
+					console.log(
+						'kickUser first => ',
+						client.adapter.rooms[kickUserDto.icrId]
+					);
 					this.server
 						.to(kickUserDto.icrId)
 						.emit('kickUser', kickClient['kickData']);
 
-					console.log(client.adapter.rooms[kickUserDto.icrId]);
+					console.log(
+						'kickUser second => ',
+						client.adapter.rooms[kickUserDto.icrId]
+					);
 
 					// 만약 그 클라이언트가 실제로 현재 접속중이라면 방을 떠나게 만듬
 					for (const key in client.adapter.rooms[kickUserDto.icrId]
