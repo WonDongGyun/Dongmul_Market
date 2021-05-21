@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Code } from 'src/entities/code.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
-import { Code, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AddressChange } from './dto/addressChange.dto';
 
 @Injectable()
@@ -48,16 +49,16 @@ export class MyPageService {
 	async getMyPost(email: string) {
 		return await this.saleItemRepository
 			.createQueryBuilder('si')
-			.select('u.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('u.address', 'address')
-			.addSelect('si.itemId', 'itemId')
+			.select('si.itemId', 'itemId')
 			.addSelect('si.image', 'image')
 			.addSelect('si.title', 'title')
 			.addSelect('si.category', 'category')
 			.addSelect('si.wantItem', 'wantItem')
 			.addSelect('si.comment', 'comment')
 			.addSelect('si.deadLine', 'deadLine')
+			.addSelect('u.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('u.address', 'address')
 			.addSelect('c.codeName', 'status')
 			.addSelect('si.icrId', 'icrId')
 			.addSelect('si.buyerEmail', 'buyerEmail')
