@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class ErrService {
+export class MessageService {
 	signUpOk() {
 		return { msg: 'success', successMsg: '회원가입 성공!' };
 	}
@@ -64,6 +64,13 @@ export class ErrService {
 		return {
 			msg: 'fail',
 			errorMsg: '이메일이 맞는지 확인 해주세요.!'
+		};
+	}
+
+	passwordChangeOk() {
+		return {
+			msg: 'success',
+			successMsg: '비밀번호 변경 성공!'
 		};
 	}
 }

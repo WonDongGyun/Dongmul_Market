@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { ErrService } from 'src/err/err.service';
+import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
-import { KakaoChkEmailDto } from './dto/kakaoChkEmail.dto';
+import { GoogleChkEmailDto } from '../dto/googleChkEmail.dto';
+
 
 @Injectable()
-export class AccountKakaoService {
+export class AccountGoogleService {
 	constructor(
 		private readonly jwtService: JwtService,
-		private readonly errService: ErrService,
-
+		private readonly messageService: MessageService,
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>
 	) {}
@@ -23,50 +23,51 @@ export class AccountKakaoService {
 		});
 	}
 
-	//카카오 로그인
-
-	async kakaoCheck(kakaoChkEmaildto: KakaoChkEmailDto): Promise<any> {
+	//구글 로그인
+	async googleCheck(googleChkEmaildto: GoogleChkEmailDto): Promise<any> {
 		try {
-			const kakao = await this.userRepository.findOne({
-				email: kakaoChkEmaildto.email
+			const google = await this.userRepository.findOne({
+				email: googleChkEmaildto.email
 			});
-			console.log(kakao);
-			if (kakao) {
+			console.log(google);
+			if (google) {
 				return await this.userRepository
 					.findOne({
-						email: kakaoChkEmaildto.email,
+						email: googleChkEmaildto.email,
 						password: null
 					})
-					.then((findKakao) => {
-						if (findKakao) {
+					.then((findGoogle) => {
+						if (findGoogle) {
 							const token = this.getTokenForUser(
-								kakaoChkEmaildto.email
+								googleChkEmaildto.email
 							);
 							return {
 								msg: 'success',
-								email: findKakao.email,
-								nickname: findKakao.nickname,
+								email: findGoogle.email,
+								nickname: findGoogle.nickname,
 								token: 'bearer ' + token
 							};
 						} else {
-							return this.errService.existEmail();
+							return this.messageService.existEmail();
 						}
 					})
 					.catch((err) => {
-						return this.errService.socialLoginFail();
+						return this.messageService.socialLoginFail();
 					});
 			} else {
 				const user = new User();
-				user.email = kakaoChkEmaildto.email;
-				user.nickname = kakaoChkEmaildto.nickname;
+				user.email = googleChkEmaildto.email;
+				user.nickname =
+					googleChkEmaildto.lastName + googleChkEmaildto.firstName;
 				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
-					return this.errService.signUpOk();
+					return this.messageService.signUpOk();
 				});
 			}
 		} catch (err) {
 			console.log(err);
+			return this.messageService.setUserErr();
 		}
 	}
 }

@@ -5,13 +5,13 @@ import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { User } from 'src/entities/user.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { AccountController } from './account.controller';
-import { AccountService } from './account.service';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { ErrService } from '../err/err.service';
-import { AccountNormalService } from './accountNormal.service';
-import { AccountGoogleService } from './accountGoogle.service';
-import { AccountKakaoService } from './accountKakao.service';
+import { MessageService } from '../message/message.service';
+import { AccountNormalService } from './services/accountNormal.service';
+import { AccountGoogleService } from './services/accountGoogle.service';
+import { AccountKakaoService } from './services/accountKakao.service';
+
 
 @Module({
 	imports: [
@@ -29,10 +29,9 @@ import { AccountKakaoService } from './accountKakao.service';
 	],
 	controllers: [AccountController],
 	providers: [
-		AccountService,
 		JwtStrategy,
 		GoogleStrategy,
-		ErrService,
+		MessageService,
 		AccountNormalService,
 		AccountGoogleService,
 		AccountKakaoService

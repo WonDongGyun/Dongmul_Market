@@ -1,24 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ChkLoginDto } from './dto/chkLogin.dto';
-import { MailerService } from '@nestjs-modules/mailer';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dtd';
-import { PasswordChangeDto } from './dto/passwordChange.dto';
-import { EmailAuthDto } from './dto/emailAuth.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { ErrService } from '../err/err.service';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from '../dto/create.user.dto';
+import * as bcrypt from 'bcrypt';
+import { Injectable } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+import { LoginUserDto } from '../dto/login-user.dto';
+import { ChkLoginDto } from '../dto/chkLogin.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dtd';
+import { EmailAuthDto } from '../dto/emailAuth.dto';
+import { PasswordChangeDto } from '../dto/passwordChange.dto';
+import { MessageService } from 'src/message/message.service';
 
 @Injectable()
-export class AccountService {
+export class AccountNormalService {
 	constructor(
 		private readonly jwtService: JwtService,
 		private mailerService: MailerService,
-		private readonly errService: ErrService,
+		private readonly messageService: MessageService,
 
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
@@ -32,13 +33,31 @@ export class AccountService {
 		return await bcrypt.hash(password, 10);
 	}
 
-	// jwt 토큰 만들기
 	public getTokenForUser(email: string) {
 		return this.jwtService.sign({
 			email
 		});
 	}
 
+	// 회원가입 하기
+	async setUser(createUserDto: CreateUserDto) {
+		try {
+			const user = new User();
+
+			user.email = createUserDto.email;
+			user.password = await this.hashPassword(createUserDto.password);
+			user.nickname = createUserDto.nickname;
+			user.address = createUserDto.address;
+
+			await this.emailRepository.delete({ email: createUserDto.email });
+			return await this.userRepository.insert(user).then(async () => {
+				return this.messageService.signUpOk();
+			});
+		} catch (err) {
+			console.log(err);
+			return this.messageService.setUserErr();
+		}
+	}
 
 	// 이메일 중복확인
 	async chkEmail(loginUserDto: LoginUserDto) {
@@ -48,7 +67,7 @@ export class AccountService {
 			});
 		} catch (err) {
 			console.log(err);
-			return this.errService.existEmail();
+			return this.messageService.existEmail();
 		}
 	}
 
@@ -58,9 +77,10 @@ export class AccountService {
 			return await this.userRepository.findOne(email);
 		} catch (err) {
 			console.log(err);
-			return this.errService.emailChkOk();
+			return this.messageService.emailChkOk();
 		}
 	}
+
 	//업데이트
 	async update(email: string, payload: Partial<User>) {
 		try {
@@ -70,13 +90,7 @@ export class AccountService {
 			return { msg: 'fail', errorMsg: '업데이트 실패' };
 		}
 	}
-	//패스워드 찾기
-	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-		const user = await this.findByEmail(forgotPasswordDto.email);
-		if (!user) {
-			return this.errService.emailChkOk();
-		}
-	}
+
 	// 로그인 확인
 	async chkLogin(chkLoginDto: ChkLoginDto) {
 		try {
@@ -85,11 +99,11 @@ export class AccountService {
 			});
 
 			if (!user) {
-				return this.errService.loginFail();
+				return this.messageService.loginFail();
 			}
 
 			if (!(await bcrypt.compare(chkLoginDto.password, user.password))) {
-				return this.errService.loginFail();
+				return this.messageService.loginFail();
 			}
 
 			console.log(this.getTokenForUser(user.email));
@@ -102,7 +116,7 @@ export class AccountService {
 			};
 		} catch (err) {
 			console.log(err);
-			return this.errService.loginFail();
+			return this.messageService.loginFail();
 		}
 	}
 
@@ -129,33 +143,21 @@ export class AccountService {
 				to: email,
 				from: 'dongmulMarket@gmail.com',
 				subject: ' 이메일 인증번호 입니다.',
-				template: '../dongmul/src/template/emailAuthNum.hbs',
+				template: '../dongmul/src/template/html/emailAuthNum.hbs',
 				context: {
 					code: authNum,
 					username: email
-				},
-				// html: `
-				// 	<h1>
-				// 	회원가입 요청 메일 
-				// 	</h1>
-				// 	<hr />
-				// 	<br />
-				// 	<p>안녕하세요 ${email}님 <p/>
-				// 	<br />
-				// 	<hr />
-				// 	6자리 인증 코드 :  <b> ${authNum}</b>
-				// 	<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-				// `
+				}
 			});
 
 			if (!findemail) {
 				await this.emailRepository.insert(emailAuth);
-				return this.errService.sendEmailOk();
+				return this.messageService.sendEmailOk();
 			} else {
 				await this.emailRepository.update(email, {
 					authNum: authNum
 				});
-				return this.errService.sendEmailReOk();
+				return this.messageService.sendEmailReOk();
 			}
 		} catch (err) {
 			console.log(err);
@@ -172,13 +174,21 @@ export class AccountService {
 				})
 				.then(async (findEmail) => {
 					if (findEmail) {
-						return this.errService.authNumOk();
+						return this.messageService.authNumOk();
 					} else {
-						return this.errService.authNumDiffent();
+						return this.messageService.authNumDiffent();
 					}
 				});
 		} catch (err) {
 			console.log(err);
+		}
+	}
+
+	//패스워드 찾기
+	async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+		const user = await this.findByEmail(forgotPasswordDto.email);
+		if (!user) {
+			return this.messageService.emailChkOk();
 		}
 	}
 
@@ -204,23 +214,11 @@ export class AccountService {
 					from: 'dongmulMarket@gmail.com',
 					subject: ' 비밀번호 인증번호 입니다.',
 					template:
-						'../dongmul/src/template/passwordAuthNum.hbs',
+						'../dongmul/src/template/html/passwordAuthNum.hbs',
 					context: {
 						code: authNum,
 						username: email
 					}
-					// html: `
-					// 		<h1>
-					// 		비밀번호 찾기 인증번호
-					// 		</h1>
-					// 		<hr />
-					// 		<br />
-					// 		<p>안녕하세요 ${email}님 <p/>
-					// 		<br />
-					// 		<hr />
-					// 		인증번호는 6자리 입니다. :  <b> ${authNum}</b>
-					// 		<p>이 메일을 요청한 적이 없으시다면 무시하시기 바랍니다.</p>
-					// 	`
 				});
 				if (findemail) {
 					const find = await this.emailRepository.findOne(email);
@@ -228,15 +226,15 @@ export class AccountService {
 						await this.emailRepository.update(email, {
 							authNum: authNum
 						});
-						return this.errService.sendEmailReOk();
+						return this.messageService.sendEmailReOk();
 					} else {
 						await this.emailRepository.insert(emailAuth);
-						return this.errService.sendEmailOk();
+						return this.messageService.sendEmailOk();
 					}
 				}
 			} else {
 			}
-			return this.errService.emailChkOk();
+			return this.messageService.emailChkOk();
 		} catch (err) {
 			console.log(err);
 		}
@@ -263,15 +261,13 @@ export class AccountService {
 							email: passwordChangeDto.email
 						})
 						.then(async () => {
-							return {
-								msg: '비밀번호 변경 성공!'
-							};
+							return this.messageService.passwordChangeOk();
 						});
 				} else {
-					return this.errService.authNumDiffent();
+					return this.messageService.authNumDiffent();
 				}
 			} else {
-				return this.errService.emailChkOk();
+				return this.messageService.emailChkOk();
 			}
 		} catch (err) {
 			console.log(err);

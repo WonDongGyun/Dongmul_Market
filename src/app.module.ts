@@ -10,13 +10,12 @@ import { ItemChatRoomUser } from './entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from './entities/itemChatRoomUserMsg.entity';
 import { MainPageModule } from './main-page/main-page.module';
 import { Code } from './entities/code.entity';
-import { ServeStaticModule } from '@nestjs/serve-static';
+
 import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
-import { ErrModule } from './err/err.module';
-import { PostDetailController } from './post-detail/post-detail.controller';
-import { PostDetailService } from './post-detail/post-detail.service';
+import {  MessageModule } from './message/message.module';
+
 import { PostDetailModule } from './post-detail/post-detail.module';
 
 @Module({
@@ -60,7 +59,7 @@ import { PostDetailModule } from './post-detail/post-detail.module';
 		AccountModule,
 		MainPageModule,
 		MyPageModule,
-		ErrModule,
+		MessageModule,
 		PostDetailModule
 	]
 })
