@@ -104,11 +104,12 @@ export class ChatGateway
 				if (exchangeYn['msg'] == 'success') {
 					// 현재 접속중인 모든 사용자들을 현재의 채팅방에서 내보냄
 					// 프론트에서 무조건 모두에게 팝업을 띄워주어야 함.
+
+					this.server.to(exchangeDto.icrId).emit('exchange');
 					for (const key in client.adapter.rooms[exchangeDto.icrId]
 						.sockets) {
 						this.server.sockets[key].leave(exchangeDto.icrId);
 					}
-					this.server.to(exchangeDto.icrId).emit('exchange');
 				}
 			});
 	}
