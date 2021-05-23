@@ -21,7 +21,8 @@ import { AccountNormalService } from './services/accountNormal.service';
 import { AccountGoogleService } from './services/accountGoogle.service';
 import { AccountKakaoService } from './services/accountKakao.service';
 import { MessageService } from 'src/message/message.service';
-
+import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
+import { CurrentUser } from './current-account.decorator';
 
 @Controller('account')
 export class AccountController {
@@ -108,5 +109,12 @@ export class AccountController {
 	@Post('/kakaoAuth')
 	async KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
 		return await this.accountKakaoService.kakaoCheck(kakaoChkEmaildto);
+	}
+
+	// front redux set
+	@Post('/reset')
+	@UseGuards(AccountGuardJwt)
+	async getPostList(@CurrentUser() email: string) {
+		return await this.accountNormalService.resetRedux(email);
 	}
 }

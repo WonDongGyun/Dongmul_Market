@@ -47,7 +47,6 @@ export class AccountNormalService {
 			user.email = createUserDto.email;
 			user.password = await this.hashPassword(createUserDto.password);
 			user.nickname = createUserDto.nickname;
-			user.address = createUserDto.address;
 
 			await this.emailRepository.delete({ email: createUserDto.email });
 			return await this.userRepository.insert(user).then(async () => {
@@ -106,12 +105,11 @@ export class AccountNormalService {
 				return this.messageService.loginFail();
 			}
 
-			console.log(this.getTokenForUser(user.email));
-
 			return {
 				msg: 'success',
 				email: user.email,
 				nickname: user.nickname,
+				address: user.address,
 				token: 'bearer ' + this.getTokenForUser(user.email)
 			};
 		} catch (err) {
@@ -272,5 +270,14 @@ export class AccountNormalService {
 		} catch (err) {
 			console.log(err);
 		}
+	}
+
+	async resetRedux(email: string) {
+		return this.userRepository
+			.createQueryBuilder('u')
+			.select('u.email', 'email')
+			.addSelect('u.nickname', 'nickname')
+			.addSelect('u.address', 'address')
+			.where('u.email = :email', { email: email });
 	}
 }

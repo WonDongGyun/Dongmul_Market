@@ -6,7 +6,6 @@ import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { GoogleChkEmailDto } from '../dto/googleChkEmail.dto';
 
-
 @Injectable()
 export class AccountGoogleService {
 	constructor(
@@ -45,6 +44,7 @@ export class AccountGoogleService {
 								msg: 'success',
 								email: findGoogle.email,
 								nickname: findGoogle.nickname,
+								address: findGoogle.address,
 								token: 'bearer ' + token
 							};
 						} else {
@@ -59,7 +59,6 @@ export class AccountGoogleService {
 				user.email = googleChkEmaildto.email;
 				user.nickname =
 					googleChkEmaildto.lastName + googleChkEmaildto.firstName;
-				user.address = ' ';
 
 				return await this.userRepository.save(user).then(async () => {
 					return this.messageService.signUpOk();
