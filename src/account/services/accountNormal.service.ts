@@ -278,6 +278,7 @@ export class AccountNormalService {
 			.select('u.email', 'email')
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('u.address', 'address')
-			.where('u.email = :email', { email: email });
+			.where('u.email = :email', { email: email })
+			.getRawOne();
 	}
 }
