@@ -342,14 +342,19 @@ export class ChatService {
 			})
 			.then(async (findItem) => {
 				console.log('findItem => ', findItem);
+				console.log('findItem => ', exchangeDto.hostEmail);
 				if (findItem) {
-					await this.saleItemRepository.update(
-						exchangeDto.hostEmail,
-						{
+					await this.saleItemRepository
+						.update(exchangeDto.hostEmail, {
 							status: 'SI02',
 							buyerEmail: exchangeDto.consumerEmail
-						}
-					);
+						})
+						.then((updateing) => {
+							console.log('updateing => ', updateing);
+						})
+						.catch((err) => {
+							console.log(err);
+						});
 
 					console.log('1');
 					return {
