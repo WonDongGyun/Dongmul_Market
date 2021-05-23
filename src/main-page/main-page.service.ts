@@ -93,7 +93,7 @@ export class MainPageService {
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
 			.where('u.address = :address', { address: userData.address })
-			.andWhere('si.status = "SI01"')
+			.andWhere(`si.status = 'SI01'`)
 			.andWhere('now() < si.deadLine')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
@@ -129,6 +129,7 @@ export class MainPageService {
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('now() < si.deadLine')
+			.andWhere(`si.status = 'SI01'`)
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((data) => {
