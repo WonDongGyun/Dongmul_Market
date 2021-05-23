@@ -98,6 +98,7 @@ export class ChatGateway
 	// 해당 유저와 교환 성공!
 	@SubscribeMessage('exchange')
 	async handleExchange(client: Socket, exchangeDto: ExchangeDto) {
+		console.log(exchangeDto);
 		await this.chatService
 			.exchange(exchangeDto)
 			.then(async (exchangeYn) => {
