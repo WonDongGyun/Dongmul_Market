@@ -93,6 +93,7 @@ export class MainPageService {
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
 			.where('u.address = :address', { address: userData.address })
+			.andWhere('si.status = "SI01"')
 			.andWhere('now() < si.deadLine')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()

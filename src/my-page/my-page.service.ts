@@ -66,6 +66,7 @@ export class MyPageService {
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('u.email = :email', { email: email })
+			.orWhere('si.buyerEmail = :email', { email: email })
 			.orderBy('si.createdDt', 'DESC')
 			.getRawMany()
 			.then(async (getPost) => {
