@@ -279,6 +279,16 @@ export class AccountNormalService {
 			.addSelect('u.nickname', 'nickname')
 			.addSelect('u.address', 'address')
 			.where('u.email = :email', { email: email })
-			.getRawOne();
+			.getRawOne()
+			.then(async (findUser) => {
+				if (findUser) {
+					return {
+						msg: 'success',
+						email: findUser.email,
+						nickname: findUser.nickname,
+						address: findUser.address
+					};
+				}
+			});
 	}
 }
