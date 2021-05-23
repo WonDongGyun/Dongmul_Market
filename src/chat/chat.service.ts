@@ -13,6 +13,7 @@ import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
+import { ConfigurationServicePlaceholders } from 'aws-sdk/lib/config_service_placeholders';
 
 @Injectable()
 export class ChatService {
@@ -340,12 +341,14 @@ export class ChatService {
 				itemId: exchangeDto.itemId
 			})
 			.then(async (findItem) => {
+				console.log(findItem);
 				if (findItem) {
 					await this.saleItemRepository.update(user, {
 						status: 'SI02',
 						buyerEmail: exchangeDto.consumerEmail
 					});
 
+					console.log('1');
 					return {
 						msg: 'success'
 					};

@@ -102,6 +102,7 @@ export class ChatGateway
 		await this.chatService
 			.exchange(exchangeDto)
 			.then(async (exchangeYn) => {
+				console.log(exchangeYn);
 				if (exchangeYn['msg'] == 'success') {
 					// 현재 접속중인 모든 사용자들을 현재의 채팅방에서 내보냄
 					// 프론트에서 무조건 모두에게 팝업을 띄워주어야 함.
