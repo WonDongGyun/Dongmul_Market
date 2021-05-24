@@ -6,6 +6,10 @@ import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { GoogleChkEmailDto } from '../dto/googleChkEmail.dto';
 
+// **************************************
+// * service: accountGoogle
+// * programer: JaeYoon Lee
+// **************************************
 @Injectable()
 export class AccountGoogleService {
 	constructor(
@@ -28,7 +32,6 @@ export class AccountGoogleService {
 			const google = await this.userRepository.findOne({
 				email: googleChkEmaildto.email
 			});
-			console.log(google);
 			if (google) {
 				return await this.userRepository
 					.findOne({
@@ -65,7 +68,6 @@ export class AccountGoogleService {
 				});
 			}
 		} catch (err) {
-			console.log(err);
 			return this.messageService.setUserErr();
 		}
 	}

@@ -24,6 +24,11 @@ import { MessageService } from 'src/message/message.service';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { CurrentUser } from './current-account.decorator';
 
+// **************************************
+// * controller: account
+// * programer: JaeYoon Lee
+// **************************************
+
 @Controller('account')
 export class AccountController {
 	constructor(
@@ -62,9 +67,6 @@ export class AccountController {
 				if (findEmail) {
 					return this.messageService.existEmail();
 				} else {
-					console.log(
-						`email ID ${loginUserDto.email} 인증번호 메일 요청했습니다`
-					);
 					return await this.accountNormalService.sendRegisterMail(
 						loginUserDto.email
 					);

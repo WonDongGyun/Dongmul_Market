@@ -14,6 +14,10 @@ import { EmailAuthDto } from '../dto/emailAuth.dto';
 import { PasswordChangeDto } from '../dto/passwordChange.dto';
 import { MessageService } from 'src/message/message.service';
 
+// **************************************
+// * service: accountNormal
+// * programer: JaeYoon Lee
+// **************************************
 @Injectable()
 export class AccountNormalService {
 	constructor(
@@ -53,7 +57,6 @@ export class AccountNormalService {
 				return this.messageService.signUpOk();
 			});
 		} catch (err) {
-			console.log(err);
 			return this.messageService.setUserErr();
 		}
 	}
@@ -65,7 +68,6 @@ export class AccountNormalService {
 				email: loginUserDto.email
 			});
 		} catch (err) {
-			console.log(err);
 			return this.messageService.existEmail();
 		}
 	}
@@ -75,7 +77,6 @@ export class AccountNormalService {
 		try {
 			return await this.userRepository.findOne(email);
 		} catch (err) {
-			console.log(err);
 			return this.messageService.emailChkOk();
 		}
 	}
@@ -85,7 +86,6 @@ export class AccountNormalService {
 		try {
 			return this.userRepository.update({ email: email }, payload);
 		} catch (err) {
-			console.log(err);
 			return { msg: 'fail', errorMsg: '업데이트 실패' };
 		}
 	}
@@ -113,7 +113,6 @@ export class AccountNormalService {
 				token: 'bearer ' + this.getTokenForUser(user.email)
 			};
 		} catch (err) {
-			console.log(err);
 			return this.messageService.loginFail();
 		}
 	}

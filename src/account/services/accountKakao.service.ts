@@ -6,6 +6,10 @@ import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { KakaoChkEmailDto } from '../dto/kakaoChkEmail.dto';
 
+// **************************************
+// * service: accountKakao
+// * programer: JaeYoon Lee
+// **************************************
 @Injectable()
 export class AccountKakaoService {
 	constructor(
@@ -30,7 +34,6 @@ export class AccountKakaoService {
 			const kakao = await this.userRepository.findOne({
 				email: kakaoChkEmaildto.email
 			});
-			console.log(kakao);
 			if (kakao) {
 				return await this.userRepository
 					.findOne({
