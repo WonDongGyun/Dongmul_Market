@@ -7,6 +7,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
+import { MessageService } from 'src/message/message.service';
 import { PostDetailController } from './post-detail.controller';
 import { PostDetailService } from './post-detail.service';
 
@@ -23,6 +24,6 @@ import { PostDetailService } from './post-detail.service';
 		])
 	],
 	controllers: [PostDetailController],
-	providers: [PostDetailService]
+	providers: [PostDetailService, MessageService]
 })
 export class PostDetailModule {}

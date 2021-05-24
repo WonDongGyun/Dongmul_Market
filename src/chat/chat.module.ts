@@ -7,6 +7,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
+import { MessageService } from 'src/message/message.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
 
@@ -22,6 +23,6 @@ import { ChatService } from './chat.service';
 			KickUser
 		])
 	],
-	providers: [ChatGateway, ChatService]
+	providers: [ChatGateway, ChatService, MessageService]
 })
 export class ChatModule {}
