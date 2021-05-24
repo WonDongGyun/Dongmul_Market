@@ -12,10 +12,17 @@ import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
 import { DeleteButtonDto } from './dto/deleteButton.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
+import { MessageService } from 'src/message/message.service';
 
+// **************************************
+// * service: main-page
+// * programer: DongGyun Won
+// **************************************
 @Injectable()
 export class MainPageService {
 	constructor(
+		private readonly messageService: MessageService,
+
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 
@@ -93,17 +100,19 @@ export class MainPageService {
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
 			.where('u.address = :address', { address: userData.address })
+			.andWhere(`si.status = 'SI01'`)
 			.andWhere('now() < si.deadLine')
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
 			.then((getPost) => {
-				return { msg: 'success', data: getPost };
+				if (getPost) {
+					return { msg: 'success', data: getPost };
+				} else {
+					return this.messageService.getPostListErr();
+				}
 			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: '로그인을 다시 해주시길 바랍니다.'
-				};
+			.catch(() => {
+				return this.messageService.selectQueryErr();
 			});
 	}
 
@@ -128,16 +137,18 @@ export class MainPageService {
 			.innerJoin(User, 'u', 'si.email = u.email')
 			.innerJoin(Code, 'c', 'c.codeId = si.status')
 			.where('now() < si.deadLine')
+			.andWhere(`si.status = 'SI01'`)
 			.orderBy('si.deadLine', 'DESC')
 			.getRawMany()
-			.then((data) => {
-				return { msg: 'success', data: data };
+			.then((getPost) => {
+				if (getPost) {
+					return { msg: 'success', data: getPost };
+				} else {
+					return this.messageService.getPostListErr();
+				}
 			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: '로그인을 다시 해주시길 바랍니다.'
-				};
+			.catch(() => {
+				return this.messageService.selectQueryErr();
 			});
 	}
 
@@ -156,14 +167,20 @@ export class MainPageService {
 
 		// 채팅방 만들기
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		await this.itemChatRoomRepository.insert(itemChatRoom);
+		await this.itemChatRoomRepository.insert(itemChatRoom).catch(() => {
+			return this.messageService.insertQueryErr();
+		});
 
 		// 경매 글 올린 사람, 채팅방 유저로 저장
 		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
 		itemChatRoomUser.user = user;
 		itemChatRoomUser.itemChatRoom = itemChatRoom;
 		itemChatRoomUser.chooseYn = 'Y';
-		await this.itemChatRoomUserRepository.insert(itemChatRoomUser);
+		await this.itemChatRoomUserRepository
+			.insert(itemChatRoomUser)
+			.catch(() => {
+				return this.messageService.insertQueryErr();
+			});
 
 		// 경매 글 저장
 		const saleItem: SaleItem = new SaleItem();
@@ -179,35 +196,33 @@ export class MainPageService {
 		return await this.saleItemRepository
 			.insert(saleItem)
 			.then(() => {
-				return { msg: 'success' };
+				return this.messageService.returnSuccess();
 			})
-			.catch((err) => {
-				return {
-					msg: 'fail',
-					errorMsg: '경매 물건을 등록하던 중 오류가 발생하였습니다.'
-				};
+			.catch(() => {
+				return this.messageService.insertQueryErr();
 			});
 	}
 
 	// 등록한 품목 삭제하기
 	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
-		try {
-			const id = await this.saleItemRepository.findOne(
-				deleteButtonDto.itemId
-			);
-			if (id) {
-				await this.saleItemRepository.delete({
-					itemId: deleteButtonDto.itemId
-				});
-				return { msg: 'success' };
-			} else {
-				return {
-					msg: 'fail',
-					errorMsg: 'itemId가 다릅니다.'
-				};
-			}
-		} catch (err) {
-			console.log(err);
-		}
+		await this.saleItemRepository
+			.findOne(deleteButtonDto.itemId)
+			.then(async (findItem) => {
+				if (findItem) {
+					await this.saleItemRepository
+						.delete({
+							itemId: deleteButtonDto.itemId
+						})
+						.catch(() => {
+							return this.messageService.deleteQueryErr();
+						});
+					return this.messageService.returnSuccess();
+				} else {
+					return this.messageService.deleteButtonErr();
+				}
+			})
+			.catch(() => {
+				return this.messageService.findQueryErr();
+			});
 	}
 }

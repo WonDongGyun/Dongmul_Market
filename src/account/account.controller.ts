@@ -21,7 +21,13 @@ import { AccountNormalService } from './services/accountNormal.service';
 import { AccountGoogleService } from './services/accountGoogle.service';
 import { AccountKakaoService } from './services/accountKakao.service';
 import { MessageService } from 'src/message/message.service';
+import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
+import { CurrentUser } from './current-account.decorator';
 
+// **************************************
+// * controller: account
+// * programer: JaeYoon Lee
+// **************************************
 
 @Controller('account')
 export class AccountController {
@@ -61,9 +67,6 @@ export class AccountController {
 				if (findEmail) {
 					return this.messageService.existEmail();
 				} else {
-					console.log(
-						`email ID ${loginUserDto.email} 인증번호 메일 요청했습니다`
-					);
 					return await this.accountNormalService.sendRegisterMail(
 						loginUserDto.email
 					);
@@ -108,5 +111,12 @@ export class AccountController {
 	@Post('/kakaoAuth')
 	async KakaoAuthCheck(@Body() kakaoChkEmaildto: KakaoChkEmailDto) {
 		return await this.accountKakaoService.kakaoCheck(kakaoChkEmaildto);
+	}
+
+	// front redux set
+	@Post('/reset')
+	@UseGuards(AccountGuardJwt)
+	async getPostList(@CurrentUser() email: string) {
+		return await this.accountNormalService.resetRedux(email);
 	}
 }

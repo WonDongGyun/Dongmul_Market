@@ -16,6 +16,11 @@ import { DeleteButtonDto } from './dto/deleteButton.dto';
 import { SetItemDto } from './dto/setItem.dto';
 import { MainPageService } from './main-page.service';
 
+// **************************************
+// * controller: main-page
+// * programer: DongGyun Won
+// **************************************
+
 @Controller('mainPage')
 export class MainPageController {
 	constructor(private readonly mainPageService: MainPageService) {}
@@ -42,8 +47,6 @@ export class MainPageController {
 		@CurrentUser() email: string,
 		@Body() deleteButtonDto: DeleteButtonDto
 	) {
-		console.log(email);
-		console.log(deleteButtonDto);
 		return await this.mainPageService.deleteButton(email, deleteButtonDto);
 	}
 
@@ -56,9 +59,7 @@ export class MainPageController {
 		@UploadedFile() file,
 		@CurrentUser() email: string
 	) {
-		console.log(setItemDto);
 		const a = new Date(setItemDto.deadLine);
-		console.log(a);
 		return await this.mainPageService.writePost(setItemDto, file, email);
 	}
 }

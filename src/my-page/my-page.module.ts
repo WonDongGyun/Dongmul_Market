@@ -10,6 +10,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Code } from 'src/entities/code.entity';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { JwtStrategy } from 'src/account/jwt.strategy';
+import { MessageService } from 'src/message/message.service';
 
 @Module({
 	imports: [
@@ -24,6 +25,6 @@ import { JwtStrategy } from 'src/account/jwt.strategy';
 		])
 	],
 	controllers: [MyPageController],
-	providers: [MyPageService, JwtStrategy]
+	providers: [MyPageService, JwtStrategy, MessageService]
 })
 export class MyPageModule {}

@@ -4,6 +4,10 @@ import { AddressChange } from './dto/addressChange.dto';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { CurrentUser } from 'src/account/current-account.decorator';
 
+// **************************************
+// * controller: my-page
+// * programer: DongGyun Won, JaeYoon Lee
+// **************************************
 @Controller('myPage')
 export class MyPageController {
 	constructor(private readonly myPageService: MyPageService) {}

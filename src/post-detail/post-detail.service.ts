@@ -8,10 +8,17 @@ import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Code } from 'src/entities/code.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
+import { MessageService } from 'src/message/message.service';
 
+// **************************************
+// * service: post-detail
+// * programer: DongGyun Won
+// **************************************
 @Injectable()
 export class PostDetailService {
 	constructor(
+		private readonly messageService: MessageService,
+
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 
@@ -65,17 +72,11 @@ export class PostDetailService {
 				if (findDetail) {
 					return { msg: 'success', data: findDetail };
 				} else {
-					return {
-						msg: 'fail',
-						errorMsg: 'itemId를 다시 확인해주세요.'
-					};
+					return this.messageService.getPostDetailErr();
 				}
 			})
 			.catch(() => {
-				return {
-					msg: 'fail',
-					errorMsg: '로그인을 다시 해주시길 바랍니다.'
-				};
+				return this.messageService.selectQueryErr();
 			});
 	}
 
@@ -106,6 +107,9 @@ export class PostDetailService {
 				} else {
 					return { buttonYn: button };
 				}
+			})
+			.catch(() => {
+				return this.messageService.findQueryErr();
 			});
 	}
 }

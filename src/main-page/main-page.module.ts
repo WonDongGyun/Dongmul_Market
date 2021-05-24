@@ -10,6 +10,7 @@ import { MainPageController } from './main-page.controller';
 import { MainPageService } from './main-page.service';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
+import { MessageService } from 'src/message/message.service';
 
 @Module({
 	imports: [
@@ -25,6 +26,6 @@ import { KickUser } from 'src/entities/kickUser.entity';
 		])
 	],
 	controllers: [MainPageController],
-	providers: [MainPageService]
+	providers: [MainPageService, MessageService]
 })
 export class MainPageModule {}

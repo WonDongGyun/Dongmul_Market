@@ -4,6 +4,11 @@ import { Module } from '@nestjs/common';
 
 require('dotenv').config();
 
+// **************************************
+// * module: mail
+// * programer: JaeYoon Lee
+// **************************************
+
 @Module({
 	imports: [
 		MailerModule.forRoot({
