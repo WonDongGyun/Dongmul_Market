@@ -109,14 +109,8 @@ export class MessageService {
 			successMsg: '비밀번호 변경 성공!'
 		};
 	}
+	
 
-<<<<<<< HEAD
-	passwordChangeNO() {
-		return {
-			msg: 'success',
-			successMsg: '비밀번호 변경 실패!'
-		}
-=======
 	// **************************************
 	// * service: main-page
 	// * programer: DongGyun Won
@@ -196,7 +190,6 @@ export class MessageService {
 			errorMsg:
 				'현재 존재하지 않는 채팅방이거나 사용자 이메일이 잘못되었습니다.'
 		};
->>>>>>> 5be1d63ef9ae40de40c5487a880cea6f187dba4c
 	}
 }
 

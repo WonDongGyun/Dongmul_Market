@@ -271,7 +271,7 @@ export class AccountNormalService {
 			}
 		} catch (err) {
 			console.log(err);
-			return this.messageService.passwordChangeNO();
+			return this.messageService.returnFail();
 		}
 	}
 
