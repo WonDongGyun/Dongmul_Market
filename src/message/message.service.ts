@@ -73,4 +73,12 @@ export class MessageService {
 			successMsg: '비밀번호 변경 성공!'
 		};
 	}
+
+	passwordChangeNO() {
+		return {
+			msg: 'success',
+			successMsg: '비밀번호 변경 실패!'
+		}
+	}
 }
+

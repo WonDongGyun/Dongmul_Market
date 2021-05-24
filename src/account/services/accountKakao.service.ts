@@ -68,6 +68,7 @@ export class AccountKakaoService {
 			}
 		} catch (err) {
 			console.log(err);
+			return this.messageService.setUserErr();
 		}
 	}
 }

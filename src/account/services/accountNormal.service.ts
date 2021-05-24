@@ -161,6 +161,7 @@ export class AccountNormalService {
 			}
 		} catch (err) {
 			console.log(err);
+			return this.messageService.emailChkOk()
 		}
 	}
 
@@ -181,6 +182,7 @@ export class AccountNormalService {
 				});
 		} catch (err) {
 			console.log(err);
+			return this.messageService.emailChkOk();
 		}
 	}
 
@@ -237,6 +239,7 @@ export class AccountNormalService {
 			return this.messageService.emailChkOk();
 		} catch (err) {
 			console.log(err);
+			return this.messageService.emailChkOk();
 		}
 	}
 
@@ -271,6 +274,7 @@ export class AccountNormalService {
 			}
 		} catch (err) {
 			console.log(err);
+			return this.messageService.passwordChangeNO();
 		}
 	}
 }
