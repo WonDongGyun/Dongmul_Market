@@ -3,6 +3,10 @@ import { CurrentUser } from 'src/account/current-account.decorator';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { PostDetailService } from './post-detail.service';
 
+// **************************************
+// * controller: post-detail
+// * programer: DongGyun Won
+// **************************************
 @Controller('postDetail')
 export class PostDetailController {
 	constructor(private readonly postDetailService: PostDetailService) {}

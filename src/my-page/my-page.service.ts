@@ -4,12 +4,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Code } from 'src/entities/code.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
+import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { AddressChange } from './dto/addressChange.dto';
 
+// **************************************
+// * service: my-page
+// * programer: DongGyun Won, JaeYoon Lee
+// **************************************
 @Injectable()
 export class MyPageService {
 	constructor(
+		private readonly messageService: MessageService,
+
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 
@@ -18,31 +25,27 @@ export class MyPageService {
 	) {}
 	//주소변경
 	async addressChange(addressChangeDto: AddressChange) {
-		try {
-			const email = await this.userRepository.findOne(
-				addressChangeDto.email
-			);
+		const email = await this.userRepository
+			.findOne(addressChangeDto.email)
+			.catch(() => {
+				return this.messageService.findQueryErr();
+			});
 
-			const user = new User();
-			user.email = addressChangeDto.email;
-			user.address = addressChangeDto.new_address;
+		const user = new User();
+		user.email = addressChangeDto.email;
+		user.address = addressChangeDto.new_address;
 
-			if (user.address) {
-				await this.userRepository.update(addressChangeDto.email, {
+		if (user.address) {
+			await this.userRepository
+				.update(addressChangeDto.email, {
 					address: addressChangeDto.new_address
+				})
+				.catch(() => {
+					return this.messageService.updateQueryErr();
 				});
-				return { msg: 'success', message: '주소 변경 완료' };
-			} else {
-				return {
-					msg: 'fail',
-					errorMsg: '주소를 입력해주세요'
-				};
-			}
-		} catch (err) {
-			return {
-				msg: 'fail',
-				errorMsg: '주소를 입력해주세요'
-			};
+			return this.messageService.addressChangeOk();
+		} else {
+			return this.messageService.addressChangeErr();
 		}
 	}
 
@@ -70,18 +73,30 @@ export class MyPageService {
 			.orderBy('si.createdDt', 'DESC')
 			.getRawMany()
 			.then(async (getPost) => {
-				const postCnt = await this.saleItemRepository
-					.createQueryBuilder('si')
-					.select('COUNT(si.itemId)', 'postCnt')
-					.where('si.email = :email', { email: email })
-					.getRawOne();
-				return { msg: 'success', postCnt: postCnt, postInfo: getPost };
+				if (getPost) {
+					return await this.saleItemRepository
+						.createQueryBuilder('si')
+						.select('COUNT(si.itemId)', 'postCnt')
+						.where('si.email = :email', {
+							email: email
+						})
+						.getRawOne()
+						.then((postCnt) => {
+							return {
+								msg: 'success',
+								postCnt: postCnt,
+								postInfo: getPost
+							};
+						})
+						.catch(() => {
+							return this.messageService.selectQueryErr();
+						});
+				} else {
+					return this.messageService.getMyPostErr();
+				}
 			})
-			.catch((err) => {
-				return {
-					mag: 'fail',
-					errorMsg: '로그인을 다시 해주시길 바랍니다.'
-				};
+			.catch(() => {
+				return this.messageService.selectQueryErr();
 			});
 	}
 }

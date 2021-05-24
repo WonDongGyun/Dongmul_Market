@@ -16,6 +16,11 @@ import { DeleteButtonDto } from './dto/deleteButton.dto';
 import { SetItemDto } from './dto/setItem.dto';
 import { MainPageService } from './main-page.service';
 
+// **************************************
+// * controller: main-page
+// * programer: DongGyun Won
+// **************************************
+
 @Controller('mainPage')
 export class MainPageController {
 	constructor(private readonly mainPageService: MainPageService) {}
