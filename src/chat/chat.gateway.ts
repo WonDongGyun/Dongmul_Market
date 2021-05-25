@@ -22,7 +22,18 @@ import * as fs from 'fs';
 // * gateway: chat
 // * programer: DongGyun Won
 // **************************************
-@WebSocketGateway(3001, { namespace: '/chatting' })
+const httpsOptions = {
+	key: fs.readFileSync(
+		'/etc/letsencrypt/live/dongmul.shop/privkey.pem',
+		'utf8'
+	),
+	cert: fs.readFileSync(
+		'/etc/letsencrypt/live/dongmul.shop/cert.pem',
+		'utf8'
+	),
+	ca: fs.readFileSync('/etc/letsencrypt/live/dongmul.shop/chain.pem', 'utf8')
+};
+@WebSocketGateway(3001, { namespace: '/chatting', httpsOptions })
 export class ChatGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
