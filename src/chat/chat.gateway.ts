@@ -33,7 +33,12 @@ const httpsOptions = {
 	),
 	ca: fs.readFileSync('/etc/letsencrypt/live/dongmul.shop/chain.pem', 'utf8')
 };
-@WebSocketGateway(3001, { namespace: '/chatting', httpsOptions })
+@WebSocketGateway(3001, {
+	namespace: '/chatting',
+	secure: true,
+	rejectUnauthorized: true,
+	httpsOptions
+})
 export class ChatGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
