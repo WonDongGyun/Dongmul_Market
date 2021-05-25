@@ -21,7 +21,7 @@ import { MessageService } from 'src/message/message.service';
 // * gateway: chat
 // * programer: DongGyun Won
 // **************************************
-@WebSocketGateway(3001, { namespace: '/chatting' })
+@WebSocketGateway({ namespace: '/chatting' })
 export class ChatGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(

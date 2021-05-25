@@ -2,14 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
-import {
-	ExpressAdapter,
-	NestExpressApplication
-} from '@nestjs/platform-express';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import http from 'http';
-import https from 'https';
-import express from 'express';
 
 async function bootstrap() {
 	const httpsOptions = {
@@ -26,15 +20,10 @@ async function bootstrap() {
 			'utf8'
 		)
 	};
-	const server = express();
-	const app = await NestFactory.create<NestExpressApplication>(
-		AppModule,
-		new ExpressAdapter(server),
-		{
-			cors: true,
-			httpsOptions
-		}
-	);
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+		cors: true,
+		httpsOptions
+	});
 
 	app.useStaticAssets(join(__dirname, '..', 'public'));
 	app.useGlobalPipes(
@@ -44,9 +33,6 @@ async function bootstrap() {
 			transform: true
 		})
 	);
-
-	await app.init();
-	http.createServer(server).listen(3001);
-	https.createServer(httpsOptions, server).listen(3000);
+	await app.listen(3000);
 }
 bootstrap();
