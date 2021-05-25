@@ -14,7 +14,7 @@ import { Code } from './entities/code.entity';
 import { EmailAuth } from './entities/emailAuth.entity';
 import { MyPageModule } from './my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
-import {  MessageModule } from './message/message.module';
+import { MessageModule } from './message/message.module';
 
 import { PostDetailModule } from './post-detail/post-detail.module';
 
@@ -53,7 +53,7 @@ import { PostDetailModule } from './post-detail/post-detail.module';
 			synchronize: true
 		}),
 		// ServeStaticModule.forRoot({
-		// 	rootPath: join(__dirname, '..', 'static')
+		// 	rootPath: join(__dirname, '..', '.well-known/acme-challenge')
 		// }),
 		ChatModule,
 		AccountModule,
