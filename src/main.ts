@@ -24,6 +24,14 @@ async function bootstrap() {
 		cors: true,
 		httpsOptions
 	});
+	const chatApp = await NestFactory.create<NestExpressApplication>(
+		AppModule,
+		{
+			cors: true,
+			httpsOptions
+		}
+	);
+
 	app.useStaticAssets(join(__dirname, '..', 'public'));
 	app.useGlobalPipes(
 		new ValidationPipe({
@@ -32,7 +40,16 @@ async function bootstrap() {
 			transform: true
 		})
 	);
+
+	chatApp.useStaticAssets(join(__dirname, '..', 'public'));
+	chatApp.useGlobalPipes(
+		new ValidationPipe({
+			whitelist: true,
+			forbidNonWhitelisted: true,
+			transform: true
+		})
+	);
 	await app.listen(3000);
-	await app.listen(3001);
+	await chatApp.listen(3001);
 }
 bootstrap();
