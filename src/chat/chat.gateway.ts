@@ -16,12 +16,24 @@ import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
 import { MessageService } from 'src/message/message.service';
+import * as fs from 'fs';
 
 // **************************************
 // * gateway: chat
 // * programer: DongGyun Won
 // **************************************
-@WebSocketGateway(3001, { namespace: '/chatting' })
+const httpsOptions = {
+	key: fs.readFileSync(
+		'/etc/letsencrypt/live/dongmul.shop/privkey.pem',
+		'utf8'
+	),
+	cert: fs.readFileSync(
+		'/etc/letsencrypt/live/dongmul.shop/cert.pem',
+		'utf8'
+	),
+	ca: fs.readFileSync('/etc/letsencrypt/live/dongmul.shop/chain.pem', 'utf8')
+};
+@WebSocketGateway(3001, { namespace: '/chatting', httpsOptions })
 export class ChatGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
