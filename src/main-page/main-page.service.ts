@@ -10,7 +10,6 @@ import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
-import { DeleteButtonDto } from './dto/deleteButton.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { MessageService } from 'src/message/message.service';
 
@@ -200,29 +199,6 @@ export class MainPageService {
 			})
 			.catch(() => {
 				return this.messageService.insertQueryErr();
-			});
-	}
-
-	// 등록한 품목 삭제하기
-	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
-		await this.saleItemRepository
-			.findOne(deleteButtonDto.itemId)
-			.then(async (findItem) => {
-				if (findItem) {
-					await this.saleItemRepository
-						.delete({
-							itemId: deleteButtonDto.itemId
-						})
-						.catch(() => {
-							return this.messageService.deleteQueryErr();
-						});
-					return this.messageService.returnSuccess();
-				} else {
-					return this.messageService.deleteButtonErr();
-				}
-			})
-			.catch(() => {
-				return this.messageService.findQueryErr();
 			});
 	}
 }

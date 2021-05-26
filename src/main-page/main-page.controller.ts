@@ -1,9 +1,7 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
-	Param,
 	Post,
 	UploadedFile,
 	UseGuards,
@@ -12,7 +10,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from 'src/account/current-account.decorator';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
-import { DeleteButtonDto } from './dto/deleteButton.dto';
 import { SetItemDto } from './dto/setItem.dto';
 import { MainPageService } from './main-page.service';
 
@@ -38,16 +35,6 @@ export class MainPageController {
 	@Get('noLogin')
 	async noLoginGetPost() {
 		return await this.mainPageService.noLoginGetPost();
-	}
-
-	// 등록한 품목 삭제하기
-	@Delete('delete')
-	@UseGuards(AccountGuardJwt)
-	async delButton(
-		@CurrentUser() email: string,
-		@Body() deleteButtonDto: DeleteButtonDto
-	) {
-		return await this.mainPageService.deleteButton(email, deleteButtonDto);
 	}
 
 	// 경매 글 작성

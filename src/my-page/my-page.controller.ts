@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	Post,
+	UseGuards
+} from '@nestjs/common';
 import { MyPageService } from './my-page.service';
 import { AddressChange } from './dto/addressChange.dto';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { CurrentUser } from 'src/account/current-account.decorator';
+import { DeleteButtonDto } from 'src/main-page/dto/deleteButton.dto';
 
 // **************************************
 // * controller: my-page
@@ -23,5 +32,16 @@ export class MyPageController {
 	@UseGuards(AccountGuardJwt)
 	async getMyPost(@CurrentUser() email: string) {
 		return await this.myPageService.getMyPost(email);
+	}
+
+	// 등록한 품목 삭제하기
+	@Delete('delete')
+	@UseGuards(AccountGuardJwt)
+	async delButton(
+		@CurrentUser() email: string,
+		@Body() deleteButtonDto: DeleteButtonDto
+	) {
+		console.log(email, deleteButtonDto);
+		return await this.myPageService.deleteButton(email, deleteButtonDto);
 	}
 }
