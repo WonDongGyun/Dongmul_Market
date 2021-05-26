@@ -121,7 +121,7 @@ export class MyPageService {
 
 	// 등록한 품목 삭제하기
 	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
-		await this.saleItemRepository
+		return await this.saleItemRepository
 			.findOne(deleteButtonDto.itemId)
 			.then(async (findItem) => {
 				if (findItem) {
