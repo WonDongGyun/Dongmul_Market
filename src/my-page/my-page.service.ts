@@ -108,13 +108,12 @@ export class MyPageService {
 			.then(async (findItem) => {
 				if (findItem) {
 					console.log(findItem);
-					await this.saleItemRepository
-						.delete({
-							itemId: deleteButtonDto.itemId
-						})
-						.catch(() => {
-							return this.messageService.deleteQueryErr();
-						});
+					const saleItem: SaleItem = new SaleItem();
+					saleItem.itemId = deleteButtonDto.itemId;
+
+					await this.saleItemRepository.delete(saleItem).catch(() => {
+						return this.messageService.deleteQueryErr();
+					});
 					return this.messageService.returnSuccess();
 				} else {
 					return this.messageService.deleteButtonErr();
