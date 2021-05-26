@@ -24,7 +24,7 @@ async function bootstrap() {
 		cors: true,
 		httpsOptions
 	});
-
+	app.enableCors();
 	app.useStaticAssets(join(__dirname, '..', 'public'));
 	app.useGlobalPipes(
 		new ValidationPipe({
