@@ -59,6 +59,8 @@ export class MyPageService {
 						splitArr[0] + ' ' + splitArr[1];
 				}
 
+				console.log(addressChangeDto.new_address);
+
 				const user = new User();
 				user.email = addressChangeDto.email;
 				user.address = addressChangeDto.new_address;
