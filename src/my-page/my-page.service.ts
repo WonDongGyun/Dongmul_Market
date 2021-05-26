@@ -108,8 +108,13 @@ export class MyPageService {
 			.then(async (findItem) => {
 				if (findItem) {
 					console.log(findItem);
+
+					const user: User = new User();
+					user.email = email;
+
 					const saleItem: SaleItem = new SaleItem();
 					saleItem.itemId = deleteButtonDto.itemId;
+					saleItem.user = user;
 
 					await this.saleItemRepository.delete(saleItem).catch(() => {
 						return this.messageService.deleteQueryErr();
