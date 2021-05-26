@@ -145,13 +145,13 @@ export class MyPageService {
 									itemChatRoom: itemChatRoom
 								})
 								.then(async () => {
-									await this.kickUserRepository
+									return await this.kickUserRepository
 										.delete({ saleItem: saleItem })
 										.then(async () => {
-											await this.saleItemRepository
+											return await this.saleItemRepository
 												.delete(saleItem)
 												.then(async () => {
-													await this.itemChatRoomRepository
+													return await this.itemChatRoomRepository
 														.delete({
 															icrId:
 																deleteButtonDto.icrId
