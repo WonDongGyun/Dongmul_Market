@@ -42,30 +42,45 @@ export class MyPageService {
 	) {}
 	//주소변경
 	async addressChange(addressChangeDto: AddressChange) {
-		const email = await this.userRepository
+		return await this.userRepository
 			.findOne(addressChangeDto.email)
+			.then(async () => {
+				if (addressChangeDto.new_address.indexOf('서울특별시') != -1) {
+					addressChangeDto.new_address.replace('특별시', '');
+				}
+
+				if (
+					addressChangeDto.new_address.split(' ')[0].indexOf('도') !=
+					-1
+				) {
+					const splitArr = addressChangeDto.new_address.split(' ');
+					splitArr[0].replace('도', '');
+					addressChangeDto.new_address =
+						splitArr[0] + ' ' + splitArr[1];
+				}
+
+				const user = new User();
+				user.email = addressChangeDto.email;
+				user.address = addressChangeDto.new_address;
+
+				if (user.address) {
+					return await this.userRepository
+						.update(addressChangeDto.email, {
+							address: addressChangeDto.new_address
+						})
+						.then(() => {
+							return this.messageService.addressChangeOk();
+						})
+						.catch(() => {
+							return this.messageService.updateQueryErr();
+						});
+				} else {
+					return this.messageService.addressChangeErr();
+				}
+			})
 			.catch(() => {
 				return this.messageService.findQueryErr();
 			});
-
-		const user = new User();
-		user.email = addressChangeDto.email;
-		user.address = addressChangeDto.new_address;
-
-		if (user.address) {
-			return await this.userRepository
-				.update(addressChangeDto.email, {
-					address: addressChangeDto.new_address
-				})
-				.then(() => {
-					return this.messageService.addressChangeOk();
-				})
-				.catch(() => {
-					return this.messageService.updateQueryErr();
-				});
-		} else {
-			return this.messageService.addressChangeErr();
-		}
 	}
 
 	async getMyPost(email: string) {

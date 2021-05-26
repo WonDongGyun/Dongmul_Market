@@ -4,9 +4,6 @@ export class AddressChange {
 	@IsEmail()
 	readonly email: string;
 
-	// @IsString()
-	// readonly address: string;
-
-    @IsString()
-    readonly new_address: string
+	@IsString()
+	new_address: string;
 }
