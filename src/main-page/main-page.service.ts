@@ -166,36 +166,41 @@ export class MainPageService {
 
 		// 채팅방 만들기
 		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		await this.itemChatRoomRepository.insert(itemChatRoom).catch(() => {
-			return this.messageService.insertQueryErr();
-		});
+		return await this.itemChatRoomRepository
+			.insert(itemChatRoom)
+			.then(async () => {
+				// 경매 글 올린 사람, 채팅방 유저로 저장
+				const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+				itemChatRoomUser.user = user;
+				itemChatRoomUser.itemChatRoom = itemChatRoom;
+				itemChatRoomUser.chooseYn = 'Y';
 
-		// 경매 글 올린 사람, 채팅방 유저로 저장
-		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
-		itemChatRoomUser.user = user;
-		itemChatRoomUser.itemChatRoom = itemChatRoom;
-		itemChatRoomUser.chooseYn = 'Y';
-		await this.itemChatRoomUserRepository
-			.insert(itemChatRoomUser)
-			.catch(() => {
-				return this.messageService.insertQueryErr();
-			});
+				return await this.itemChatRoomUserRepository
+					.insert(itemChatRoomUser)
+					.then(async () => {
+						// 경매 글 저장
+						const saleItem: SaleItem = new SaleItem();
+						saleItem.image = uploadFile['Location'];
+						saleItem.title = setItemDto.title;
+						saleItem.category = setItemDto.category;
+						saleItem.wantItem = setItemDto.wantItem;
+						saleItem.comment = setItemDto.comment;
+						saleItem.deadLine = new Date(setItemDto.deadLine);
+						saleItem.itemChatRoom = itemChatRoom;
+						saleItem.user = user;
 
-		// 경매 글 저장
-		const saleItem: SaleItem = new SaleItem();
-		saleItem.image = uploadFile['Location'];
-		saleItem.title = setItemDto.title;
-		saleItem.category = setItemDto.category;
-		saleItem.wantItem = setItemDto.wantItem;
-		saleItem.comment = setItemDto.comment;
-		saleItem.deadLine = new Date(setItemDto.deadLine);
-		saleItem.itemChatRoom = itemChatRoom;
-		saleItem.user = user;
-
-		return await this.saleItemRepository
-			.insert(saleItem)
-			.then(() => {
-				return this.messageService.returnSuccess();
+						return await this.saleItemRepository
+							.insert(saleItem)
+							.then(() => {
+								return this.messageService.returnSuccess();
+							})
+							.catch(() => {
+								return this.messageService.insertQueryErr();
+							});
+					})
+					.catch(() => {
+						return this.messageService.insertQueryErr();
+					});
 			})
 			.catch(() => {
 				return this.messageService.insertQueryErr();

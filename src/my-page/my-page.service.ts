@@ -125,8 +125,6 @@ export class MyPageService {
 			.findOne(deleteButtonDto.itemId)
 			.then(async (findItem) => {
 				if (findItem) {
-					console.log(findItem);
-
 					const user: User = new User();
 					user.email = email;
 

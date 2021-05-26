@@ -196,51 +196,61 @@ export class ChatService {
 								itemChatRoomUserMsg.chatMsg =
 									saveUser.nickname + '님이 입장하셨습니다.';
 								itemChatRoomUserMsg.textStatus = 'TXT02';
-								await this.itemChatRoomUserMsgRepository
+								return await this.itemChatRoomUserMsgRepository
 									.insert(itemChatRoomUserMsg)
+									.then(async () => {
+										return await this.itemChatRoomUserMsgRepository
+											.createQueryBuilder('icrum')
+											.select(
+												'icrum.icruMsgId',
+												'icruMsgId'
+											)
+											.addSelect('icrum.email', 'email')
+											.addSelect('u.nickname', 'nickname')
+											.addSelect('c.codeName', 'msgType')
+											.addSelect(
+												'icrum.chatMsg',
+												'chatMsg'
+											)
+											.addSelect(
+												'icrum.createdDt',
+												'createdDt'
+											)
+											.innerJoin(
+												User,
+												'u',
+												'u.email = icrum.email'
+											)
+											.innerJoin(
+												Code,
+												'c',
+												'c.codeId = icrum.textStatus'
+											)
+											.where('icrum.email = :email', {
+												email: itemChatJoinDto.email
+											})
+											.andWhere('icrum.icrId = :icrId', {
+												icrId: itemChatJoinDto.icrId
+											})
+											.orderBy('icrum.createdDt', 'DESC')
+											.limit(1)
+											.getRawOne()
+											.then((findMsgList) => {
+												if (findMsgList) {
+													return {
+														msg: 'success',
+														data: findMsgList
+													};
+												} else {
+													return this.messageService.chatRoomMsgErr();
+												}
+											})
+											.catch(() => {
+												return this.messageService.selectQueryErr();
+											});
+									})
 									.catch(() => {
 										return this.messageService.insertQueryErr();
-									});
-
-								return await this.itemChatRoomUserMsgRepository
-									.createQueryBuilder('icrum')
-									.select('icrum.icruMsgId', 'icruMsgId')
-									.addSelect('icrum.email', 'email')
-									.addSelect('u.nickname', 'nickname')
-									.addSelect('c.codeName', 'msgType')
-									.addSelect('icrum.chatMsg', 'chatMsg')
-									.addSelect('icrum.createdDt', 'createdDt')
-									.innerJoin(
-										User,
-										'u',
-										'u.email = icrum.email'
-									)
-									.innerJoin(
-										Code,
-										'c',
-										'c.codeId = icrum.textStatus'
-									)
-									.where('icrum.email = :email', {
-										email: itemChatJoinDto.email
-									})
-									.andWhere('icrum.icrId = :icrId', {
-										icrId: itemChatJoinDto.icrId
-									})
-									.orderBy('icrum.createdDt', 'DESC')
-									.limit(1)
-									.getRawOne()
-									.then((findMsgList) => {
-										if (findMsgList) {
-											return {
-												msg: 'success',
-												data: findMsgList
-											};
-										} else {
-											return this.messageService.chatRoomMsgErr();
-										}
-									})
-									.catch(() => {
-										return this.messageService.selectQueryErr();
 									});
 							}
 						})
@@ -267,36 +277,44 @@ export class ChatService {
 		itemChatRoomUserMsg.itemChatRoom = itemChatRoom;
 		itemChatRoomUserMsg.chatMsg = itemChatDto.chatMsg;
 		itemChatRoomUserMsg.textStatus = 'TXT01';
-		await this.itemChatRoomUserMsgRepository
-			.insert(itemChatRoomUserMsg)
-			.catch(() => {
-				return this.messageService.insertQueryErr();
-			});
-
 		return await this.itemChatRoomUserMsgRepository
-			.createQueryBuilder('icrum')
-			.select('icrum.icruMsgId', 'icruMsgId')
-			.addSelect('icrum.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('c.codeName', 'msgType')
-			.addSelect('icrum.chatMsg', 'chatMsg')
-			.addSelect('icrum.createdDt', 'createdDt')
-			.innerJoin(User, 'u', 'u.email = icrum.email')
-			.innerJoin(Code, 'c', 'c.codeId = icrum.textStatus')
-			.where('icrum.email = :email', { email: itemChatDto.email })
-			.andWhere('icrum.icrId = :icrId', { icrId: itemChatDto.icrId })
-			.orderBy('icrum.createdDt', 'DESC')
-			.limit(1)
-			.getRawOne()
-			.then((findMsgList) => {
-				if (findMsgList) {
-					return { msg: 'success', data: findMsgList };
-				} else {
-					return this.messageService.chatRoomMsgErr();
-				}
+			.insert(itemChatRoomUserMsg)
+			.then(async () => {
+				return await this.itemChatRoomUserMsgRepository
+					.createQueryBuilder('icrum')
+					.select('icrum.icruMsgId', 'icruMsgId')
+					.addSelect('icrum.email', 'email')
+					.addSelect('u.nickname', 'nickname')
+					.addSelect('c.codeName', 'msgType')
+					.addSelect('icrum.chatMsg', 'chatMsg')
+					.addSelect('icrum.createdDt', 'createdDt')
+					.innerJoin(User, 'u', 'u.email = icrum.email')
+					.innerJoin(Code, 'c', 'c.codeId = icrum.textStatus')
+					.where('icrum.email = :email', {
+						email: itemChatDto.email
+					})
+					.andWhere('icrum.icrId = :icrId', {
+						icrId: itemChatDto.icrId
+					})
+					.orderBy('icrum.createdDt', 'DESC')
+					.limit(1)
+					.getRawOne()
+					.then((findMsgList) => {
+						if (findMsgList) {
+							return {
+								msg: 'success',
+								data: findMsgList
+							};
+						} else {
+							return this.messageService.chatRoomMsgErr();
+						}
+					})
+					.catch(() => {
+						return this.messageService.selectQueryErr();
+					});
 			})
 			.catch(() => {
-				return this.messageService.selectQueryErr();
+				return this.messageService.insertQueryErr();
 			});
 	}
 
@@ -312,16 +330,17 @@ export class ChatService {
 			})
 			.then(async (findItem) => {
 				if (findItem) {
-					await this.saleItemRepository
+					return await this.saleItemRepository
 						.update(exchangeDto.itemId, {
 							status: 'SI02',
 							buyerEmail: exchangeDto.consumerEmail
 						})
+						.then(() => {
+							return this.messageService.returnSuccess();
+						})
 						.catch(() => {
 							return this.messageService.updateQueryErr();
 						});
-
-					return this.messageService.returnSuccess();
 				}
 			})
 			.catch(() => {

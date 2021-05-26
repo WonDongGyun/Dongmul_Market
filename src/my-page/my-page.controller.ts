@@ -41,7 +41,6 @@ export class MyPageController {
 		@CurrentUser() email: string,
 		@Body() deleteButtonDto: DeleteButtonDto
 	) {
-		console.log(email, deleteButtonDto);
 		return await this.myPageService.deleteButton(email, deleteButtonDto);
 	}
 }
