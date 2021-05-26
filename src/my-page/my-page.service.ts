@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Code } from 'src/entities/code.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
+import { DeleteButtonDto } from 'src/main-page/dto/deleteButton.dto';
 import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { AddressChange } from './dto/addressChange.dto';
@@ -97,6 +98,30 @@ export class MyPageService {
 			})
 			.catch(() => {
 				return this.messageService.selectQueryErr();
+			});
+	}
+
+	// 등록한 품목 삭제하기
+	async deleteButton(email: string, deleteButtonDto: DeleteButtonDto) {
+		await this.saleItemRepository
+			.findOne(deleteButtonDto.itemId)
+			.then(async (findItem) => {
+				if (findItem) {
+					console.log(findItem);
+					await this.saleItemRepository
+						.delete({
+							itemId: deleteButtonDto.itemId
+						})
+						.catch(() => {
+							return this.messageService.deleteQueryErr();
+						});
+					return this.messageService.returnSuccess();
+				} else {
+					return this.messageService.deleteButtonErr();
+				}
+			})
+			.catch(() => {
+				return this.messageService.findQueryErr();
 			});
 	}
 }
