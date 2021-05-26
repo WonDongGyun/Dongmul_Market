@@ -46,7 +46,10 @@ export class MyPageService {
 			.findOne(addressChangeDto.email)
 			.then(async () => {
 				if (addressChangeDto.new_address.indexOf('서울특별시') != -1) {
-					addressChangeDto.new_address.replace('특별시', '');
+					addressChangeDto.new_address = addressChangeDto.new_address.replace(
+						'특별시',
+						''
+					);
 				}
 
 				if (
@@ -54,12 +57,10 @@ export class MyPageService {
 					-1
 				) {
 					const splitArr = addressChangeDto.new_address.split(' ');
-					splitArr[0].replace('도', '');
+					splitArr[0] = splitArr[0].replace('도', '');
 					addressChangeDto.new_address =
 						splitArr[0] + ' ' + splitArr[1];
 				}
-
-				console.log(addressChangeDto.new_address);
 
 				const user = new User();
 				user.email = addressChangeDto.email;
