@@ -1,7 +1,9 @@
 import { IsString } from 'class-validator';
 
-
 export class DeleteButtonDto {
 	@IsString()
-	itemId: string;
+	readonly itemId: string;
+
+	@IsString()
+	readonly icrId: string;
 }

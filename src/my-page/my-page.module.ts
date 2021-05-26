@@ -11,6 +11,7 @@ import { Code } from 'src/entities/code.entity';
 import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { JwtStrategy } from 'src/account/jwt.strategy';
 import { MessageService } from 'src/message/message.service';
+import { KickUser } from 'src/entities/kickUser.entity';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { MessageService } from 'src/message/message.service';
 			ItemChatRoom,
 			ItemChatRoomUser,
 			ItemChatRoomUserMsg,
+			KickUser,
 			Code,
 			EmailAuth
 		])

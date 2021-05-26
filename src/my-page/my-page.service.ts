@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Code } from 'src/entities/code.entity';
+import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
+import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
-import { DeleteButtonDto } from 'src/main-page/dto/deleteButton.dto';
+import { DeleteButtonDto } from 'src/my-page/dto/deleteButton.dto';
 import { MessageService } from 'src/message/message.service';
 import { Repository } from 'typeorm';
 import { AddressChange } from './dto/addressChange.dto';
+import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
+import { KickUser } from 'src/entities/kickUser.entity';
 
 // **************************************
 // * service: my-page
@@ -22,7 +26,19 @@ export class MyPageService {
 		private readonly userRepository: Repository<User>,
 
 		@InjectRepository(SaleItem)
-		private readonly saleItemRepository: Repository<SaleItem>
+		private readonly saleItemRepository: Repository<SaleItem>,
+
+		@InjectRepository(ItemChatRoom)
+		private readonly itemChatRoomRepository: Repository<ItemChatRoom>,
+
+		@InjectRepository(ItemChatRoomUser)
+		private readonly itemChatRoomUserRepository: Repository<ItemChatRoomUser>,
+
+		@InjectRepository(ItemChatRoomUserMsg)
+		private readonly itemChatRoomUserMsgRepository: Repository<ItemChatRoomUserMsg>,
+
+		@InjectRepository(KickUser)
+		private readonly kickUserRepository: Repository<KickUser>
 	) {}
 	//주소변경
 	async addressChange(addressChangeDto: AddressChange) {
@@ -37,14 +53,16 @@ export class MyPageService {
 		user.address = addressChangeDto.new_address;
 
 		if (user.address) {
-			await this.userRepository
+			return await this.userRepository
 				.update(addressChangeDto.email, {
 					address: addressChangeDto.new_address
+				})
+				.then(() => {
+					return this.messageService.addressChangeOk();
 				})
 				.catch(() => {
 					return this.messageService.updateQueryErr();
 				});
-			return this.messageService.addressChangeOk();
 		} else {
 			return this.messageService.addressChangeErr();
 		}
@@ -116,10 +134,52 @@ export class MyPageService {
 					saleItem.itemId = deleteButtonDto.itemId;
 					saleItem.user = user;
 
-					await this.saleItemRepository.delete(saleItem).catch(() => {
-						return this.messageService.deleteQueryErr();
-					});
-					return this.messageService.returnSuccess();
+					const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+					itemChatRoom.icrId = deleteButtonDto.icrId;
+
+					return await this.itemChatRoomUserRepository
+						.delete({
+							itemChatRoom: itemChatRoom
+						})
+						.then(async () => {
+							return await this.itemChatRoomUserMsgRepository
+								.delete({
+									itemChatRoom: itemChatRoom
+								})
+								.then(async () => {
+									await this.kickUserRepository
+										.delete({ saleItem: saleItem })
+										.then(async () => {
+											await this.saleItemRepository
+												.delete(saleItem)
+												.then(async () => {
+													await this.itemChatRoomRepository
+														.delete({
+															icrId:
+																deleteButtonDto.icrId
+														})
+														.then(async () => {
+															return this.messageService.returnSuccess();
+														})
+														.catch(() => {
+															return this.messageService.deleteQueryErr();
+														});
+												})
+												.catch(() => {
+													return this.messageService.deleteQueryErr();
+												});
+										})
+										.catch(() => {
+											return this.messageService.deleteQueryErr();
+										});
+								})
+								.catch(() => {
+									return this.messageService.deleteQueryErr();
+								});
+						})
+						.catch(() => {
+							return this.messageService.deleteQueryErr();
+						});
 				} else {
 					return this.messageService.deleteButtonErr();
 				}
