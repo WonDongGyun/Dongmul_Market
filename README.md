@@ -98,6 +98,9 @@ CREATE EVENT IF NOT EXISTS exchange_Fail ON SCHEDULE EVERY 1 HOUR STARTS '2021-0
 그래서 공식문서를 보면서 이해를 하였고 이해하지 못한 기술들은 **Nest Js Discord**에서 해답을 얻거나  
 **StackOverFlow**에 물어보는 식으로 해결하였습니다.
 
+**그리고 Socket io를 사용하실 때는 반드시 front-end와 back-end의 버전을 맞춰주셔야 합니다.**    
+그렇지 않으면 동작하지 않아요!!!  
+
 <br/>
 <br/>
 
