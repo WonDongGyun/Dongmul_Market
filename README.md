@@ -91,7 +91,7 @@ CREATE EVENT IF NOT EXISTS exchange_Fail ON SCHEDULE EVERY 1 HOUR STARTS '2021-0
 🤩 나의 업무   
 -----------------
 
-* 항해 99 12조 조장
+* 조장 역할을 맡아 팀원들의 업무 분담 및 관리
 * 데이터베이스 설계 및 관리
 * socket io를 활용한 소켓 통신
 * myPage, mainPage, DetailPage 기능 구현
