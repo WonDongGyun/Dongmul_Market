@@ -102,6 +102,17 @@ CREATE EVENT IF NOT EXISTS exchange_Fail ON SCHEDULE EVERY 1 HOUR STARTS '2021-0
 <br/>
 <br/>
 
+😎 그 외 Back - End 문서 정리
+-----------------  
+
+[**[동물 마켓 API]**](https://www.notion.so/API-73cc665aaceb49429ca27425a4eb7d1c)  
+[**[동물 마켓 Message]**](https://www.notion.so/Message-8fc8459e32da455ba0ce8b9355f48b3e)  
+[**[동물 마켓 DTO]**](https://www.notion.so/DTO-137d6135ef344623b4be77142bbdd6b6)  
+[**[동물 마켓 Socket]**](https://www.notion.so/3315fe3ef1c248a5a24ffe27f4fa2e07?v=f726a278bed94bc09493b2241b0e80ca)  
+
+<br/>
+<br/>
+
 
 🤩 나의 업무   
 -----------------
