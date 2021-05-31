@@ -37,8 +37,8 @@
 [Back-End] 원동균, [이재윤](https://github.com/Leejaeyoon94)  
 [Design] 황나경, 이혜진
 
-- **원동균** : 프로젝트(API, DB) 설계 및 세팅, 메인 화면, 마이 페이지, 글 상세 내용, 채팅 관련 기능 [``src/user``, ``src/middleware``, ``src/chat``]
-- **이재윤** : 로그인 및 회원가입 기능, 에러 메시지 정리 [``src/account``, ``src/mail``, ``src/message``]
+- **원동균** : 프로젝트(API, DB) 설계 및 세팅, 메인 화면, 마이 페이지, 글 상세 내용, 채팅 관련 기능 [``src/main-page``, ``src/my-page``, ``src/chat``, ``src/post-detail``]
+- **이재윤** : 로그인 및 회원가입 관련 기능, 에러 메시지 정리 [``src/account``, ``src/mail``, ``src/template/html``, ``src/message``]
 
 <br/>
 <br/>
