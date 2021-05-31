@@ -88,6 +88,20 @@ CREATE EVENT IF NOT EXISTS exchange_Fail ON SCHEDULE EVERY 1 HOUR STARTS '2021-0
 <br/>
 
 
+🤩 나의 업무   
+-----------------
+
+* 항해 99 12조 조장
+* 데이터베이스 설계 및 관리
+* socket io를 활용한 소켓 통신
+* myPage, mainPage, DetailPage 기능 구현
+* Nginx와 pm2를 활용한 서버 구성 및 배포
+* 전체 코드 정리 및 관리
+
+<br/>
+<br/>
+
+
 
 🤭 Nest Js Socket Io   
 -----------------
