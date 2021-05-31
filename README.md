@@ -23,6 +23,7 @@
 -------------  
 [Front-End] [곽혜미](https://github.com/hyemigwak), [이지은](https://github.com/Jinnycorn)  
 [Back-End] 원동균, [이재윤](https://github.com/Leejaeyoon94)  
+[Design] 황나경, 이혜진
 
 <br/>
 <br/>
