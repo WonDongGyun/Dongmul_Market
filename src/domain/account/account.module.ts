@@ -7,11 +7,10 @@ import { MailModule } from 'src/mail/mail.module';
 import { AccountController } from './account.controller';
 import { GoogleStrategy } from './google.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { MessageService } from '../message/message.service';
+import { MessageService } from '../../global/message/message.service';
 import { AccountNormalService } from './services/accountNormal.service';
 import { AccountGoogleService } from './services/accountGoogle.service';
 import { AccountKakaoService } from './services/accountKakao.service';
-
 
 @Module({
 	imports: [

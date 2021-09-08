@@ -8,7 +8,7 @@ import {
 	UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CurrentUser } from 'src/account/current-account.decorator';
+import { CurrentUser } from 'src/domain/account/current-account.decorator';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { SetItemDto } from './dto/setItem.dto';
 import { MainPageService } from './main-page.service';

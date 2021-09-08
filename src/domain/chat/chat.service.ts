@@ -14,7 +14,7 @@ import { KickUser } from 'src/entities/kickUser.entity';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
 import { ConfigurationServicePlaceholders } from 'aws-sdk/lib/config_service_placeholders';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 
 // **************************************
 // * service: chat

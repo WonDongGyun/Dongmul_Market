@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChatModule } from './chat/chat.module';
-import { AccountModule } from './account/account.module';
+import { ChatModule } from './domain/chat/chat.module';
+import { AccountModule } from './domain/account/account.module';
 import { User } from './entities/user.entity';
 import { SaleItem } from './entities/saleItem.entity';
 import { ItemChatRoom } from './entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from './entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from './entities/itemChatRoomUserMsg.entity';
-import { MainPageModule } from './main-page/main-page.module';
+import { MainPageModule } from './domain/main-page/main-page.module';
 import { Code } from './entities/code.entity';
 
 import { EmailAuth } from './entities/emailAuth.entity';
-import { MyPageModule } from './my-page/my-page.module';
+import { MyPageModule } from './domain/my-page/my-page.module';
 import { KickUser } from './entities/kickUser.entity';
-import { MessageModule } from './message/message.module';
+import { MessageModule } from './global/message/message.module';
 
-import { PostDetailModule } from './post-detail/post-detail.module';
+import { PostDetailModule } from './domain/post-detail/post-detail.module';
 
 @Module({
 	imports: [

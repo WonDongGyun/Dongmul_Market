@@ -8,7 +8,7 @@ import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Code } from 'src/entities/code.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 
 // **************************************
 // * service: post-detail

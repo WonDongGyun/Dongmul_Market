@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 import { Repository } from 'typeorm';
 import { KakaoChkEmailDto } from '../dto/kakaoChkEmail.dto';
 

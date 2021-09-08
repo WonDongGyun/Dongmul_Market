@@ -12,7 +12,7 @@ import { ChkLoginDto } from '../dto/chkLogin.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dtd';
 import { EmailAuthDto } from '../dto/emailAuth.dto';
 import { PasswordChangeDto } from '../dto/passwordChange.dto';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 
 // **************************************
 // * service: accountNormal
@@ -158,7 +158,7 @@ export class AccountNormalService {
 			}
 		} catch (err) {
 			console.log(err);
-			return this.messageService.emailChkOk()
+			return this.messageService.emailChkOk();
 		}
 	}
 

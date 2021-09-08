@@ -15,7 +15,7 @@ import * as jwt from 'jsonwebtoken';
 import { AutoJoinDto } from './dto/autoJoin.dto';
 import { KickUserDto } from './dto/kickUser.dto';
 import { ExchangeDto } from './dto/exchange.dto';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 import * as fs from 'fs';
 
 // **************************************

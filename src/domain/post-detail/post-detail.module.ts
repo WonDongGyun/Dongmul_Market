@@ -7,9 +7,9 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
 import { SaleItem } from 'src/entities/saleItem.entity';
 import { User } from 'src/entities/user.entity';
-import { MessageService } from 'src/message/message.service';
-import { ChatGateway } from './chat.gateway';
-import { ChatService } from './chat.service';
+import { MessageService } from 'src/global/message/message.service';
+import { PostDetailController } from './post-detail.controller';
+import { PostDetailService } from './post-detail.service';
 
 @Module({
 	imports: [
@@ -23,6 +23,7 @@ import { ChatService } from './chat.service';
 			KickUser
 		])
 	],
-	providers: [ChatGateway, ChatService, MessageService]
+	controllers: [PostDetailController],
+	providers: [PostDetailService, MessageService]
 })
-export class ChatModule {}
+export class PostDetailModule {}

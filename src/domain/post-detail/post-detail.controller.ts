@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'src/account/current-account.decorator';
+import { CurrentUser } from 'src/domain/account/current-account.decorator';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { PostDetailService } from './post-detail.service';
 

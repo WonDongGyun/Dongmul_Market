@@ -11,7 +11,7 @@ import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
 import { Repository } from 'typeorm';
 import { SetItemDto } from './dto/setItem.dto';
 import { KickUser } from 'src/entities/kickUser.entity';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 
 // **************************************
 // * service: main-page

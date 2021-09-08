@@ -10,8 +10,8 @@ import {
 import { MyPageService } from './my-page.service';
 import { AddressChange } from './dto/addressChange.dto';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
-import { CurrentUser } from 'src/account/current-account.decorator';
-import { DeleteButtonDto } from 'src/my-page/dto/deleteButton.dto';
+import { CurrentUser } from 'src/domain/account/current-account.decorator';
+import { DeleteButtonDto } from 'src/domain/my-page/dto/deleteButton.dto';
 
 // **************************************
 // * controller: my-page

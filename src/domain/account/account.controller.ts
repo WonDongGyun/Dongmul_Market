@@ -20,7 +20,7 @@ import { GoogleChkEmailDto } from './dto/googleChkEmail.dto';
 import { AccountNormalService } from './services/accountNormal.service';
 import { AccountGoogleService } from './services/accountGoogle.service';
 import { AccountKakaoService } from './services/accountKakao.service';
-import { MessageService } from 'src/message/message.service';
+import { MessageService } from 'src/global/message/message.service';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { CurrentUser } from './current-account.decorator';
 

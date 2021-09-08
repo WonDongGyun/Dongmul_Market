@@ -109,7 +109,6 @@ export class MessageService {
 			successMsg: '비밀번호 변경 성공!'
 		};
 	}
-	
 
 	// **************************************
 	// * service: main-page
@@ -192,4 +191,3 @@ export class MessageService {
 		};
 	}
 }
-

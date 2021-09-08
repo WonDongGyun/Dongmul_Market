@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Code } from 'src/entities/code.entity';
-import { User } from 'src/entities/user.entity';
-import { SaleItem } from 'src/entities/saleItem.entity';
 import { ItemChatRoom } from 'src/entities/itemChatRoom.entity';
 import { ItemChatRoomUser } from 'src/entities/itemChatRoomUser.entity';
 import { ItemChatRoomUserMsg } from 'src/entities/itemChatRoomUserMsg.entity';
-import { MainPageController } from './main-page.controller';
-import { MainPageService } from './main-page.service';
-import { EmailAuth } from 'src/entities/emailAuth.entity';
 import { KickUser } from 'src/entities/kickUser.entity';
-import { MessageService } from 'src/message/message.service';
+import { SaleItem } from 'src/entities/saleItem.entity';
+import { User } from 'src/entities/user.entity';
+import { MessageService } from 'src/global/message/message.service';
+import { ChatGateway } from './chat.gateway';
+import { ChatService } from './chat.service';
 
 @Module({
 	imports: [
@@ -21,11 +20,9 @@ import { MessageService } from 'src/message/message.service';
 			ItemChatRoomUser,
 			ItemChatRoomUserMsg,
 			Code,
-			EmailAuth,
 			KickUser
 		])
 	],
-	controllers: [MainPageController],
-	providers: [MainPageService, MessageService]
+	providers: [ChatGateway, ChatService, MessageService]
 })
-export class MainPageModule {}
+export class ChatModule {}
