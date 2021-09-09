@@ -5,6 +5,7 @@ import {
 	Post,
 	Req,
 	Res,
+	UseFilters,
 	UseGuards
 } from '@nestjs/common';
 // import { AccountService } from './account.service';
@@ -23,6 +24,7 @@ import { AccountKakaoService } from './services/accountKakao.service';
 import { MessageService } from 'src/global/message/message.service';
 import { AccountGuardJwt } from 'src/guard/account.guard.jwt';
 import { CurrentUser } from './current-account.decorator';
+import { ExceptionHandler } from 'src/global/exception/ExceptionHandler';
 
 // **************************************
 // * controller: account
@@ -30,6 +32,7 @@ import { CurrentUser } from './current-account.decorator';
 // **************************************
 
 @Controller('account')
+@UseFilters(ExceptionHandler)
 export class AccountController {
 	constructor(
 		// private readonly accountService: AccountService,

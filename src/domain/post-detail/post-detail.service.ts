@@ -43,73 +43,73 @@ export class PostDetailService {
 
 	// 경매 글 상세내용
 	async getPostDetail(itemId: string) {
-		return await this.saleItemRepository
-			.createQueryBuilder('si')
-			.select('si.itemId', 'itemId')
-			.addSelect('si.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('si.image', 'image')
-			.addSelect('si.title', 'title')
-			.addSelect('si.category', 'category')
-			.addSelect('si.wantItem', 'wantItem')
-			.addSelect('si.comment', 'comment')
-			.addSelect(
-				'DATE_FORMAT(si.deadLine, "%Y년 %m월 %d일 %H시 %i분")',
-				'deadLine'
-			)
-			.addSelect('c.codeName', 'status')
-			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.buyerEmail', 'buyerEmail')
-			.addSelect(
-				'DATE_FORMAT(si.createdDt, "%Y년 %m월 %d일 %H시 %i분")',
-				'createdDt'
-			)
-			.innerJoin(User, 'u', 'u.email = si.email')
-			.innerJoin(Code, 'c', 'c.codeId = si.status')
-			.where('si.itemId = :itemId', { itemId: itemId })
-			.getRawOne()
-			.then((findDetail) => {
-				if (findDetail) {
-					return { msg: 'success', data: findDetail };
-				} else {
-					return this.messageService.getPostDetailErr();
-				}
-			})
-			.catch(() => {
-				return this.messageService.selectQueryErr();
-			});
+		try {
+			const findDetail = await this.saleItemRepository
+				.createQueryBuilder('si')
+				.select('si.itemId', 'itemId')
+				.addSelect('si.email', 'email')
+				.addSelect('u.nickname', 'nickname')
+				.addSelect('si.image', 'image')
+				.addSelect('si.title', 'title')
+				.addSelect('si.category', 'category')
+				.addSelect('si.wantItem', 'wantItem')
+				.addSelect('si.comment', 'comment')
+				.addSelect(
+					'DATE_FORMAT(si.deadLine, "%Y년 %m월 %d일 %H시 %i분")',
+					'deadLine'
+				)
+				.addSelect('c.codeName', 'status')
+				.addSelect('si.icrId', 'icrId')
+				.addSelect('si.buyerEmail', 'buyerEmail')
+				.addSelect(
+					'DATE_FORMAT(si.createdDt, "%Y년 %m월 %d일 %H시 %i분")',
+					'createdDt'
+				)
+				.innerJoin(User, 'u', 'u.email = si.email')
+				.innerJoin(Code, 'c', 'c.codeId = si.status')
+				.where('si.itemId = :itemId', { itemId: itemId })
+				.getRawOne();
+
+			if (findDetail) {
+				return { msg: 'success', data: findDetail };
+			} else {
+				return this.messageService.getPostDetailErr();
+			}
+		} catch {
+			return this.messageService.selectQueryErr();
+		}
 	}
 
 	// 버튼 유무
 	async getButton(email: string, icrId: string) {
-		const user: User = new User();
-		user.email = email;
+		try {
+			const user: User = new User();
+			user.email = email;
 
-		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		itemChatRoom.icrId = icrId;
+			const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+			itemChatRoom.icrId = icrId;
 
-		const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
-		itemChatRoomUser.user = user;
-		itemChatRoomUser.itemChatRoom = itemChatRoom;
+			const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+			itemChatRoomUser.user = user;
+			itemChatRoomUser.itemChatRoom = itemChatRoom;
 
-		return this.itemChatRoomUserRepository
-			.findOne(itemChatRoomUser)
-			.then(async (joinYn) => {
-				// true 켜짐, false 꺼짐
-				const button = {
-					groupJoinButton: true,
-					oneJoinButton: false
-				};
+			const joinYn = this.itemChatRoomUserRepository.findOne(
+				itemChatRoomUser
+			);
 
-				if (joinYn) {
-					button.groupJoinButton = false;
-					return { buttonYn: button };
-				} else {
-					return { buttonYn: button };
-				}
-			})
-			.catch(() => {
-				return this.messageService.findQueryErr();
-			});
+			const button = {
+				groupJoinButton: true,
+				oneJoinButton: false
+			};
+
+			if (joinYn) {
+				button.groupJoinButton = false;
+				return { buttonYn: button };
+			} else {
+				return { buttonYn: button };
+			}
+		} catch {
+			return this.messageService.findQueryErr();
+		}
 	}
 }

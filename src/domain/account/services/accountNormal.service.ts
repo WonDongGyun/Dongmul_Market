@@ -13,6 +13,7 @@ import { ForgotPasswordDto } from '../dto/forgot-password.dtd';
 import { EmailAuthDto } from '../dto/emailAuth.dto';
 import { PasswordChangeDto } from '../dto/passwordChange.dto';
 import { MessageService } from 'src/global/message/message.service';
+import { DuplicateEmailException } from '../exception/DuplicateEmailException';
 
 // **************************************
 // * service: accountNormal
@@ -53,9 +54,8 @@ export class AccountNormalService {
 			user.nickname = createUserDto.nickname;
 
 			await this.emailRepository.delete({ email: createUserDto.email });
-			return await this.userRepository.insert(user).then(async () => {
-				return this.messageService.signUpOk();
-			});
+			await this.userRepository.insert(user);
+			return this.messageService.signUpOk();
 		} catch (err) {
 			return this.messageService.setUserErr();
 		}
@@ -165,20 +165,17 @@ export class AccountNormalService {
 	//email auth에 저장된 이메일 인증번호 찾음
 	async sendEmailConfirm(emailAuthDto: EmailAuthDto) {
 		try {
-			return await this.emailRepository
-				.findOne({
-					email: emailAuthDto.email,
-					authNum: emailAuthDto.authchkNum
-				})
-				.then(async (findEmail) => {
-					if (findEmail) {
-						return this.messageService.authNumOk();
-					} else {
-						return this.messageService.authNumDiffent();
-					}
-				});
+			const findEmail = await this.emailRepository.findOne({
+				email: emailAuthDto.email,
+				authNum: emailAuthDto.authchkNum
+			});
+
+			if (findEmail) {
+				return this.messageService.authNumOk();
+			} else {
+				return this.messageService.authNumDiffent();
+			}
 		} catch (err) {
-			console.log(err);
 			return this.messageService.emailChkOk();
 		}
 	}

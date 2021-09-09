@@ -32,16 +32,7 @@ export class MainPageService {
 		private readonly itemChatRoomRepository: Repository<ItemChatRoom>,
 
 		@InjectRepository(ItemChatRoomUser)
-		private readonly itemChatRoomUserRepository: Repository<ItemChatRoomUser>,
-
-		@InjectRepository(ItemChatRoomUserMsg)
-		private readonly itemChatRoomUserMsgRepository: Repository<ItemChatRoomUserMsg>,
-
-		@InjectRepository(Code)
-		private readonly codeRepository: Repository<Code>,
-
-		@InjectRepository(KickUser)
-		private readonly kickUserRepository: Repository<KickUser>
+		private readonly itemChatRoomUserRepository: Repository<ItemChatRoomUser>
 	) {}
 
 	//s3 접속 키
@@ -74,136 +65,119 @@ export class MainPageService {
 	// 로그인 했을 경우의 메인 화면
 	// 강퇴당한 여부를 알 수 있음.
 	async getPostList(email: string) {
-		const userData = await this.userRepository.findOne({ email: email });
-		return await this.saleItemRepository
-			.createQueryBuilder('si')
-			.select('u.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('u.address', 'address')
-			.addSelect('si.itemId', 'itemId')
-			.addSelect('si.image', 'image')
-			.addSelect('si.title', 'title')
-			.addSelect('si.category', 'category')
-			.addSelect('si.wantItem', 'wantItem')
-			.addSelect('si.comment', 'comment')
-			.addSelect('si.deadLine', 'deadLine')
-			.addSelect('c.codeName', 'status')
-			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.buyerEmail', 'buyerEmail')
-			.addSelect('si.createdDt', 'createdDt')
-			.addSelect(
-				`IF(CASE WHEN ku.email = '${userData.email}' THEN true ELSE false END, 'true', 'false')`,
-				'kickYn'
-			)
-			.innerJoin(User, 'u', 'si.email = u.email')
-			.innerJoin(Code, 'c', 'c.codeId = si.status')
-			.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
-			.where('u.address = :address', { address: userData.address })
-			.andWhere(`si.status = 'SI01'`)
-			.andWhere('now() < si.deadLine')
-			.orderBy('si.deadLine', 'DESC')
-			.getRawMany()
-			.then((getPost) => {
-				if (getPost) {
-					return { msg: 'success', data: getPost };
-				} else {
-					return this.messageService.getPostListErr();
-				}
-			})
-			.catch(() => {
-				return this.messageService.selectQueryErr();
+		try {
+			const userData = await this.userRepository.findOne({
+				email: email
 			});
+
+			const getPost = await this.saleItemRepository
+				.createQueryBuilder('si')
+				.select('u.email', 'email')
+				.addSelect('u.nickname', 'nickname')
+				.addSelect('u.address', 'address')
+				.addSelect('si.itemId', 'itemId')
+				.addSelect('si.image', 'image')
+				.addSelect('si.title', 'title')
+				.addSelect('si.category', 'category')
+				.addSelect('si.wantItem', 'wantItem')
+				.addSelect('si.comment', 'comment')
+				.addSelect('si.deadLine', 'deadLine')
+				.addSelect('c.codeName', 'status')
+				.addSelect('si.icrId', 'icrId')
+				.addSelect('si.buyerEmail', 'buyerEmail')
+				.addSelect('si.createdDt', 'createdDt')
+				.addSelect(
+					`IF(CASE WHEN ku.email = '${userData.email}' THEN true ELSE false END, 'true', 'false')`,
+					'kickYn'
+				)
+				.innerJoin(User, 'u', 'si.email = u.email')
+				.innerJoin(Code, 'c', 'c.codeId = si.status')
+				.leftJoin(KickUser, 'ku', 'ku.itemId = si.itemId')
+				.where('u.address = :address', {
+					address: userData.address
+				})
+				.andWhere(`si.status = 'SI01'`)
+				.andWhere('now() < si.deadLine')
+				.orderBy('si.deadLine', 'DESC')
+				.getRawMany();
+
+			return { msg: 'success', data: getPost };
+		} catch {
+			return this.messageService.selectQueryErr();
+		}
 	}
 
 	// 로그인을 하지 않은 경우 메인 화면
 	async noLoginGetPost() {
-		return await this.saleItemRepository
-			.createQueryBuilder('si')
-			.select('u.email', 'email')
-			.addSelect('u.nickname', 'nickname')
-			.addSelect('u.address', 'address')
-			.addSelect('si.itemId', 'itemId')
-			.addSelect('si.image', 'image')
-			.addSelect('si.title', 'title')
-			.addSelect('si.category', 'category')
-			.addSelect('si.wantItem', 'wantItem')
-			.addSelect('si.comment', 'comment')
-			.addSelect('si.deadLine', 'deadLine')
-			.addSelect('c.codeName', 'status')
-			.addSelect('si.icrId', 'icrId')
-			.addSelect('si.buyerEmail', 'buyerEmail')
-			.addSelect('si.createdDt', 'createdDt')
-			.innerJoin(User, 'u', 'si.email = u.email')
-			.innerJoin(Code, 'c', 'c.codeId = si.status')
-			.where('now() < si.deadLine')
-			.andWhere(`si.status = 'SI01'`)
-			.orderBy('si.deadLine', 'DESC')
-			.getRawMany()
-			.then((getPost) => {
-				if (getPost) {
-					return { msg: 'success', data: getPost };
-				} else {
-					return this.messageService.getPostListErr();
-				}
-			})
-			.catch(() => {
-				return this.messageService.selectQueryErr();
-			});
+		try {
+			const getPost = await this.saleItemRepository
+				.createQueryBuilder('si')
+				.select('u.email', 'email')
+				.addSelect('u.nickname', 'nickname')
+				.addSelect('u.address', 'address')
+				.addSelect('si.itemId', 'itemId')
+				.addSelect('si.image', 'image')
+				.addSelect('si.title', 'title')
+				.addSelect('si.category', 'category')
+				.addSelect('si.wantItem', 'wantItem')
+				.addSelect('si.comment', 'comment')
+				.addSelect('si.deadLine', 'deadLine')
+				.addSelect('c.codeName', 'status')
+				.addSelect('si.icrId', 'icrId')
+				.addSelect('si.buyerEmail', 'buyerEmail')
+				.addSelect('si.createdDt', 'createdDt')
+				.innerJoin(User, 'u', 'si.email = u.email')
+				.innerJoin(Code, 'c', 'c.codeId = si.status')
+				.where('now() < si.deadLine')
+				.andWhere(`si.status = 'SI01'`)
+				.orderBy('si.deadLine', 'DESC')
+				.getRawMany();
+			return { msg: 'success', data: getPost };
+		} catch {
+			return this.messageService.selectQueryErr();
+		}
 	}
 
 	// 경매 글 작성
 	async writePost(setItemDto: SetItemDto, file, email: string) {
-		const { originalname } = file;
-		const bucketS3 = 'dongmulbucket';
-		const uploadFile = await this.uploadS3(
-			file.buffer,
-			bucketS3,
-			originalname
-		);
+		try {
+			const { originalname } = file;
+			const bucketS3 = 'dongmulbucket';
+			const uploadFile = await this.uploadS3(
+				file.buffer,
+				bucketS3,
+				originalname
+			);
 
-		const user: User = new User();
-		user.email = email;
+			const user: User = new User();
+			user.email = email;
 
-		// 채팅방 만들기
-		const itemChatRoom: ItemChatRoom = new ItemChatRoom();
-		return await this.itemChatRoomRepository
-			.insert(itemChatRoom)
-			.then(async () => {
-				// 경매 글 올린 사람, 채팅방 유저로 저장
-				const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
-				itemChatRoomUser.user = user;
-				itemChatRoomUser.itemChatRoom = itemChatRoom;
-				itemChatRoomUser.chooseYn = 'Y';
+			// 채팅방 만들기
+			const itemChatRoom: ItemChatRoom = new ItemChatRoom();
+			await this.itemChatRoomRepository.insert(itemChatRoom);
 
-				return await this.itemChatRoomUserRepository
-					.insert(itemChatRoomUser)
-					.then(async () => {
-						// 경매 글 저장
-						const saleItem: SaleItem = new SaleItem();
-						saleItem.image = uploadFile['Location'];
-						saleItem.title = setItemDto.title;
-						saleItem.category = setItemDto.category;
-						saleItem.wantItem = setItemDto.wantItem;
-						saleItem.comment = setItemDto.comment;
-						saleItem.deadLine = new Date(setItemDto.deadLine);
-						saleItem.itemChatRoom = itemChatRoom;
-						saleItem.user = user;
+			const itemChatRoomUser: ItemChatRoomUser = new ItemChatRoomUser();
+			itemChatRoomUser.user = user;
+			itemChatRoomUser.itemChatRoom = itemChatRoom;
+			itemChatRoomUser.chooseYn = 'Y';
 
-						return await this.saleItemRepository
-							.insert(saleItem)
-							.then(() => {
-								return this.messageService.returnSuccess();
-							})
-							.catch(() => {
-								return this.messageService.insertQueryErr();
-							});
-					})
-					.catch(() => {
-						return this.messageService.insertQueryErr();
-					});
-			})
-			.catch(() => {
-				return this.messageService.insertQueryErr();
-			});
+			await this.itemChatRoomUserRepository.insert(itemChatRoomUser);
+
+			// 경매 글 저장
+			const saleItem: SaleItem = new SaleItem();
+			saleItem.image = uploadFile['Location'];
+			saleItem.title = setItemDto.title;
+			saleItem.category = setItemDto.category;
+			saleItem.wantItem = setItemDto.wantItem;
+			saleItem.comment = setItemDto.comment;
+			saleItem.deadLine = new Date(setItemDto.deadLine);
+			saleItem.itemChatRoom = itemChatRoom;
+			saleItem.user = user;
+
+			await this.saleItemRepository.insert(saleItem);
+			return this.messageService.returnSuccess();
+		} catch {
+			return this.messageService.insertQueryErr();
+		}
 	}
 }

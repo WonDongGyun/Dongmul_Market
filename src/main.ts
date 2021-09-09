@@ -6,23 +6,23 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
 async function bootstrap() {
-	const httpsOptions = {
-		key: fs.readFileSync(
-			'/etc/letsencrypt/live/dongmul.shop/privkey.pem',
-			'utf8'
-		),
-		cert: fs.readFileSync(
-			'/etc/letsencrypt/live/dongmul.shop/cert.pem',
-			'utf8'
-		),
-		ca: fs.readFileSync(
-			'/etc/letsencrypt/live/dongmul.shop/chain.pem',
-			'utf8'
-		)
-	};
+	// const httpsOptions = {
+	// 	key: fs.readFileSync(
+	// 		'/etc/letsencrypt/live/dongmul.shop/privkey.pem',
+	// 		'utf8'
+	// 	),
+	// 	cert: fs.readFileSync(
+	// 		'/etc/letsencrypt/live/dongmul.shop/cert.pem',
+	// 		'utf8'
+	// 	),
+	// 	ca: fs.readFileSync(
+	// 		'/etc/letsencrypt/live/dongmul.shop/chain.pem',
+	// 		'utf8'
+	// 	)
+	// };
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-		cors: true,
-		httpsOptions
+		cors: true
+		// httpsOptions
 	});
 	app.useStaticAssets(join(__dirname, '..', 'public'));
 	app.useGlobalPipes(
