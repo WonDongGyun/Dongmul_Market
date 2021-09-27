@@ -9,7 +9,6 @@ import { QueryFailedError } from 'typeorm';
 
 @Catch()
 export class ExceptionHandler implements ExceptionFilter {
-	// QueryFailedError
 	catch(exception: HttpException, host: ArgumentsHost) {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
@@ -21,6 +20,5 @@ export class ExceptionHandler implements ExceptionFilter {
 			message: exception.message,
 			path: request.url
 		});
-		// throw new Error('Method not implemented.');
 	}
 }

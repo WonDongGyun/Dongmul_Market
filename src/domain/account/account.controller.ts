@@ -54,13 +54,6 @@ export class AccountController {
 		return await this.accountNormalService.chkLogin(chkLoginDto);
 	}
 
-	// // 프로필 조회
-	// @Get('profile')
-	// @UseGuards(AccountGuardJwt)
-	// getProfile(@CurrentUser() email: string) {
-	// 	return this.accountService.getProfile(email);
-	// }
-
 	// 이메일 중복확인 및 이메일 인증 보내기
 	@Post('mail')
 	async mail(@Body() loginUserDto: LoginUserDto) {
